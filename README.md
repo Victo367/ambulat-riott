@@ -18,13 +18,6 @@ npm run dev
 Abra no navegador:
 - `http://localhost:3000`
 
-## Testar conexão com o banco
-
-Há uma rota de teste para validar a conexão com o MySQL:
-- `GET /api/testdb`
-
-Ela executa um `SELECT 1` e retorna `ok: true` se a conexão estiver funcionando.
-
 ## Scripts disponíveis
 
 - `npm run dev` - inicia o servidor de desenvolvimento

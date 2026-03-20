@@ -40,9 +40,7 @@ function getPool(): Pool {
   return globalThis.__mysqlPool;
 }
 
-export async function testMysqlConnection(): Promise<unknown> {
-  const pool = getPool();
-  const [rows] = await pool.query("SELECT 1 AS ok");
-  return rows;
+export function getMySqlPool(): Pool {
+  return getPool();
 }
 
