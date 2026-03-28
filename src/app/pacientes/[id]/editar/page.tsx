@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 
 import { PacienteForm } from "@/components/PacienteForm";
-import { obterPaciente } from "@/lib/pacientes";
+import { nomeExibicao, obterPaciente } from "@/lib/pacientes";
 
 import { salvarPaciente } from "../../actions";
 
@@ -35,7 +35,7 @@ export default async function EditarPacientePage({ params, searchParams }: Props
         </Link>
         <h2 className="mt-4 text-xl font-semibold">Editar paciente</h2>
         <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
-          Atualize os dados de <strong>{paciente.nome}</strong>.
+          Atualize os dados de <strong>{nomeExibicao(paciente)}</strong>.
         </p>
       </div>
 
