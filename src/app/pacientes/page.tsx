@@ -3,6 +3,7 @@ import Link from "next/link";
 import { ExcluirPacienteButton } from "./ExcluirPacienteButton";
 import { NomePacienteListagem } from "@/components/NomePacienteListagem";
 import { formatarCpf } from "@/lib/cpf";
+import { formatarTelefone } from "@/lib/telefone";
 import { listarPacientes, nomeExibicao } from "@/lib/pacientes";
 
 function formatarData(iso: string | null): string {
@@ -77,8 +78,8 @@ export default async function PacientesPage() {
                   <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                     {labelSexo(p.sexo)}
                   </td>
-                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
-                    {p.telefone ?? "—"}
+                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 tabular-nums">
+                    {p.telefone ? formatarTelefone(p.telefone) : "—"}
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex flex-wrap items-center justify-end gap-2">

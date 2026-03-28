@@ -1,4 +1,5 @@
 import { CpfInput } from "@/components/CpfInput";
+import { TelefoneInput } from "@/components/TelefoneInput";
 import type { Paciente } from "@/lib/pacientes";
 
 type Props = {
@@ -150,14 +151,11 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
           <label htmlFor="telefone" className="text-sm font-medium">
             Telefone <span className="text-red-600">*</span>
           </label>
-          <input
+          <TelefoneInput
             id="telefone"
-            name="telefone"
-            type="tel"
-            required
-            autoComplete="tel"
             defaultValue={paciente?.telefone ?? ""}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+            required
+            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
           />
         </div>
         <div className="flex flex-col gap-1">
