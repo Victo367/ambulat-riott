@@ -8,7 +8,12 @@ type Props = {
 };
 
 const mensagensErro: Record<string, string> = {
-  nome_obrigatorio: "Informe o nome do paciente.",
+  nome_obrigatorio: "Informe o nome civil do paciente.",
+  nome_social_obrigatorio: "Informe o nome social.",
+  cpf_obrigatorio: "Informe o CPF.",
+  cpf_invalido: "O CPF deve ter 11 dígitos.",
+  telefone_obrigatorio: "Informe o telefone.",
+  endereco_obrigatorio: "Informe o endereço.",
   cpf_duplicado: "Já existe um paciente com este CPF.",
   id_invalido: "Registro inválido.",
 };
@@ -32,8 +37,28 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
       ) : null}
 
       <div className="flex flex-col gap-1">
+        <label htmlFor="nome_social" className="text-sm font-medium">
+          Nome social <span className="text-red-600">*</span>
+        </label>
+        <input
+          id="nome_social"
+          name="nome_social"
+          type="text"
+          required
+          maxLength={255}
+          autoComplete="off"
+          placeholder="Como prefere ser chamado(a) na unidade"
+          defaultValue={paciente?.nome_social ?? ""}
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+        />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Exibido em primeiro na listagem.
+        </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
         <label htmlFor="nome" className="text-sm font-medium">
-          Nome completo <span className="text-red-600">*</span>
+          Nome civil <span className="text-red-600">*</span>
         </label>
         <input
           id="nome"
@@ -46,15 +71,35 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
         />
       </div>
 
+      <div className="flex flex-col gap-1">
+        <label htmlFor="pronome" className="text-sm font-medium">
+          Pronome
+        </label>
+        <input
+          id="pronome"
+          name="pronome"
+          type="text"
+          maxLength={120}
+          autoComplete="off"
+          placeholder="ex.: ela, ele, elu, outro"
+          defaultValue={paciente?.pronome ?? ""}
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+        />
+        <p className="text-xs text-zinc-500 dark:text-zinc-400">
+          Como a pessoa prefere ser tratada (opcional).
+        </p>
+      </div>
+
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <label htmlFor="cpf" className="text-sm font-medium">
-            CPF
+            CPF <span className="text-red-600">*</span>
           </label>
           <input
             id="cpf"
             name="cpf"
             type="text"
+            required
             inputMode="numeric"
             autoComplete="off"
             placeholder="000.000.000-00"
@@ -77,7 +122,7 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Sexo</span>
+        <span className="text-sm font-medium">Sexo atribuido ao nascer </span>
         <div className="flex flex-wrap gap-4 text-sm">
           {(
             [
@@ -107,12 +152,13 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
       <div className="grid gap-4 sm:grid-cols-2">
         <div className="flex flex-col gap-1">
           <label htmlFor="telefone" className="text-sm font-medium">
-            Telefone
+            Telefone <span className="text-red-600">*</span>
           </label>
           <input
             id="telefone"
             name="telefone"
             type="tel"
+            required
             autoComplete="tel"
             defaultValue={paciente?.telefone ?? ""}
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
@@ -135,11 +181,12 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="endereco" className="text-sm font-medium">
-          Endereço
+          Endereço <span className="text-red-600">*</span>
         </label>
         <textarea
           id="endereco"
           name="endereco"
+          required
           rows={3}
           defaultValue={paciente?.endereco ?? ""}
           className="resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"

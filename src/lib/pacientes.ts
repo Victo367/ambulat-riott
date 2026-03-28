@@ -7,6 +7,8 @@ const COLUNAS_PACIENTES: readonly { nome: string; ddl: string }[] = [
   { nome: "cpf", ddl: "ADD COLUMN cpf VARCHAR(14) NULL" },
   { nome: "data_nascimento", ddl: "ADD COLUMN data_nascimento DATE NULL" },
   { nome: "sexo", ddl: "ADD COLUMN sexo ENUM('M', 'F', 'O') NULL" },
+  { nome: "nome_social", ddl: "ADD COLUMN nome_social VARCHAR(255) NULL" },
+  { nome: "pronome", ddl: "ADD COLUMN pronome VARCHAR(120) NULL" },
   { nome: "telefone", ddl: "ADD COLUMN telefone VARCHAR(40) NULL" },
   { nome: "email", ddl: "ADD COLUMN email VARCHAR(255) NULL" },
   { nome: "endereco", ddl: "ADD COLUMN endereco TEXT NULL" },
@@ -48,6 +50,8 @@ export type Sexo = "M" | "F" | "O";
 export type Paciente = {
   id: number;
   nome: string;
+  nome_social: string | null;
+  pronome: string | null;
   cpf: string | null;
   data_nascimento: string | null;
   sexo: Sexo | null;
@@ -61,6 +65,8 @@ export type Paciente = {
 type PacienteRow = RowDataPacket & {
   id: number;
   nome: string;
+  nome_social: string | null;
+  pronome: string | null;
   cpf: string | null;
   data_nascimento: Date | string | null;
   sexo: Sexo | null;
@@ -71,11 +77,20 @@ type PacienteRow = RowDataPacket & {
   updated_at: Date;
 };
 
+/** Nome preferencial para exibição: nome social, se houver; senão nome civil. */
+export function nomeExibicao(p: Pick<Paciente, "nome" | "nome_social">): string {
+  const s = p.nome_social?.trim();
+  if (s) return s;
+  return p.nome.trim();
+}
+
 function rowToPaciente(row: PacienteRow): Paciente {
   const dn = row.data_nascimento;
   return {
     id: row.id,
     nome: row.nome,
+    nome_social: row.nome_social,
+    pronome: row.pronome,
     cpf: row.cpf,
     data_nascimento:
       dn === null
@@ -98,9 +113,9 @@ export async function listarPacientes(): Promise<Paciente[]> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [rows] = await pool.execute<PacienteRow[]>(
-    `SELECT id, nome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
+    `SELECT id, nome, nome_social, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
      FROM pacientes
-     ORDER BY nome ASC`,
+     ORDER BY COALESCE(NULLIF(TRIM(nome_social), ''), nome) ASC`,
   );
   return rows.map(rowToPaciente);
 }
@@ -109,7 +124,7 @@ export async function obterPaciente(id: number): Promise<Paciente | null> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [rows] = await pool.execute<PacienteRow[]>(
-    `SELECT id, nome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
+    `SELECT id, nome, nome_social, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
      FROM pacientes
      WHERE id = ?
      LIMIT 1`,
@@ -121,6 +136,8 @@ export async function obterPaciente(id: number): Promise<Paciente | null> {
 
 export type PacienteInput = {
   nome: string;
+  nome_social: string | null;
+  pronome: string | null;
   cpf: string | null;
   data_nascimento: string | null;
   sexo: Sexo | null;
@@ -133,10 +150,12 @@ export async function inserirPaciente(input: PacienteInput): Promise<number> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO pacientes (nome, cpf, data_nascimento, sexo, telefone, email, endereco)
-     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO pacientes (nome, nome_social, pronome, cpf, data_nascimento, sexo, telefone, email, endereco)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.nome,
+      input.nome_social,
+      input.pronome,
       input.cpf,
       input.data_nascimento,
       input.sexo,
@@ -156,10 +175,12 @@ export async function atualizarPaciente(
   await garantirSchemaPacientes(pool);
   await pool.execute(
     `UPDATE pacientes SET
-       nome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, endereco = ?
+       nome = ?, nome_social = ?, pronome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, endereco = ?
      WHERE id = ?`,
     [
       input.nome,
+      input.nome_social,
+      input.pronome,
       input.cpf,
       input.data_nascimento,
       input.sexo,

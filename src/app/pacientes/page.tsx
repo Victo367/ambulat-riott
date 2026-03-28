@@ -1,7 +1,8 @@
 import Link from "next/link";
 
 import { ExcluirPacienteButton } from "./ExcluirPacienteButton";
-import { listarPacientes } from "@/lib/pacientes";
+import { NomePacienteListagem } from "@/components/NomePacienteListagem";
+import { listarPacientes, nomeExibicao } from "@/lib/pacientes";
 
 function formatarData(iso: string | null): string {
   if (!iso) return "—";
@@ -35,10 +36,11 @@ export default async function PacientesPage() {
         </p>
       ) : (
         <div className="overflow-x-auto rounded-xl border border-zinc-200 dark:border-zinc-800">
-          <table className="w-full min-w-[640px] border-collapse text-left text-sm">
+          <table className="w-full min-w-[760px] border-collapse text-left text-sm">
             <thead>
               <tr className="border-b border-zinc-200 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-900/50">
                 <th className="px-4 py-3 font-medium">Nome</th>
+                <th className="px-4 py-3 font-medium">Pronome</th>
                 <th className="px-4 py-3 font-medium">CPF</th>
                 <th className="px-4 py-3 font-medium">Nascimento</th>
                 <th className="px-4 py-3 font-medium">Sexo</th>
@@ -52,8 +54,18 @@ export default async function PacientesPage() {
                   key={p.id}
                   className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80"
                 >
-                  <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">
-                    {p.nome}
+                  <td className="px-4 py-3 text-zinc-900 dark:text-zinc-100">
+                    {p.nome_social?.trim() ? (
+                      <NomePacienteListagem
+                        nomeSocial={p.nome_social.trim()}
+                        nomeCivil={p.nome}
+                      />
+                    ) : (
+                      <span className="font-medium">{p.nome}</span>
+                    )}
+                  </td>
+                  <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
+                    {p.pronome ?? "—"}
                   </td>
                   <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
                     {p.cpf ?? "—"}
@@ -75,7 +87,10 @@ export default async function PacientesPage() {
                       >
                         Editar
                       </Link>
-                      <ExcluirPacienteButton id={p.id} nome={p.nome} />
+                      <ExcluirPacienteButton
+                        id={p.id}
+                        nome={nomeExibicao(p)}
+                      />
                     </div>
                   </td>
                 </tr>
