@@ -1,49 +1,111 @@
-# ambulat-riott
+# Ambulat-RIOTT
 
-Este é um projeto [Next.js](https://nextjs.org) criado com [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+Sistema web para cadastro e gestão de pacientes de ambulatório, construído com Next.js (App Router), React, TypeScript, Tailwind CSS e MySQL.
 
-## Pré-requisitos
+## Tecnologias
 
-- Node.js compatível com o Next.js 16 (recomendado usar Node LTS)
-- Acesso a um banco MySQL com o banco `ambulatoriott` (pode ser local ou em nuvem)
-- Um arquivo de variáveis de ambiente em `./.env.local`
+- Next.js 16
+- React 19
+- TypeScript
+- Tailwind CSS 4
+- MySQL 
 
-## 1) Instalar dependências
+## Funcionalidades atuais
+
+- Cadastro de paciente
+- Edição de paciente
+- Exclusão de paciente com confirmação
+- Listagem de pacientes
+- Máscara de CPF e telefone no formulário/listagem
+- Navbar lateral na área de pacientes
+
+## Requisitos
+
+- Node.js (recomendado: LTS atual)
+- npm
+- MySQL 8+ (ou compatível)
+
+## Configuração de ambiente
+
+Crie o arquivo `.env.local` na raiz do projeto com:
+
+```env
+MYSQL_HOST=localhost
+MYSQL_PORT=3306
+MYSQL_USER=root
+MYSQL_PASSWORD="sua senha"
+MYSQL_DATABASE="seu banco"
+MYSQL_CONNECTION_LIMIT="Opcional"
+```
+
+Variáveis obrigatórias:
+
+- `MYSQL_HOST`
+- `MYSQL_USER`
+- `MYSQL_PASSWORD`
+
+Variáveis com padrão:
+
+- `MYSQL_DATABASE` (padrão: `ambulatoriott`)
+- `MYSQL_PORT` (padrão: `3306`)
+- `MYSQL_CONNECTION_LIMIT` (padrão: `10`)
+
+## Banco de dados
+
+O projeto espera a tabela `pacientes` no banco.
+
+Colunas utilizadas atualmente:
+
+- `id` (INT, PK, auto increment)
+- `nome` (VARCHAR, obrigatório)
+- `identidade_genero` (VARCHAR, opcional)
+- `pronome` (VARCHAR, obrigatório no cadastro)
+- `cpf` (VARCHAR, obrigatório no cadastro, único)
+- `data_nascimento` (DATE, obrigatório no cadastro)
+- `telefone` (VARCHAR, obrigatório no cadastro)
+- `created_at`
+- `updated_at`
+
+Observação importante:
+
+- O código possui ajustes automáticos para compatibilidade de schema em bases antigas.
+
+## Como rodar o projeto
+
+1. Instale as dependências:
 
 ```bash
 npm install
 ```
 
-## 2) Configurar o MySQL
+2. Configure o `.env.local` (seção acima).
 
-1. Crie o um arquivo:
-    `.env.local`
-2. Preencha:
-   - `MYSQL_HOST`
-   - `MYSQL_PORT` (padrão: `3306`)
-   - `MYSQL_USER`
-   - `MYSQL_PASSWORD`
-   - `MYSQL_DATABASE` (padrão do código: `ambulatoriott`)
-   - `MYSQL_CONNECTION_LIMIT` (padrão: `10`)
-
-Observações importantes:
-- Se o MySQL estiver em nuvem, `MYSQL_HOST` não deve ser `localhost` — precisa ser o endpoint público/privado fornecido pelo provedor.
-- Se o provedor fizer `allowlist` de IPs, libere o IP de onde você vai rodar o projeto.
-- O projeto usa um *pool* de conexões (`mysql2`).
-- Se seu MySQL exigir SSL/TLS e você não conseguir conectar, avise que eu ajusto `src/lib/db.ts` para suportar SSL.
-
-## 3) Rodar em desenvolvimento
+3. Inicie em desenvolvimento:
 
 ```bash
 npm run dev
 ```
 
-Abra:
-- `http://localhost:3000`
+4. Acesse:
 
-## Scripts disponíveis
+- [http://localhost:3000](http://localhost:3000)
 
-- `npm run dev` - inicia o servidor de desenvolvimento
+## Scripts
+
+- `npm run dev` - sobe o servidor de desenvolvimento
 - `npm run build` - gera build de produção
-- `npm run start` - inicia o servidor em modo produção
-- `npm run lint` - executa verificação de lint
+- `npm run start` - roda a build em produção
+- `npm run lint` - valida lint do projeto
+
+## Estrutura principal
+
+- `src/app/` - rotas da aplicação (App Router)
+- `src/app/pacientes/` - páginas de pacientes
+- `src/components/` - componentes de UI
+- `src/lib/` - conexão com banco e funções de domínio
+
+## Troubleshooting rápido
+
+- Erro de conexão MySQL: revise `.env.local` e credenciais.
+- Erro de permissão SQL (`ALTER`): ajuste permissões do usuário MySQL.
+- Mudança não refletiu no navegador: reinicie `npm run dev`.
