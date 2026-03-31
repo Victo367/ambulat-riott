@@ -14,13 +14,6 @@ function formatarData(iso: string | null): string {
   return `${d}/${m}/${y}`;
 }
 
-function labelSexo(s: string | null): string {
-  if (s === "M") return "Masculino";
-  if (s === "F") return "Feminino";
-  if (s === "O") return "Outro";
-  return "—";
-}
-
 type Props = {
   paciente: Paciente;
 };
@@ -29,7 +22,7 @@ export function PacienteRow({ paciente: p }: Props) {
   return (
     <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80">
       <td className="px-4 py-3 text-zinc-900 dark:text-zinc-100">
-        <Listagem nomeSocial={p.nome_social} />
+        <Listagem nome={p.nome_social} />
       </td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{p.pronome ?? "—"}</td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 tabular-nums">
@@ -38,7 +31,6 @@ export function PacienteRow({ paciente: p }: Props) {
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">
         {formatarData(p.data_nascimento)}
       </td>
-      <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{labelSexo(p.sexo)}</td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 tabular-nums">
         {p.telefone ? formatarTelefone(p.telefone) : "—"}
       </td>
