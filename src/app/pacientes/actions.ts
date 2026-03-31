@@ -40,8 +40,15 @@ function parsePacienteInput(formData: FormData): PacienteInput {
 function validarObrigatoriosNovo(input: PacienteInput): void {
   if (!input.nome) redirect("/pacientes/novo?erro=nome_obrigatorio");
   if (!input.nome_social) redirect("/pacientes/novo?erro=nome_social_obrigatorio");
+  if (!input.pronome) redirect("/pacientes/novo?erro=pronome_obrigatorio");
+  if (!input.identidade_genero) {
+    redirect("/pacientes/novo?erro=identidade_genero_obrigatoria");
+  }
   if (!input.cpf) redirect("/pacientes/novo?erro=cpf_obrigatorio");
   if (input.cpf.length !== 11) redirect("/pacientes/novo?erro=cpf_invalido");
+  if (!input.data_nascimento) {
+    redirect("/pacientes/novo?erro=data_nascimento_obrigatoria");
+  }
   if (!input.telefone) redirect("/pacientes/novo?erro=telefone_obrigatorio");
 }
 
@@ -50,8 +57,15 @@ function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
   if (!input.nome_social) {
     redirect(`/pacientes/${id}/editar?erro=nome_social_obrigatorio`);
   }
+  if (!input.pronome) redirect(`/pacientes/${id}/editar?erro=pronome_obrigatorio`);
+  if (!input.identidade_genero) {
+    redirect(`/pacientes/${id}/editar?erro=identidade_genero_obrigatoria`);
+  }
   if (!input.cpf) redirect(`/pacientes/${id}/editar?erro=cpf_obrigatorio`);
   if (input.cpf.length !== 11) redirect(`/pacientes/${id}/editar?erro=cpf_invalido`);
+  if (!input.data_nascimento) {
+    redirect(`/pacientes/${id}/editar?erro=data_nascimento_obrigatoria`);
+  }
   if (!input.telefone) redirect(`/pacientes/${id}/editar?erro=telefone_obrigatorio`);
 }
 

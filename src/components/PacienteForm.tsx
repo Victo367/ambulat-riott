@@ -12,8 +12,11 @@ type Props = {
 const mensagensErro: Record<string, string> = {
   nome_obrigatorio: "Informe o nome civil do paciente.",
   nome_social_obrigatorio: "Informe o nome social.",
+  pronome_obrigatorio: "Informe os pronomes.",
+  identidade_genero_obrigatoria: "Informe a identidade de gênero.",
   cpf_obrigatorio: "Informe o CPF.",
   cpf_invalido: "O CPF deve ter 11 dígitos.",
+  data_nascimento_obrigatoria: "Informe a data de nascimento.",
   telefone_obrigatorio: "Informe o telefone.",
   cpf_duplicado: "Já existe um paciente com este CPF.",
   id_invalido: "Registro inválido.",
@@ -74,31 +77,30 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="pronome" className="text-sm font-medium">
-          Pronomes
+          Pronomes <span className="text-red-600">*</span>
         </label>
         <input
           id="pronome"
           name="pronome"
           type="text"
+          required
           maxLength={120}
           autoComplete="off"
           placeholder="ex.: ela, ele, elu, outro"
           defaultValue={paciente?.pronome ?? ""}
           className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
         />
-        <p className="text-xs text-zinc-500 dark:text-zinc-400">
-          Como a pessoa prefere ser tratada (opcional).
-        </p>
       </div>
 
       <div className="flex flex-col gap-1">
         <label htmlFor="identidade_genero" className="text-sm font-medium">
-          Identidade de gênero
+          Identidade de gênero <span className="text-red-600">*</span>
         </label>
         <input
           id="identidade_genero"
           name="identidade_genero"
           type="text"
+          required
           maxLength={120}
           autoComplete="off"
           placeholder="ex.: mulher, homem, não-binárie, outro"
@@ -121,12 +123,13 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
         </div>
         <div className="flex flex-col gap-1">
           <label htmlFor="data_nascimento" className="text-sm font-medium">
-            Data de nascimento
+            Data de nascimento <span className="text-red-600">*</span>
           </label>
           <input
             id="data_nascimento"
             name="data_nascimento"
             type="date"
+            required
             defaultValue={paciente?.data_nascimento ?? ""}
             className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
           />
