@@ -29,7 +29,6 @@ function parsePacienteInput(formData: FormData): PacienteInput {
     pronome: normalizarTexto(formData.get("pronome")),
     cpf: normalizarCpf(formData.get("cpf")),
     data_nascimento: dn,
-    sexo: null,
     telefone: normalizarTexto(formData.get("telefone")),
     email: null,
     endereco: null,
