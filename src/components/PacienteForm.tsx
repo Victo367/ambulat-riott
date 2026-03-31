@@ -10,7 +10,6 @@ type Props = {
 };
 
 const mensagensErro: Record<string, string> = {
-  nome_obrigatorio: "Informe o nome civil do paciente.",
   nome_social_obrigatorio: "Informe o nome social.",
   pronome_obrigatorio: "Informe os pronomes.",
   identidade_genero_obrigatoria: "Informe a identidade de gênero.",
@@ -58,21 +57,6 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Exibido em primeiro na listagem.
         </p>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="nome" className="text-sm font-medium">
-          Nome civil <span className="text-red-600">*</span>
-        </label>
-        <input
-          id="nome"
-          name="nome"
-          type="text"
-          required
-          maxLength={255}
-          defaultValue={paciente?.nome ?? ""}
-          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
-        />
       </div>
 
       <div className="flex flex-col gap-1">
