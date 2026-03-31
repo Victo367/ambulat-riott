@@ -1,6 +1,6 @@
 "use client";
 
-import { removerPaciente } from "./actions";
+import { removerPaciente } from "../app/pacientes/actions";
 
 type Props = {
   id: number;

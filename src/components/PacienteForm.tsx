@@ -15,7 +15,6 @@ const mensagensErro: Record<string, string> = {
   cpf_obrigatorio: "Informe o CPF.",
   cpf_invalido: "O CPF deve ter 11 dígitos.",
   telefone_obrigatorio: "Informe o telefone.",
-  endereco_obrigatorio: "Informe o endereço.",
   cpf_duplicado: "Já existe um paciente com este CPF.",
   id_invalido: "Registro inválido.",
 };
@@ -40,7 +39,7 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="nome_social" className="text-sm font-medium">
-          Nome social <span className="text-red-600">*</span>
+          Nome <span className="text-red-600">*</span>
         </label>
         <input
           id="nome_social"
@@ -75,7 +74,7 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
 
       <div className="flex flex-col gap-1">
         <label htmlFor="pronome" className="text-sm font-medium">
-          Pronome
+          Pronomes
         </label>
         <input
           id="pronome"
@@ -90,6 +89,22 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
         <p className="text-xs text-zinc-500 dark:text-zinc-400">
           Como a pessoa prefere ser tratada (opcional).
         </p>
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="identidade_genero" className="text-sm font-medium">
+          Identidade de gênero
+        </label>
+        <input
+          id="identidade_genero"
+          name="identidade_genero"
+          type="text"
+          maxLength={120}
+          autoComplete="off"
+          placeholder="ex.: mulher, homem, não-binárie, outro"
+          defaultValue={paciente?.identidade_genero ?? ""}
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+        />
       </div>
 
       <div className="grid gap-4 sm:grid-cols-2">
@@ -119,71 +134,14 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium">Sexo atribuido ao nascer </span>
-        <div className="flex flex-wrap gap-4 text-sm">
-          {(
-            [
-              { value: "", label: "Não informado" },
-              { value: "M", label: "Masculino" },
-              { value: "F", label: "Feminino" },
-              { value: "O", label: "Outro" },
-            ] as const
-          ).map((opt) => (
-            <label key={opt.value || "empty"} className="inline-flex items-center gap-2">
-              <input
-                type="radio"
-                name="sexo"
-                value={opt.value}
-                defaultChecked={
-                  paciente
-                    ? (paciente.sexo ?? "") === opt.value
-                    : opt.value === ""
-                }
-              />
-              {opt.label}
-            </label>
-          ))}
-        </div>
-      </div>
-
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="flex flex-col gap-1">
-          <label htmlFor="telefone" className="text-sm font-medium">
-            Telefone <span className="text-red-600">*</span>
-          </label>
-          <TelefoneInput
-            id="telefone"
-            defaultValue={paciente?.telefone ?? ""}
-            required
-            className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
-          />
-        </div>
-        <div className="flex flex-col gap-1">
-          <label htmlFor="email" className="text-sm font-medium">
-            E-mail
-          </label>
-          <input
-            id="email"
-            name="email"
-            type="email"
-            autoComplete="email"
-            defaultValue={paciente?.email ?? ""}
-            className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
-          />
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-1">
-        <label htmlFor="endereco" className="text-sm font-medium">
-          Endereço <span className="text-red-600">*</span>
+        <label htmlFor="telefone" className="text-sm font-medium">
+          Telefone <span className="text-red-600">*</span>
         </label>
-        <textarea
-          id="endereco"
-          name="endereco"
+        <TelefoneInput
+          id="telefone"
+          defaultValue={paciente?.telefone ?? ""}
           required
-          rows={3}
-          defaultValue={paciente?.endereco ?? ""}
-          className="resize-y rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+          className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </div>
 

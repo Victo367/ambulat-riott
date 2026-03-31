@@ -3,7 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
-import type { PacienteInput, Sexo } from "@/lib/pacientes";
+import type { PacienteInput } from "@/lib/pacientes";
 import {
   atualizarPaciente,
   excluirPaciente,
@@ -21,22 +21,19 @@ function normalizarCpf(v: FormDataEntryValue | null): string | null {
 }
 
 function parsePacienteInput(formData: FormData): PacienteInput {
-  const sexoRaw = normalizarTexto(formData.get("sexo"));
-  const sexo: Sexo | null =
-    sexoRaw === "M" || sexoRaw === "F" || sexoRaw === "O" ? sexoRaw : null;
-
   const dn = normalizarTexto(formData.get("data_nascimento"));
 
   return {
     nome: String(formData.get("nome") ?? "").trim(),
     nome_social: normalizarTexto(formData.get("nome_social")),
+    identidade_genero: normalizarTexto(formData.get("identidade_genero")),
     pronome: normalizarTexto(formData.get("pronome")),
     cpf: normalizarCpf(formData.get("cpf")),
     data_nascimento: dn,
-    sexo,
+    sexo: null,
     telefone: normalizarTexto(formData.get("telefone")),
-    email: normalizarTexto(formData.get("email")),
-    endereco: normalizarTexto(formData.get("endereco")),
+    email: null,
+    endereco: null,
   };
 }
 
@@ -46,7 +43,6 @@ function validarObrigatoriosNovo(input: PacienteInput): void {
   if (!input.cpf) redirect("/pacientes/novo?erro=cpf_obrigatorio");
   if (input.cpf.length !== 11) redirect("/pacientes/novo?erro=cpf_invalido");
   if (!input.telefone) redirect("/pacientes/novo?erro=telefone_obrigatorio");
-  if (!input.endereco) redirect("/pacientes/novo?erro=endereco_obrigatorio");
 }
 
 function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
@@ -57,7 +53,6 @@ function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
   if (!input.cpf) redirect(`/pacientes/${id}/editar?erro=cpf_obrigatorio`);
   if (input.cpf.length !== 11) redirect(`/pacientes/${id}/editar?erro=cpf_invalido`);
   if (!input.telefone) redirect(`/pacientes/${id}/editar?erro=telefone_obrigatorio`);
-  if (!input.endereco) redirect(`/pacientes/${id}/editar?erro=endereco_obrigatorio`);
 }
 
 function isDuplicateKeyError(e: unknown): boolean {

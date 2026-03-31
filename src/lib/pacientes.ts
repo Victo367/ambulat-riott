@@ -8,6 +8,10 @@ const COLUNAS_PACIENTES: readonly { nome: string; ddl: string }[] = [
   { nome: "data_nascimento", ddl: "ADD COLUMN data_nascimento DATE NULL" },
   { nome: "sexo", ddl: "ADD COLUMN sexo ENUM('M', 'F', 'O') NULL" },
   { nome: "nome_social", ddl: "ADD COLUMN nome_social VARCHAR(255) NULL" },
+  {
+    nome: "identidade_genero",
+    ddl: "ADD COLUMN identidade_genero VARCHAR(120) NULL",
+  },
   { nome: "pronome", ddl: "ADD COLUMN pronome VARCHAR(120) NULL" },
   { nome: "telefone", ddl: "ADD COLUMN telefone VARCHAR(40) NULL" },
   { nome: "email", ddl: "ADD COLUMN email VARCHAR(255) NULL" },
@@ -51,6 +55,7 @@ export type Paciente = {
   id: number;
   nome: string;
   nome_social: string | null;
+  identidade_genero: string | null;
   pronome: string | null;
   cpf: string | null;
   data_nascimento: string | null;
@@ -66,6 +71,7 @@ type PacienteRow = RowDataPacket & {
   id: number;
   nome: string;
   nome_social: string | null;
+  identidade_genero: string | null;
   pronome: string | null;
   cpf: string | null;
   data_nascimento: Date | string | null;
@@ -90,6 +96,7 @@ function rowToPaciente(row: PacienteRow): Paciente {
     id: row.id,
     nome: row.nome,
     nome_social: row.nome_social,
+    identidade_genero: row.identidade_genero,
     pronome: row.pronome,
     cpf: row.cpf,
     data_nascimento:
@@ -113,7 +120,7 @@ export async function listarPacientes(): Promise<Paciente[]> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [rows] = await pool.execute<PacienteRow[]>(
-    `SELECT id, nome, nome_social, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
+    `SELECT id, nome, nome_social, identidade_genero, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
      FROM pacientes
      ORDER BY COALESCE(NULLIF(TRIM(nome_social), ''), nome) ASC`,
   );
@@ -124,7 +131,7 @@ export async function obterPaciente(id: number): Promise<Paciente | null> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [rows] = await pool.execute<PacienteRow[]>(
-    `SELECT id, nome, nome_social, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
+    `SELECT id, nome, nome_social, identidade_genero, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
      FROM pacientes
      WHERE id = ?
      LIMIT 1`,
@@ -137,6 +144,7 @@ export async function obterPaciente(id: number): Promise<Paciente | null> {
 export type PacienteInput = {
   nome: string;
   nome_social: string | null;
+  identidade_genero: string | null;
   pronome: string | null;
   cpf: string | null;
   data_nascimento: string | null;
@@ -150,11 +158,12 @@ export async function inserirPaciente(input: PacienteInput): Promise<number> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO pacientes (nome, nome_social, pronome, cpf, data_nascimento, sexo, telefone, email, endereco)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO pacientes (nome, nome_social, identidade_genero, pronome, cpf, data_nascimento, sexo, telefone, email, endereco)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.nome,
       input.nome_social,
+      input.identidade_genero,
       input.pronome,
       input.cpf,
       input.data_nascimento,
@@ -175,11 +184,12 @@ export async function atualizarPaciente(
   await garantirSchemaPacientes(pool);
   await pool.execute(
     `UPDATE pacientes SET
-       nome = ?, nome_social = ?, pronome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, endereco = ?
+       nome = ?, nome_social = ?, identidade_genero = ?, pronome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, endereco = ?
      WHERE id = ?`,
     [
       input.nome,
       input.nome_social,
+      input.identidade_genero,
       input.pronome,
       input.cpf,
       input.data_nascimento,

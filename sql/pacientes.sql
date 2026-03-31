@@ -3,6 +3,7 @@ CREATE TABLE IF NOT EXISTS pacientes (
   id INT UNSIGNED NOT NULL AUTO_INCREMENT,
   nome VARCHAR(255) NOT NULL,
   nome_social VARCHAR(255) NULL,
+  identidade_genero VARCHAR(120) NULL,
   pronome VARCHAR(120) NULL,
   cpf VARCHAR(14) NULL,
   data_nascimento DATE NULL,
