@@ -2,7 +2,6 @@ import Link from "next/link";
 
 import { formatarCpf } from "@/lib/cpf";
 import type { Paciente } from "@/lib/pacientes";
-import { nomeExibicao } from "@/lib/pacientes";
 import { formatarTelefone } from "@/lib/telefone";
 
 import { Excluir } from "./excluir";
@@ -30,11 +29,7 @@ export function PacienteRow({ paciente: p }: Props) {
   return (
     <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80">
       <td className="px-4 py-3 text-zinc-900 dark:text-zinc-100">
-        {p.nome_social?.trim() ? (
-          <Listagem nomeSocial={p.nome_social.trim()} nomeCivil={p.nome} />
-        ) : (
-          <span className="font-medium">{p.nome}</span>
-        )}
+        <Listagem nomeSocial={p.nome_social} />
       </td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{p.pronome ?? "—"}</td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 tabular-nums">
@@ -55,7 +50,7 @@ export function PacienteRow({ paciente: p }: Props) {
           >
             Editar
           </Link>
-          <Excluir id={p.id} nome={nomeExibicao(p)} />
+          <Excluir id={p.id} nome={p.nome_social} />
         </div>
       </td>
     </tr>

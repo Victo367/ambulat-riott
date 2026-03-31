@@ -24,7 +24,6 @@ function parsePacienteInput(formData: FormData): PacienteInput {
   const dn = normalizarTexto(formData.get("data_nascimento"));
 
   return {
-    nome: String(formData.get("nome") ?? "").trim(),
     nome_social: normalizarTexto(formData.get("nome_social")),
     identidade_genero: normalizarTexto(formData.get("identidade_genero")),
     pronome: normalizarTexto(formData.get("pronome")),
@@ -38,7 +37,6 @@ function parsePacienteInput(formData: FormData): PacienteInput {
 }
 
 function validarObrigatoriosNovo(input: PacienteInput): void {
-  if (!input.nome) redirect("/pacientes/novo?erro=nome_obrigatorio");
   if (!input.nome_social) redirect("/pacientes/novo?erro=nome_social_obrigatorio");
   if (!input.pronome) redirect("/pacientes/novo?erro=pronome_obrigatorio");
   if (!input.identidade_genero) {
@@ -53,7 +51,6 @@ function validarObrigatoriosNovo(input: PacienteInput): void {
 }
 
 function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
-  if (!input.nome) redirect(`/pacientes/${id}/editar?erro=nome_obrigatorio`);
   if (!input.nome_social) {
     redirect(`/pacientes/${id}/editar?erro=nome_social_obrigatorio`);
   }
