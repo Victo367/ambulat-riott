@@ -48,7 +48,7 @@ type Props = {
 };
 
 /** Listagem: nome social em destaque; nome civil com alternância por ícone de olho. */
-export function NomePacienteListagem({ nomeSocial, nomeCivil }: Props) {
+export function Listagem({ nomeSocial, nomeCivil }: Props) {
   const [mostrarCivil, setMostrarCivil] = useState(false);
   const civilDiferente = nomeCivil.trim() !== nomeSocial.trim();
 

@@ -7,7 +7,7 @@ type Props = {
   nome: string;
 };
 
-export function ExcluirPacienteButton({ id, nome }: Props) {
+export function Excluir({ id, nome }: Props) {
   return (
     <form action={removerPaciente}>
       <input type="hidden" name="id" value={id} />
