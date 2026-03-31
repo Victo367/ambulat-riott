@@ -29,7 +29,6 @@ function createPool(): Pool {
 }
 
 declare global {
-  // eslint-disable-next-line no-var
   var __mysqlPool: Pool | undefined;
 }
 

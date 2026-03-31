@@ -2,11 +2,9 @@ import type { Pool, ResultSetHeader, RowDataPacket } from "mysql2/promise";
 
 import { getMySqlPool } from "./db";
 
-/** Colunas do cadastro completo; faltantes são criadas com ALTER (bases antigas). */
 const COLUNAS_PACIENTES: readonly { nome: string; ddl: string }[] = [
   { nome: "cpf", ddl: "ADD COLUMN cpf VARCHAR(14) NULL" },
   { nome: "data_nascimento", ddl: "ADD COLUMN data_nascimento DATE NULL" },
-  { nome: "sexo", ddl: "ADD COLUMN sexo ENUM('M', 'F', 'O') NULL" },
   { nome: "nome_social", ddl: "ADD COLUMN nome_social VARCHAR(255) NULL" },
   {
     nome: "identidade_genero",
@@ -27,7 +25,6 @@ const COLUNAS_PACIENTES: readonly { nome: string; ddl: string }[] = [
   },
 ];
 
-/** Sem cache global: após migrar só `sexo`, o processo não pode “pular” `endereco` nas próximas chamadas. */
 async function garantirSchemaPacientes(pool: Pool): Promise<void> {
   const [cols] = await pool.execute<RowDataPacket[]>(
     `SELECT COLUMN_NAME AS n FROM INFORMATION_SCHEMA.COLUMNS
@@ -42,14 +39,23 @@ async function garantirSchemaPacientes(pool: Pool): Promise<void> {
       existentes.add(nome.toLowerCase());
     } catch (e) {
       const err = e as { errno?: number };
-      // 1060 = coluna duplicada (corrida entre requisições)
+
       if (err.errno !== 1060) throw e;
       existentes.add(nome.toLowerCase());
     }
   }
-}
 
-export type Sexo = "M" | "F" | "O";
+  
+  if (existentes.has("nome")) {
+    try {
+      await pool.execute(
+        `ALTER TABLE pacientes MODIFY COLUMN nome VARCHAR(255) NULL`,
+      );
+    } catch {
+     
+    }
+  }
+}
 
 export type Paciente = {
   id: number;
@@ -58,7 +64,6 @@ export type Paciente = {
   pronome: string | null;
   cpf: string | null;
   data_nascimento: string | null;
-  sexo: Sexo | null;
   telefone: string | null;
   email: string | null;
   endereco: string | null;
@@ -68,12 +73,11 @@ export type Paciente = {
 
 type PacienteRow = RowDataPacket & {
   id: number;
-  nome_social: string;
+  nome_social: string | null;
   identidade_genero: string | null;
   pronome: string | null;
   cpf: string | null;
   data_nascimento: Date | string | null;
-  sexo: Sexo | null;
   telefone: string | null;
   email: string | null;
   endereco: string | null;
@@ -85,7 +89,7 @@ function rowToPaciente(row: PacienteRow): Paciente {
   const dn = row.data_nascimento;
   return {
     id: row.id,
-    nome_social: row.nome_social,
+    nome_social: (row.nome_social ?? "").trim() || "(Sem nome)",
     identidade_genero: row.identidade_genero,
     pronome: row.pronome,
     cpf: row.cpf,
@@ -97,7 +101,6 @@ function rowToPaciente(row: PacienteRow): Paciente {
           : dn instanceof Date
             ? dn.toISOString().slice(0, 10)
             : String(dn).slice(0, 10),
-    sexo: row.sexo,
     telefone: row.telefone,
     email: row.email,
     endereco: row.endereco,
@@ -110,7 +113,7 @@ export async function listarPacientes(): Promise<Paciente[]> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [rows] = await pool.execute<PacienteRow[]>(
-    `SELECT id, nome_social, identidade_genero, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
+    `SELECT id, nome_social, identidade_genero, pronome, cpf, data_nascimento, telefone, email, endereco, created_at, updated_at
      FROM pacientes
      ORDER BY nome_social ASC`,
   );
@@ -121,7 +124,7 @@ export async function obterPaciente(id: number): Promise<Paciente | null> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [rows] = await pool.execute<PacienteRow[]>(
-    `SELECT id, nome_social, identidade_genero, pronome, cpf, data_nascimento, sexo, telefone, email, endereco, created_at, updated_at
+    `SELECT id, nome_social, identidade_genero, pronome, cpf, data_nascimento, telefone, email, endereco, created_at, updated_at
      FROM pacientes
      WHERE id = ?
      LIMIT 1`,
@@ -137,7 +140,6 @@ export type PacienteInput = {
   pronome: string | null;
   cpf: string | null;
   data_nascimento: string | null;
-  sexo: Sexo | null;
   telefone: string | null;
   email: string | null;
   endereco: string | null;
@@ -147,15 +149,14 @@ export async function inserirPaciente(input: PacienteInput): Promise<number> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO pacientes (nome_social, identidade_genero, pronome, cpf, data_nascimento, sexo, telefone, email, endereco)
-     VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO pacientes (nome_social, identidade_genero, pronome, cpf, data_nascimento, telefone, email, endereco)
+     VALUES (?, ?, ?, ?, ?, ?, ?, ?)`,
     [
       input.nome_social,
       input.identidade_genero,
       input.pronome,
       input.cpf,
       input.data_nascimento,
-      input.sexo,
       input.telefone,
       input.email,
       input.endereco,
@@ -172,7 +173,7 @@ export async function atualizarPaciente(
   await garantirSchemaPacientes(pool);
   await pool.execute(
     `UPDATE pacientes SET
-       nome_social = ?, identidade_genero = ?, pronome = ?, cpf = ?, data_nascimento = ?, sexo = ?, telefone = ?, email = ?, endereco = ?
+       nome_social = ?, identidade_genero = ?, pronome = ?, cpf = ?, data_nascimento = ?, telefone = ?, email = ?, endereco = ?
      WHERE id = ?`,
     [
       input.nome_social,
@@ -180,7 +181,6 @@ export async function atualizarPaciente(
       input.pronome,
       input.cpf,
       input.data_nascimento,
-      input.sexo,
       input.telefone,
       input.email,
       input.endereco,
