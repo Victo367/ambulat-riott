@@ -24,19 +24,17 @@ function parsePacienteInput(formData: FormData): PacienteInput {
   const dn = normalizarTexto(formData.get("data_nascimento"));
 
   return {
-    nome_social: normalizarTexto(formData.get("nome_social")),
+    nome: normalizarTexto(formData.get("nome")),
     identidade_genero: normalizarTexto(formData.get("identidade_genero")),
     pronome: normalizarTexto(formData.get("pronome")),
     cpf: normalizarCpf(formData.get("cpf")),
     data_nascimento: dn,
     telefone: normalizarTexto(formData.get("telefone")),
-    email: null,
-    endereco: null,
   };
 }
 
 function validarObrigatoriosNovo(input: PacienteInput): void {
-  if (!input.nome_social) redirect("/pacientes/novo?erro=nome_social_obrigatorio");
+  if (!input.nome) redirect("/pacientes/novo?erro=nome_obrigatorio");
   if (!input.pronome) redirect("/pacientes/novo?erro=pronome_obrigatorio");
   if (!input.identidade_genero) {
     redirect("/pacientes/novo?erro=identidade_genero_obrigatoria");
@@ -50,8 +48,8 @@ function validarObrigatoriosNovo(input: PacienteInput): void {
 }
 
 function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
-  if (!input.nome_social) {
-    redirect(`/pacientes/${id}/editar?erro=nome_social_obrigatorio`);
+  if (!input.nome) {
+    redirect(`/pacientes/${id}/editar?erro=nome_obrigatorio`);
   }
   if (!input.pronome) redirect(`/pacientes/${id}/editar?erro=pronome_obrigatorio`);
   if (!input.identidade_genero) {

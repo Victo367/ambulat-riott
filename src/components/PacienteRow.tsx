@@ -22,7 +22,7 @@ export function PacienteRow({ paciente: p }: Props) {
   return (
     <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80">
       <td className="px-4 py-3 text-zinc-900 dark:text-zinc-100">
-        <Listagem nome={p.nome_social} />
+        <Listagem nome={p.nome} />
       </td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300">{p.pronome ?? "—"}</td>
       <td className="px-4 py-3 text-zinc-700 dark:text-zinc-300 tabular-nums">
@@ -42,7 +42,7 @@ export function PacienteRow({ paciente: p }: Props) {
           >
             Editar
           </Link>
-          <Excluir id={p.id} nome={p.nome_social} />
+          <Excluir id={p.id} nome={p.nome} />
         </div>
       </td>
     </tr>
