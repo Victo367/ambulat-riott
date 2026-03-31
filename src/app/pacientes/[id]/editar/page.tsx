@@ -1,6 +1,5 @@
 import { notFound } from "next/navigation";
 
-import { CabecalhoFormularioPaciente } from "@/components/CabecalhoFormularioPaciente";
 import { PacienteForm } from "@/components/PacienteForm";
 import { nomeExibicao, obterPaciente } from "@/lib/pacientes";
 
@@ -26,14 +25,12 @@ export default async function EditarPacientePage({ params, searchParams }: Props
 
   return (
     <div className="flex flex-col gap-6">
-      <CabecalhoFormularioPaciente
-        titulo="Editar paciente"
-        descricao={
-          <>
-            Atualize os dados de <strong>{nomeExibicao(paciente)}</strong>.
-          </>
-        }
-      />
+      <div>
+        <h2 className="text-xl font-semibold">Editar paciente</h2>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          Atualize os dados de <strong>{nomeExibicao(paciente)}</strong>.
+        </p>
+      </div>
 
       <PacienteForm
         action={salvarPaciente}

@@ -5,8 +5,8 @@ import type { Paciente } from "@/lib/pacientes";
 import { nomeExibicao } from "@/lib/pacientes";
 import { formatarTelefone } from "@/lib/telefone";
 
-import { ExcluirPacienteButton } from "./ExcluirPacienteButton";
-import { NomePacienteListagem } from "./NomePacienteListagem";
+import { Excluir } from "./excluir";
+import { Listagem } from "./Listagem";
 
 function formatarData(iso: string | null): string {
   if (!iso) return "—";
@@ -31,7 +31,7 @@ export function PacienteRow({ paciente: p }: Props) {
     <tr className="border-b border-zinc-100 last:border-0 dark:border-zinc-800/80">
       <td className="px-4 py-3 text-zinc-900 dark:text-zinc-100">
         {p.nome_social?.trim() ? (
-          <NomePacienteListagem nomeSocial={p.nome_social.trim()} nomeCivil={p.nome} />
+          <Listagem nomeSocial={p.nome_social.trim()} nomeCivil={p.nome} />
         ) : (
           <span className="font-medium">{p.nome}</span>
         )}
@@ -55,7 +55,7 @@ export function PacienteRow({ paciente: p }: Props) {
           >
             Editar
           </Link>
-          <ExcluirPacienteButton id={p.id} nome={nomeExibicao(p)} />
+          <Excluir id={p.id} nome={nomeExibicao(p)} />
         </div>
       </td>
     </tr>

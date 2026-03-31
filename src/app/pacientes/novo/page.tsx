@@ -1,4 +1,3 @@
-import { CabecalhoFormularioPaciente } from "@/components/CabecalhoFormularioPaciente";
 import { PacienteForm } from "@/components/PacienteForm";
 
 import { criarPaciente } from "../actions";
@@ -12,10 +11,12 @@ export default async function NovoPacientePage({ searchParams }: Props) {
 
   return (
     <div className="flex flex-col gap-6">
-      <CabecalhoFormularioPaciente
-        titulo="Novo paciente"
-        descricao="Preencha os dados abaixo. Campos com * são obrigatórios."
-      />
+      <div>
+        <h2 className="text-xl font-semibold">Novo paciente</h2>
+        <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+          Preencha os dados abaixo. Campos com * são obrigatórios.
+        </p>
+      </div>
 
       <PacienteForm
         action={criarPaciente}
