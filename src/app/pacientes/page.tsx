@@ -28,7 +28,6 @@ export default async function PacientesPage() {
                 <th className="px-4 py-3 font-medium">Pronome</th>
                 <th className="px-4 py-3 font-medium">CPF</th>
                 <th className="px-4 py-3 font-medium">Nascimento</th>
-                <th className="px-4 py-3 font-medium">Sexo</th>
                 <th className="px-4 py-3 font-medium">Telefone</th>
                 <th className="px-4 py-3 font-medium text-right">Ações</th>
               </tr>
