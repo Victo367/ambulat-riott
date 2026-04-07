@@ -12,6 +12,7 @@ const COLUNAS_PACIENTES: readonly { nome: string; ddl: string }[] = [
   },
   { nome: "pronome", ddl: "ADD COLUMN pronome VARCHAR(120) NULL" },
   { nome: "telefone", ddl: "ADD COLUMN telefone VARCHAR(40) NULL" },
+  { nome: "senha", ddl: "ADD COLUMN senha VARCHAR(255) NULL" },
   {
     nome: "created_at",
     ddl: "ADD COLUMN created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP",
@@ -133,14 +134,15 @@ export type PacienteInput = {
   cpf: string | null;
   data_nascimento: string | null;
   telefone: string | null;
+  senha: string | null;
 };
 
 export async function inserirPaciente(input: PacienteInput): Promise<number> {
   const pool = getMySqlPool();
   await garantirSchemaPacientes(pool);
   const [result] = await pool.execute<ResultSetHeader>(
-    `INSERT INTO pacientes (nome, identidade_genero, pronome, cpf, data_nascimento, telefone)
-     VALUES (?, ?, ?, ?, ?, ?)`,
+    `INSERT INTO pacientes (nome, identidade_genero, pronome, cpf, data_nascimento, telefone, senha)
+     VALUES (?, ?, ?, ?, ?, ?, ?)`,
     [
       input.nome,
       input.identidade_genero,
@@ -148,6 +150,7 @@ export async function inserirPaciente(input: PacienteInput): Promise<number> {
       input.cpf,
       input.data_nascimento,
       input.telefone,
+      input.senha,
     ],
   );
   return result.insertId;
@@ -161,7 +164,7 @@ export async function atualizarPaciente(
   await garantirSchemaPacientes(pool);
   await pool.execute(
     `UPDATE pacientes SET
-       nome = ?, identidade_genero = ?, pronome = ?, cpf = ?, data_nascimento = ?, telefone = ?
+       nome = ?, identidade_genero = ?, pronome = ?, cpf = ?, data_nascimento = ?, telefone = ?, senha = COALESCE(?, senha)
      WHERE id = ?`,
     [
       input.nome,
@@ -170,6 +173,7 @@ export async function atualizarPaciente(
       input.cpf,
       input.data_nascimento,
       input.telefone,
+      input.senha,
       id,
     ],
   );

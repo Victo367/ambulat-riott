@@ -1,4 +1,5 @@
 import { CpfInput } from "@/components/CpfInput";
+import { PasswordInput } from "@/components/PasswordInput";
 import { TelefoneInput } from "@/components/TelefoneInput";
 import type { Paciente } from "@/lib/pacientes";
 
@@ -17,6 +18,9 @@ const mensagensErro: Record<string, string> = {
   cpf_invalido: "O CPF deve ter 11 dígitos.",
   data_nascimento_obrigatoria: "Informe a data de nascimento.",
   telefone_obrigatorio: "Informe o telefone.",
+  senha_obrigatoria: "Informe a senha.",
+  senha_invalida:
+    "A senha deve ter no mínimo 8 caracteres, 1 letra maiúscula e 1 caractere especial.",
   cpf_duplicado: "Já existe um paciente com este CPF.",
   id_invalido: "Registro inválido.",
 };
@@ -126,6 +130,21 @@ export function PacienteForm({ action, paciente, submitLabel, erro }: Props) {
           defaultValue={paciente?.telefone ?? ""}
           required
           className="w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
+        />
+      </div>
+
+      <div className="flex flex-col gap-1">
+        <label htmlFor="senha" className="text-sm font-medium">
+          Senha {!paciente ? <span className="text-red-600">*</span> : null}
+        </label>
+        <PasswordInput
+          id="senha"
+          name="senha"
+          required={!paciente}
+          minLength={8}
+          autoComplete="new-password"
+          placeholder={!paciente ? "Crie uma senha forte" : "Nova senha (opcional)"}
+          className="rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 outline-none ring-zinc-400 focus:ring-2 dark:border-zinc-600 dark:bg-zinc-900 dark:text-zinc-100"
         />
       </div>
 
