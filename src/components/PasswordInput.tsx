@@ -52,7 +52,15 @@ export function PasswordInput({
           value={value}
           onChange={onChange}
         />
-       
+        <button
+          type="button"
+          onClick={() => setMostrar((v) => !v)}
+          aria-label={mostrar ? "Ocultar senha" : "Mostrar senha"}
+          title={mostrar ? "Ocultar senha" : "Mostrar senha"}
+          className="absolute right-2 top-1/2 -translate-y-1/2 rounded px-2 py-1 text-xs text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 dark:text-zinc-300 dark:hover:bg-zinc-800 dark:hover:text-zinc-100"
+        >
+          {mostrar ? "Ocultar" : "Mostrar"}
+        </button>
       </div>
 
       <div className="space-y-1 text-xs text-zinc-700 dark:text-zinc-300">
