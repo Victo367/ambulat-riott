@@ -30,7 +30,16 @@ function parsePacienteInput(formData: FormData): PacienteInput {
     cpf: normalizarCpf(formData.get("cpf")),
     data_nascimento: dn,
     telefone: normalizarTexto(formData.get("telefone")),
+    senha: normalizarTexto(formData.get("senha")),
   };
+}
+
+function senhaForte(senha: string): boolean {
+  return (
+    senha.length >= 8 &&
+    /[A-Z]/.test(senha) &&
+    /[^A-Za-z0-9]/.test(senha)
+  );
 }
 
 function validarObrigatoriosNovo(input: PacienteInput): void {
@@ -45,6 +54,8 @@ function validarObrigatoriosNovo(input: PacienteInput): void {
     redirect("/pacientes/novo?erro=data_nascimento_obrigatoria");
   }
   if (!input.telefone) redirect("/pacientes/novo?erro=telefone_obrigatorio");
+  if (!input.senha) redirect("/pacientes/novo?erro=senha_obrigatoria");
+  if (!senhaForte(input.senha)) redirect("/pacientes/novo?erro=senha_invalida");
 }
 
 function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
@@ -61,6 +72,9 @@ function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
     redirect(`/pacientes/${id}/editar?erro=data_nascimento_obrigatoria`);
   }
   if (!input.telefone) redirect(`/pacientes/${id}/editar?erro=telefone_obrigatorio`);
+  if (input.senha && !senhaForte(input.senha)) {
+    redirect(`/pacientes/${id}/editar?erro=senha_invalida`);
+  }
 }
 
 function isDuplicateKeyError(e: unknown): boolean {
