@@ -1,45 +1,16 @@
-import mysql from "mysql2/promise";
+import mongoose from "mongoose";
 
-import type { Pool } from "mysql2/promise";
+export async function connectDB() {
+  try {
+    if (mongoose.connection.readyState >= 1) {
+      console.log("Já conectado ao MongoDB");
+      return;
+    }
 
-function requireEnv(name: string): string {
-  const value = process.env[name];
-  if (!value) throw new Error(`Missing environment variable: ${name}`);
-  return value;
-}
+    await mongoose.connect(process.env.MONGO_URL!);
 
-function createPool(): Pool {
-  const host = requireEnv("MYSQL_HOST");
-  const user = requireEnv("MYSQL_USER");
-  const password = requireEnv("MYSQL_PASSWORD");
-  const database = process.env.MYSQL_DATABASE ?? "ambulatoriott";
-  const port = Number(process.env.MYSQL_PORT ?? 3306);
-  const connectionLimit = Number(process.env.MYSQL_CONNECTION_LIMIT ?? 10);
-
-  return mysql.createPool({
-    host,
-    port,
-    user,
-    password,
-    database,
-    waitForConnections: true,
-    connectionLimit,
-    queueLimit: 0,
-  });
-}
-
-declare global {
-  var __mysqlPool: Pool | undefined;
-}
-
-function getPool(): Pool {
-  if (!globalThis.__mysqlPool) {
-    globalThis.__mysqlPool = createPool();
+    console.log("MongoDB conectado com sucesso");
+  } catch (error) {
+    console.error("Erro ao conectar no MongoDB:", error);
   }
-  return globalThis.__mysqlPool;
 }
-
-export function getMySqlPool(): Pool {
-  return getPool();
-}
-
