@@ -1,7 +1,7 @@
 import type { ReactNode } from "react";
 import { Sidenav } from "@/components/Sidenav";
 
-/** Evita pré-render no build e acessa o MySQL só em tempo de requisição. */
+/** Evita pré-render no build e acessa o MongoDB só em tempo de requisição. */
 export const dynamic = "force-dynamic";
 
 export default function PacientesLayout({ children }: { children: ReactNode }) {

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { notFound } from "next/navigation";
 import { PacienteForm } from "@/components/PacienteForm";
 import { obterPaciente } from "@/lib/pacientes";
@@ -11,12 +12,11 @@ type Props = {
 export default async function EditarPacientePage({ params, searchParams }: Props) {
   const { id: idStr } = await params;
   const { erro } = await searchParams;
-  const id = Number(idStr);
-  if (!Number.isInteger(id) || id < 1) {
+  if (!mongoose.isValidObjectId(idStr)) {
     notFound();
   }
 
-  const paciente = await obterPaciente(id);
+  const paciente = await obterPaciente(idStr);
   if (!paciente) {
     notFound();
   }

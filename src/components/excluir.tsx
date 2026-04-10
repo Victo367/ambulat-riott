@@ -3,7 +3,7 @@
 import { removerPaciente } from "../app/pacientes/actions";
 
 type Props = {
-  id: number;
+  id: string;
   nome: string;
 };
 

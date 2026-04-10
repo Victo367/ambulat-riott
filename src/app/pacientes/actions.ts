@@ -1,5 +1,6 @@
 "use server";
 
+import mongoose from "mongoose";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 
@@ -58,7 +59,7 @@ function validarObrigatoriosNovo(input: PacienteInput): void {
   if (!senhaForte(input.senha)) redirect("/pacientes/novo?erro=senha_invalida");
 }
 
-function validarObrigatoriosEdicao(id: number, input: PacienteInput): void {
+function validarObrigatoriosEdicao(id: string, input: PacienteInput): void {
   if (!input.nome) {
     redirect(`/pacientes/${id}/editar?erro=nome_obrigatorio`);
   }
@@ -82,7 +83,7 @@ function isDuplicateKeyError(e: unknown): boolean {
     typeof e === "object" &&
     e !== null &&
     "code" in e &&
-    (e as { code?: string }).code === "ER_DUP_ENTRY"
+    (e as { code?: number }).code === 11000
   );
 }
 
@@ -104,8 +105,8 @@ export async function criarPaciente(formData: FormData) {
 }
 
 export async function salvarPaciente(formData: FormData) {
-  const id = Number(formData.get("id"));
-  if (!Number.isInteger(id) || id < 1) {
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id || !mongoose.isValidObjectId(id)) {
     redirect("/pacientes?erro=id_invalido");
   }
 
@@ -126,8 +127,8 @@ export async function salvarPaciente(formData: FormData) {
 }
 
 export async function removerPaciente(formData: FormData) {
-  const id = Number(formData.get("id"));
-  if (!Number.isInteger(id) || id < 1) {
+  const id = String(formData.get("id") ?? "").trim();
+  if (!id) {
     return;
   }
   await excluirPaciente(id);

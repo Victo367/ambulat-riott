@@ -1,6 +1,6 @@
 # Ambulat-RIOTT
 
-Sistema web para cadastro e gestão de pacientes de ambulatório, construído com Next.js (App Router), React, TypeScript, Tailwind CSS e MySQL.
+Sistema web para cadastro e gestão de pacientes de ambulatório, construído com Next.js (App Router), React, TypeScript, Tailwind CSS e MongoDB.
 
 ## Tecnologias
 
@@ -8,7 +8,7 @@ Sistema web para cadastro e gestão de pacientes de ambulatório, construído co
 - React 19
 - TypeScript
 - Tailwind CSS 4
-- MySQL 
+- MongoDB (via Mongoose)
 
 ## Funcionalidades atuais
 
@@ -23,52 +23,34 @@ Sistema web para cadastro e gestão de pacientes de ambulatório, construído co
 
 - Node.js (recomendado: LTS atual)
 - npm
-- MySQL 8+ (ou compatível)
+- Instância MongoDB acessível (local ou Atlas)
 
 ## Configuração de ambiente
 
 Crie o arquivo `.env.local` na raiz do projeto com:
 
 ```env
-MYSQL_HOST=localhost
-MYSQL_PORT=3306
-MYSQL_USER=root
-MYSQL_PASSWORD="sua senha"
-MYSQL_DATABASE="seu banco"
-MYSQL_CONNECTION_LIMIT="Opcional"
+MONGODB_URI=mongodb://localhost:27017/ambulatoriott
 ```
 
-Variáveis obrigatórias:
+Também é aceito o nome `MONGO_URL` (mesmo valor).
 
-- `MYSQL_HOST`
-- `MYSQL_USER`
-- `MYSQL_PASSWORD`
-
-Variáveis com padrão:
-
-- `MYSQL_DATABASE` (padrão: `ambulatoriott`)
-- `MYSQL_PORT` (padrão: `3306`)
-- `MYSQL_CONNECTION_LIMIT` (padrão: `10`)
+Pelo menos uma das variáveis `MONGODB_URI` ou `MONGO_URL` deve estar definida.
 
 ## Banco de dados
 
-O projeto espera a tabela `pacientes` no banco.
+A coleção `pacientes` é criada automaticamente na primeira gravação.
 
-Colunas utilizadas atualmente:
+Campos utilizados:
 
-- `id` (INT, PK, auto increment)
-- `nome` (VARCHAR, obrigatório)
-- `identidade_genero` (VARCHAR, opcional)
-- `pronome` (VARCHAR, obrigatório no cadastro)
-- `cpf` (VARCHAR, obrigatório no cadastro, único)
-- `data_nascimento` (DATE, obrigatório no cadastro)
-- `telefone` (VARCHAR, obrigatório no cadastro)
-- `created_at`
-- `updated_at`
-
-Observação importante:
-
-- O código possui ajustes automáticos para compatibilidade de schema em bases antigas.
+- `nome` (string)
+- `identidade_genero` (string ou null)
+- `pronome` (string ou null)
+- `cpf` (string, único quando preenchido)
+- `data_nascimento` (string no formato `YYYY-MM-DD` ou null)
+- `telefone` (string ou null)
+- `senha` (string ou null)
+- `created_at` / `updated_at` (timestamps geridos pelo Mongoose)
 
 ## Como rodar o projeto
 
@@ -106,6 +88,5 @@ npm run dev
 
 ## Troubleshooting rápido
 
-- Erro de conexão MySQL: revise `.env.local` e credenciais.
-- Erro de permissão SQL (`ALTER`): ajuste permissões do usuário MySQL.
+- Erro de conexão MongoDB: revise `.env.local`, URI, rede e se o serviço está escutando na porta correta.
 - Mudança não refletiu no navegador: reinicie `npm run dev`.

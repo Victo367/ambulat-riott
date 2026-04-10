@@ -1,16 +1,21 @@
 import mongoose from "mongoose";
 
-export async function connectDB() {
-  try {
-    if (mongoose.connection.readyState >= 1) {
-      console.log("Já conectado ao MongoDB");
-      return;
-    }
-
-    await mongoose.connect(process.env.MONGO_URL!);
-
-    console.log("MongoDB conectado com sucesso");
-  } catch (error) {
-    console.error("Erro ao conectar no MongoDB:", error);
+function getMongoUri(): string {
+  const uri = process.env.MONGODB_URI ?? process.env.MONGO_URL;
+  if (!uri) {
+    throw new Error(
+      "Defina MONGODB_URI ou MONGO_URL no ambiente (ex.: .env.local).",
+    );
   }
+  return uri;
+}
+
+export async function connectDB(): Promise<typeof mongoose> {
+  if (mongoose.connection.readyState >= 1) {
+    return mongoose;
+  }
+
+  const uri = getMongoUri();
+  await mongoose.connect(uri);
+  return mongoose;
 }
