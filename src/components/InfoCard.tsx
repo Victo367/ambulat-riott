@@ -7,7 +7,9 @@ image: string;
 
 export default function InfoCard({ title, description, image }: InfoCardProps) {
 return (
-    <div className="bg-white rounded-2xl shadow-md overflow-hidden w-full max-w-sm">
+    <div className="bg-white rounded-2xl shadow-md overflow-hidden w-full max-w-sm
+cursor-pointer transition duration-300 ease-in-out
+hover:-translate-y-2 hover:shadow-xl hover:scale-[1.02]">
 
 
     <Image

@@ -5,7 +5,6 @@ export default function Home() {
   return (
     <div className="flex flex-col gap-6">
 
-      {/* Título */}
       <div>
         <h1 className="text-2xl font-bold text-zinc-900">
           Ambulatório TT Marcela Prado
@@ -25,6 +24,17 @@ export default function Home() {
       />
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 justify-items-center">
+        <InfoCard
+          title="Terapia hormonal segura"
+          description="A terapia hormonal para pessoas trans é altamente segura pois garante a qualidade de vida e o bem-estar, além de ser um passo importante para a afirmação de gênero."
+          image="/comunidadetrans.jpg"
+        />
+
+        <InfoCard
+          title="Transgeneridade"
+          description="A transgeneridade é uma condição em que a identidade de gênero de uma pessoa difere do sexo atribuído no nascimento, e o tratamento hormonal é uma parte fundamental do processo de afirmação de gênero para muitas"
+          image="/trans.jpg"
+        />
         <InfoCard
           title="Terapia hormonal segura"
           description="A terapia hormonal para pessoas trans é altamente segura pois garante a qualidade de vida e o bem-estar, além de ser um passo importante para a afirmação de gênero."
