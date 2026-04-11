@@ -27,7 +27,7 @@ export default function Home() {
         <InfoCard
           title="Terapia hormonal segura"
           description="A terapia hormonal para pessoas trans é altamente segura pois garante a qualidade de vida e o bem-estar, além de ser um passo importante para a afirmação de gênero."
-          image="/comunidadetrans.jpg"
+          image="/th.jpg"
         />
 
         <InfoCard
@@ -36,15 +36,15 @@ export default function Home() {
           image="/trans.jpg"
         />
         <InfoCard
-          title="Terapia hormonal segura"
-          description="A terapia hormonal para pessoas trans é altamente segura pois garante a qualidade de vida e o bem-estar, além de ser um passo importante para a afirmação de gênero."
-          image="/comunidadetrans.jpg"
+          title="Retificação de nome e gênero de pessoas trans: como dar entrada? Quais os documentos necessários? "
+          description="O pedido pode ser feito diretamente no Cartório de Registro Civil onde foi registrada a Certidão de Nascimento da pessoa interessada. É necessária a apresentação de uma série de documentos (confira abaixo detalhes) e há uma taxa para sua realização. Caso haja alguma pendência nessa documentação, será necessário ingressar com uma ação judicial."
+          image="/retificacao.jpg"
         />
 
         <InfoCard
-          title="Transgeneridade"
-          description="A transgeneridade é uma condição em que a identidade de gênero de uma pessoa difere do sexo atribuído no nascimento, e o tratamento hormonal é uma parte fundamental do processo de afirmação de gênero para muitas"
-          image="/trans.jpg"
+          title="Procedimentos cirurgícos para afirmação de gênero de pessoas trans ofertados pelo SUS"
+          description="O SUS oferece o Processo Transexualizador, um conjunto de cuidados integrados que inclui hormonioterapia, acompanhamento multiprofissional e uma variedade de procedimentos cirúrgicos para a afirmação de gênero."
+          image="/cirurgia.jpg"
         />
       </div>
     </div>
