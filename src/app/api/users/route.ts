@@ -1,11 +1,26 @@
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
+import { getUserFromRequest } from "@/lib/getUserFromRequest";
 
-export async function GET() {
+export async function GET(req: Request) {
   try {
     await connectDB();
 
-    const users = await User.find();
+    const user = getUserFromRequest(req)
+    if(!user){
+      return Response.json(
+        {error: "Não autenticado"},
+        {status: 401}
+      )
+    }
+    
+    if (user.tipo !== "funcionario") {
+      return Response.json(
+        { error: "Acesso negado" },
+        { status: 403 }
+      );
+    }
+    const users = await User.find().select("-senha");
 
     return Response.json(users, { status: 200 });
 
