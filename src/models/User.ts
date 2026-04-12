@@ -1,4 +1,5 @@
 import mongoose, { Schema, models, model } from "mongoose";
+import bcrypt from "bcryptjs";
 
 const options = {
   discriminatorKey: "tipo_usuario",
@@ -15,5 +16,14 @@ const UserSchema = new mongoose.Schema({
     default: "ativo"
   }
 }, options);
+
+UserSchema.pre("save", async function () {
+  const user = this as any;
+
+  if (!user.isModified("senha")) return;
+
+  const salt = await bcrypt.genSalt(10);
+  user.senha = await bcrypt.hash(user.senha, salt);
+});
 
 export default mongoose.models.User || mongoose.model("User", UserSchema);
