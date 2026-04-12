@@ -12,6 +12,7 @@ export async function GET(
     const { id } = await context.params;
 
     const loggedUser = getUserFromRequest(req);
+    console.log("USER:", loggedUser);
 
     if (!loggedUser) {
       return Response.json(
@@ -46,11 +47,14 @@ export async function GET(
   }
 }
 
-export async function PUT(req: Request, context: { params: { id: string } }) {
+export async function PUT(
+  req: Request,
+  context: { params: Promise<{ id: string }> }
+) {
   try {
     await connectDB();
 
-    const { id } = context.params;
+    const { id } = await context.params; // ✅ AQUI
     const body = await req.json();
 
     const loggedUser = getUserFromRequest(req);
@@ -63,7 +67,6 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       return Response.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    // ✅ WHITELIST (campos permitidos)
     const allowedFields = ["nome", "email", "status"];
 
     const updateData: any = {};
@@ -74,10 +77,19 @@ export async function PUT(req: Request, context: { params: { id: string } }) {
       }
     }
 
+    if (Object.keys(updateData).length === 0) {
+      return Response.json(
+        { error: "Nenhum campo válido para atualizar" },
+        { status: 400 }
+      );
+    }
+
     const user = await User.findByIdAndUpdate(
       id,
       updateData,
-      { new: true }
+      {
+        returnDocument: "after"
+      }
     ).select("-senha");
 
     if (!user) {
@@ -101,9 +113,10 @@ export async function DELETE(req: Request, context: any) {
   try {
     await connectDB();
 
-    const { id } = context.params;
+    const { id } = await context.params;
 
     const loggedUser = getUserFromRequest(req);
+    console.log("USER:", loggedUser);
 
     if (!loggedUser) {
       return Response.json({ error: "Não autenticado" }, { status: 401 });
