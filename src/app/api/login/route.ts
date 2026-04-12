@@ -8,7 +8,7 @@ export async function POST(req: Request) {
 
   const { email, senha } = await req.json();
 
-  const user = await User.findOne({ email });
+  const user = await User.findOne({ email }).lean();
 
   if (!user) {
     return Response.json({ error: "Usuário não encontrado" }, { status: 401 });
@@ -24,6 +24,6 @@ export async function POST(req: Request) {
     id: user._id.toString(),
     tipo: user.tipo_usuario
   });
-
+ 
   return Response.json({ token });
 }

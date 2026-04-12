@@ -6,23 +6,25 @@ export async function GET(req: Request) {
   try {
     await connectDB();
 
-    const user = getUserFromRequest(req)
-    if(!user){
+    const loggedUser = getUserFromRequest(req);
+
+    if (!loggedUser) {
       return Response.json(
-        {error: "Não autenticado"},
-        {status: 401}
-      )
-    }
-    
-    if (user.tipo !== "funcionario") {
-      return Response.json(
-        { error: "Acesso negado" },
-        { status: 403 }
+        { error: "Não autenticado" },
+        { status: 401 }
       );
     }
-    const users = await User.find().select("-senha");
 
-    return Response.json(users, { status: 200 });
+    const user = await User.findById(loggedUser.id).select("-senha -__v");
+
+    if (!user) {
+      return Response.json(
+        { error: "Usuário não encontrado" },
+        { status: 404 }
+      );
+    }
+
+    return Response.json(user);
 
   } catch (error: any) {
     return Response.json(
