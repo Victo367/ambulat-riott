@@ -16,7 +16,12 @@ export async function GET(req: Request) {
     }
 
     const funcionarios = await Funcionario.find().select("-senha");
-    return Response.json(funcionarios, { status: 200 });
+    const funcionariosComEdicao = funcionarios.map((funcionario) => ({
+      ...funcionario.toObject(),
+      canEdit: true,
+      editEndpoint: `/api/users/${funcionario._id}`,
+    }));
+    return Response.json(funcionariosComEdicao, { status: 200 });
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 500 });
   }
