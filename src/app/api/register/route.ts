@@ -1,7 +1,6 @@
 import { connectDB } from "@/lib/db";
-import Paciente from "@/models/Paciente";
-import Funcionario from "@/models/Funcionario";
 import { getUserFromRequest } from "@/lib/getUserFromRequest";
+import { createUserByType, parseTipoUsuario } from "@/lib/register-user";
 
 export async function POST(req: Request) {
   try {
@@ -27,24 +26,18 @@ export async function POST(req: Request) {
 
     const body = await req.json();
 
-    let user;
+    const tipoUsuario = parseTipoUsuario(body);
 
-    if (body.tipo_usuario === "paciente") {
-      user = await Paciente.create(body);
-    } else if (body.tipo_usuario === "funcionario") {
-      user = await Funcionario.create(body);
-    } else {
+    if (!tipoUsuario) {
       return Response.json(
         { error: "Tipo de usuário inválido" },
         { status: 400 }
       );
     }
 
-    // 🔥 remove senha da resposta
-    const userObj = user.toObject();
-    delete userObj.senha;
+    const result = await createUserByType(body, tipoUsuario);
 
-    return Response.json(userObj, { status: 201 });
+    return Response.json(result.data, { status: result.status });
 
   } catch (error: any) {
     return Response.json(
