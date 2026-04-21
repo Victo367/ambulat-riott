@@ -16,7 +16,12 @@ export async function GET(req: Request) {
     }
 
     const pacientes = await Paciente.find().select("-senha");
-    return Response.json(pacientes, { status: 200 });
+    const pacientesComEdicao = pacientes.map((paciente) => ({
+      ...paciente.toObject(),
+      canEdit: true,
+      editEndpoint: `/api/users/${paciente._id}`,
+    }));
+    return Response.json(pacientesComEdicao, { status: 200 });
   } catch (error: any) {
     return Response.json({ error: error.message }, { status: 500 });
   }
