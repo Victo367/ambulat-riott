@@ -48,7 +48,7 @@ export default function Sidebar({ user }: SidebarProps) {
           {user?.tipo === "funcionario" && (
             <>
               <Link href="/agenda-funcionario">Agenda</Link>
-              <Link href="/pacientes-funcionario">Pacientes</Link>
+              <Link href="/funcionario/pacientes">Pacientes</Link>
             </>
           )}
         </nav>
