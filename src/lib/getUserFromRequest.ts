@@ -1,11 +1,10 @@
+import { cookies } from "next/headers";
 import { verifyToken } from "./auth";
 
-export function getUserFromRequest(req: Request) {
-  const authHeader = req.headers.get("authorization");
+export async function getUserFromRequest() {
+  const cookieStore = await cookies();
 
-  if (!authHeader) return null;
-
-  const token = authHeader.split(" ")[1];
+  const token = cookieStore.get("token")?.value;
 
   if (!token) return null;
 
