@@ -6,12 +6,12 @@ export async function GET(req: Request) {
   try {
     await connectDB();
 
-    const user = getUserFromRequest(req);
-    if (!user) {
+    const loggedUser = await getUserFromRequest();
+    if (!loggedUser) {
       return Response.json({ error: "Não autenticado" }, { status: 401 });
     }
 
-    if (user.tipo !== "funcionario") {
+    if (loggedUser.tipo !== "funcionario") {
       return Response.json({ error: "Acesso negado" }, { status: 403 });
     }
 
