@@ -31,12 +31,14 @@ export default function LoginPage() {
         setErro(data.error);
         return;
       }
+      
+      if (!res.ok) {
+        setErro(data.error);
+        return;
+      }
 
-      // salva token
-      localStorage.setItem("token", data.token);
-
-      // 🔥 redireciona pra home
       router.push("/");
+      router.refresh();
 
     } catch (err) {
       setErro("Erro ao conectar com o servidor");

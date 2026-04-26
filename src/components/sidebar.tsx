@@ -2,23 +2,14 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState, useEffect } from "react";
-import { getUserFromToken, TokenPayload } from "@/lib/auth-usu";
+import { TokenPayload } from "@/lib/auth-usu";
 import { HomeIcon, UserIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
 
-export default function Sidebar() {
-  const [user, setUser] = useState<TokenPayload | null>(null);
-  const [mounted, setMounted] = useState(false);
+type SidebarProps = {
+  user: TokenPayload | null;
+};
 
-  useEffect(() => {
-    const u = getUserFromToken();
-    setUser(u);
-    setMounted(true);
-  }, []);
-
-  // 🚨 evita hydration mismatch
-  if (!mounted) return null;
-
+export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="w-64 h-screen bg-cyan-600 text-white flex flex-col justify-between p-4 fixed left-0 top-0">
       <div>
@@ -57,7 +48,7 @@ export default function Sidebar() {
           {user?.tipo === "funcionario" && (
             <>
               <Link href="/agenda-funcionario">Agenda</Link>
-              <Link href="/pacientes-funcionario">pacientes</Link>
+              <Link href="/pacientes-funcionario">Pacientes</Link>
             </>
           )}
         </nav>
