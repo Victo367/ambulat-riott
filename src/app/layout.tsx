@@ -33,7 +33,7 @@ export default async function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex">
-        <Sidebar user={user} />
+        <Sidebar user={user ?? null} />
 
         <main className="flex-1 bg-gray-100 p-8 overflow-y-auto ml-64">
           {children}
