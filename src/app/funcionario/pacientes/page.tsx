@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 type Paciente = {
   _id: string;
@@ -13,6 +14,7 @@ type Paciente = {
 export default function ListaPacientes() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
   const [erro, setErro] = useState("");
+  const router = useRouter();
 
   useEffect(() => {
     async function fetchPacientes() {
@@ -40,7 +42,9 @@ export default function ListaPacientes() {
 <div className="flex justify-between items-center mb-4">
   <input type="text" placeholder="Nome, telefone..." className="p-3 border rounded-lg text-zinc-900">
   </input>
-  <button className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
+  <button
+  onClick={() => router.push("/funcionario/pacientes/novo")}
+  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
     Novo Paciente
   </button>
 </div>
