@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { getUserFromRequest } from "@/lib/getUserFromRequest";
+import { buildUserUpdateData } from "@/lib/update-user";
 
 export async function GET(
   req: Request,
@@ -67,26 +68,14 @@ export async function PUT(
       return Response.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    const allowedFields = ["nome", "email", "status"];
-
-    const updateData: any = {};
-
-    for (const key of allowedFields) {
-      if (body[key] !== undefined) {
-        updateData[key] = body[key];
-      }
-    }
-
-    if (Object.keys(updateData).length === 0) {
-      return Response.json(
-        { error: "Nenhum campo válido para atualizar" },
-        { status: 400 }
-      );
+    const updatePayload = await buildUserUpdateData(id, body);
+    if (!updatePayload.ok) {
+      return Response.json(updatePayload.data, { status: updatePayload.status });
     }
 
     const user = await User.findByIdAndUpdate(
       id,
-      updateData,
+      updatePayload.data,
       {
         returnDocument: "after"
       }
@@ -102,6 +91,9 @@ export async function PUT(
     return Response.json(user);
 
   } catch (error: any) {
+    if (error?.code === 11000) {
+      return Response.json({ error: "E-mail já cadastrado" }, { status: 409 });
+    }
     return Response.json(
       { error: error.message },
       { status: 500 }

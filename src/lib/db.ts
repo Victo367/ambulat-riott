@@ -12,6 +12,7 @@ function getMongoUri(): string {
   return uri;
 }
 
+
 export async function connectDB(): Promise<typeof mongoose> {
   if (mongoose.connection.readyState >= 1) {
     return mongoose;
