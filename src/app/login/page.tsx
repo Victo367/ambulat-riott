@@ -32,10 +32,8 @@ export default function LoginPage() {
         return;
       }
 
-      // salva token
       localStorage.setItem("token", data.token);
 
-      // 🔥 redireciona pra home
       router.push("/");
 
     } catch (err) {
