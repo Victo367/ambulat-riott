@@ -53,6 +53,7 @@ export default function Sidebar({ user }: SidebarProps) {
             <>
               <NavItem href="/agenda-funcionario" icon={CalendarIcon} label="Agenda" />
               <NavItem href="/funcionario/pacientes" icon={UsersIcon} label="Pacientes" />
+              <NavItem href="/perfil-funcionario" icon={UserCircleIcon} label="Perfil" />
             </>
           )}
 
