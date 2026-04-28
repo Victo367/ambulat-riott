@@ -9,4 +9,9 @@ const PacienteSchema = new mongoose.Schema({
   terapia_hormonal: { type: Boolean, default: false }
 })
 
-export default mongoose.models.Paciente || User.discriminator('paciente', PacienteSchema);
+const Paciente =
+  mongoose.models.Paciente ||
+  User.discriminators?.paciente ||
+  User.discriminator("paciente", PacienteSchema);
+
+export default Paciente;
