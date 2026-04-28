@@ -117,11 +117,6 @@ export default function CriarPaciente() {
           </div>
 
           <div>
-            <label className={labelClass}>CPF *</label>
-            <input type="text" value={cpf} onChange={(e) => setCpf(e.target.value)} className={inputClass} />
-          </div>
-
-          <div>
             <label className={labelClass}>Telefone *</label>
             <input type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)} className={inputClass} />
           </div>
