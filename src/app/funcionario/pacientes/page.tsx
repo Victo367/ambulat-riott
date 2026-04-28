@@ -6,9 +6,8 @@ import { useRouter } from "next/navigation";
 type Paciente = {
   _id: string;
   nome: string;
-  data_nascimento: string;
-  telefone: string;
   email: string;
+  telefone: string;
 };
 
 export default function ListaPacientes() {
@@ -20,24 +19,15 @@ export default function ListaPacientes() {
     async function fetchPacientes() {
       try {
         const res = await fetch("/api/users/pacientes");
-        const contentType = res.headers.get("content-type") || "";
-        const data = contentType.includes("application/json")
-          ? await res.json()
-          : null;
+        const data = await res.json();
 
         if (!res.ok) {
           setErro(data?.error || "Erro ao buscar pacientes");
           return;
         }
 
-        if (!data) {
-          setErro("Resposta inválida do servidor");
-          return;
-        }
-
         setPacientes(data);
       } catch (err) {
-        console.error("Erro ao buscar pacientes:", err);
         setErro("Erro ao conectar com o servidor");
       }
     }
@@ -46,41 +36,67 @@ export default function ListaPacientes() {
   }, []);
 
   return (
-    <div>
-<div className="flex justify-between items-center mb-4">
-  <input type="text" placeholder="Nome, telefone..." className="p-3 border rounded-lg text-zinc-900">
-  </input>
-  <button
-  onClick={() => router.push("/funcionario/pacientes/novo")}
-  className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">
-    Novo Paciente
-  </button>
-</div>
+    <div className="p-6">
 
-{erro && <p className="text-red-500">{erro}</p>}
+      <div className="flex justify-between items-center mb-6">
+        <input
+          type="text"
+          placeholder="Nome, telefone ou email..."
+          className="w-[350px] px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
+        />
 
-<table className="table-auto w-full border-collapse border border-gray-300">
-  <thead>
-    <tr className="bg-gray-100">
-      <th className="border border-gray-300 px-4 py-2 font-bold text-gray-800">Nome</th>
-      <th className="border border-gray-300 px-4 py-2 font-bold text-gray-800">Email</th>
-      <th className="border border-gray-300 px-4 py-2 font-bold text-gray-800">Telefone</th>
-    </tr>
-  </thead>
-  <tbody>
-    {pacientes.map((paciente) => (
-      <tr key={paciente._id}>
-        <td className="border border-gray-300 px-4 py-2 text-blue-500">
-          <a href={`/funcionario/pacientes/${paciente._id}`} className="hover:underline">
-            {paciente.nome}
-          </a>
-        </td>
-        <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.email}</td>
-        <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.telefone}</td>
-      </tr>
-    ))}
-  </tbody>
-</table>
+        <button
+          onClick={() => router.push("/funcionario/pacientes/novo")}
+          className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
+        >
+          Novo Paciente
+        </button>
+      </div>
+
+      {erro && <p className="text-red-500 mb-4">{erro}</p>}
+
+      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
+        <table className="w-full text-sm">
+
+          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
+            <tr>
+              <th className="text-left px-6 py-3">Nome</th>
+              <th className="text-left px-6 py-3">Email</th>
+              <th className="text-left px-6 py-3">Telefone</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {pacientes.map((paciente) => (
+              <tr
+                key={paciente._id}
+                className="border-t border-gray-200 hover:bg-gray-50 transition"
+              >
+                <td className="px-6 py-3 text-blue-600 font-medium">
+                  <button
+                    onClick={() =>
+                      router.push(`/funcionario/pacientes/${paciente._id}`)
+                    }
+                    className="hover:underline"
+                  >
+                    {paciente.nome}
+                  </button>
+                </td>
+
+                <td className="px-6 py-3 text-gray-700">
+                  {paciente.email || "-"}
+                </td>
+
+                <td className="px-6 py-3 text-gray-700">
+                  {paciente.telefone || "-"}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+
+        </table>
+      </div>
+
     </div>
   );
 }
