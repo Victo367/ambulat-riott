@@ -20,10 +20,18 @@ export default function ListaPacientes() {
     async function fetchPacientes() {
       try {
         const res = await fetch("/api/users/pacientes");
-        const data = await res.json();
+        const contentType = res.headers.get("content-type") || "";
+        const data = contentType.includes("application/json")
+          ? await res.json()
+          : null;
 
         if (!res.ok) {
-          setErro(data.error || "Erro ao buscar pacientes");
+          setErro(data?.error || "Erro ao buscar pacientes");
+          return;
+        }
+
+        if (!data) {
+          setErro("Resposta inválida do servidor");
           return;
         }
 
