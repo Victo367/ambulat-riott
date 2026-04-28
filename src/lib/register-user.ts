@@ -13,6 +13,7 @@ type RegisterInput = {
   identidade_genero?: string;
   data_nascimento?: string | Date;
   telefone?: string;
+  terapia_hormonal?: boolean;
   cargo?: string;
   data_admissao?: string | Date;
 };
@@ -27,6 +28,9 @@ function validateBaseFields(body: RegisterInput) {
   if (!body.nome?.trim()) return "Campo nome é obrigatório";
   if (!body.email?.trim()) return "Campo email é obrigatório";
   if (!body.senha?.trim()) return "Campo senha é obrigatório";
+  if (body.senha.trim().length < 8) {
+    return "Campo senha deve ter no mínimo 8 caracteres";
+  }
   return null;
 }
 
@@ -40,6 +44,12 @@ function validatePaciente(body: RegisterInput) {
   if (!body.telefone?.trim()) return "Campo telefone é obrigatório";
   if (!isValidDate(body.data_nascimento)) {
     return "Campo data_nascimento inválido";
+  }
+  if (
+    body.terapia_hormonal !== undefined &&
+    typeof body.terapia_hormonal !== "boolean"
+  ) {
+    return "Campo terapia_hormonal deve ser booleano";
   }
   return null;
 }
@@ -60,6 +70,38 @@ function sanitizeUser(user: any) {
   return userObj;
 }
 
+function sanitizeText(value: unknown) {
+  if (typeof value !== "string") return "";
+  return value.trim();
+}
+
+function buildPacientePayload(body: RegisterInput) {
+  return {
+    tipo_usuario: "paciente" as const,
+    nome: sanitizeText(body.nome),
+    email: sanitizeText(body.email).toLowerCase(),
+    senha: sanitizeText(body.senha),
+    status: body.status === "inativo" ? "inativo" : "ativo",
+    pronomes: sanitizeText(body.pronomes),
+    identidade_genero: sanitizeText(body.identidade_genero),
+    data_nascimento: new Date(body.data_nascimento as string | Date),
+    telefone: sanitizeText(body.telefone),
+    terapia_hormonal: Boolean(body.terapia_hormonal),
+  };
+}
+
+function buildFuncionarioPayload(body: RegisterInput) {
+  return {
+    tipo_usuario: "funcionario" as const,
+    nome: sanitizeText(body.nome),
+    email: sanitizeText(body.email).toLowerCase(),
+    senha: sanitizeText(body.senha),
+    status: body.status === "inativo" ? "inativo" : "ativo",
+    cargo: sanitizeText(body.cargo),
+    data_admissao: new Date(body.data_admissao as string | Date),
+  };
+}
+
 export async function createUserByType(body: RegisterInput, tipo: TipoUsuario) {
   const validationError =
     tipo === "paciente" ? validatePaciente(body) : validateFuncionario(body);
@@ -75,8 +117,8 @@ export async function createUserByType(body: RegisterInput, tipo: TipoUsuario) {
   try {
     const user =
       tipo === "paciente"
-        ? await Paciente.create({ ...body, tipo_usuario: "paciente" })
-        : await Funcionario.create({ ...body, tipo_usuario: "funcionario" });
+        ? await Paciente.create(buildPacientePayload(body))
+        : await Funcionario.create(buildFuncionarioPayload(body));
 
     return {
       ok: true as const,
