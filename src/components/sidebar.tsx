@@ -51,9 +51,10 @@ export default function Sidebar({ user }: SidebarProps) {
 
           {user?.tipo === "funcionario" && (
             <>
-              <NavItem href="/agenda-funcionario" icon={CalendarIcon} label="Agenda" />
+              <NavItem href="/funcionario/agenda" icon={CalendarIcon} label="Agenda" />
               <NavItem href="/funcionario/pacientes" icon={UsersIcon} label="Pacientes" />
-              <NavItem href="/perfil-funcionario" icon={UserCircleIcon} label="Perfil" />
+              <NavItem href="/funcionario/funcionarios" icon={UsersIcon} label="Funcionarios" />
+              <NavItem href="/funcionario/perfil" icon={UserCircleIcon} label="Perfil" />
             </>
           )}
 

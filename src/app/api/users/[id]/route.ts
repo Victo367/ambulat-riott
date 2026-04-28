@@ -14,7 +14,6 @@ export async function GET(
     const { id } = await context.params;
 
     const loggedUser = await getUserFromRequest();
-    console.log("USER:", loggedUser);
 
     if (!loggedUser) {
       return Response.json(
@@ -92,7 +91,7 @@ export async function PUT(
         { status: 404 }
       );
     }
-    
+
     const Model =
       existingUser.tipo_usuario === "paciente"
         ? Paciente
