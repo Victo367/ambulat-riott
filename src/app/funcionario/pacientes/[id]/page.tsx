@@ -2,6 +2,7 @@
 
 import { useEffect, useState, use } from "react";
 import { useRouter } from "next/navigation";
+import { ArrowLeftIcon } from "@heroicons/react/24/outline";
 
 type Paciente = {
   _id: string;
@@ -23,11 +24,10 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
   const [erro, setErro] = useState("");
   const router = useRouter();
 
-  // Função para formatar a data
   const formatarData = (dataISO: string) => {
     if (!dataISO) return "Não informada";
 
-    const data = new Date(dataISO.replace(/-/g, '\/').replace(/T.+/, ''));
+    const data = new Date(dataISO.replace(/-/g, "/").replace(/T.+/, ""));
 
     return data.toLocaleDateString("pt-BR", {
       day: "2-digit",
@@ -49,7 +49,6 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
 
         setPaciente(data);
       } catch (err) {
-        console.error("Erro ao buscar os dados do paciente:", err);
         setErro("Erro ao conectar com o servidor");
       }
     }
@@ -60,52 +59,83 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
   if (erro) return <p className="text-red-500 p-6">{erro}</p>;
   if (!paciente) return <p className="p-6">Carregando...</p>;
 
+  const labelClass = "text-sm font-bold text-gray-500";
+  const valueClass = "text-gray-800 text-sm mt-1";
+
   return (
-    <div className="p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-3xl font-bold text-blue-500 mb-6">{paciente.nome}</h1>
+    <div className="min-h-screen bg-gray-100 p-8">
 
-      <table className="table-auto w-full border-collapse border border-gray-300">
-        <tbody>
-          <tr>
-            <td className="border border-gray-300 px-4 py-2 font-bold text-gray-800 bg-gray-50 w-1/3">Email</td>
-            <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.email}</td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 px-4 py-2 font-bold text-gray-800 bg-gray-50">Pronomes</td>
-            <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.pronomes}</td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 px-4 py-2 font-bold text-gray-800 bg-gray-50">Identidade de Gênero</td>
-            <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.identidade_genero}</td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 px-4 py-2 font-bold text-gray-800 bg-gray-50">Data de Nascimento</td>
-            <td className="border border-gray-300 px-4 py-2 text-gray-900">
-              {/* Aqui usamos a função de formatação */}
+      <div className="flex items-center gap-3 mb-8">
+
+
+        <h1 className="text-2xl font-bold text-blue-500">
+          Detalhes do Paciente
+        </h1>
+      </div>
+
+      <div className="bg-white rounded-xl shadow border border-gray-200 p-8 max-w-5xl">
+
+        <h2 className="text-2xl font-bold text-gray-800 mb-8">
+          {paciente.nome}
+        </h2>
+
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+
+          <div>
+            <p className={labelClass}>Email</p>
+            <p className={valueClass}>{paciente.email}</p>
+          </div>
+
+          <div>
+            <p className={labelClass}>Telefone</p>
+            <p className={valueClass}>{paciente.telefone}</p>
+          </div>
+
+          <div>
+            <p className={labelClass}>Data de nascimento</p>
+            <p className={valueClass}>
               {formatarData(paciente.data_nascimento)}
-            </td>
-          </tr>
-          <tr>
-            <td className="border border-gray-300 px-4 py-2 font-bold text-gray-800 bg-gray-50">Telefone</td>
-            <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.telefone}</td>
-          </tr>
-        </tbody>
-      </table>
+            </p>
+          </div>
 
-      <div className="flex justify-between mt-6">
-        <button
-          onClick={() => router.push("/funcionario/pacientes")}
-          className="bg-gray-500 text-white px-4 py-2 rounded hover:bg-gray-600 transition"
-        >
-          Voltar
-        </button>
+          <div>
+            <p className={labelClass}>Pronomes</p>
+            <p className={valueClass}>{paciente.pronomes}</p>
+          </div>
 
-        <button
-          onClick={() => router.push(`/funcionario/pacientes/${paciente._id}/editar`)}
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition"
-        >
-          Editar
-        </button>
+          <div>
+            <p className={labelClass}>Identidade de gênero</p>
+            <p className={valueClass}>{paciente.identidade_genero}</p>
+          </div>
+
+          <div>
+            <p className={labelClass}>Status</p>
+            <span className="inline-block mt-1 px-3 py-1 text-xs rounded-full bg-green-100 text-green-700 font-semibold">
+              {paciente.status}
+            </span>
+          </div>
+
+        </div>
+
+        <div className="flex justify-between mt-10">
+
+          <button
+            onClick={() => router.push("/funcionario/pacientes")}
+            className="border border-gray-300 text-gray-600 px-6 py-2 rounded-lg hover:bg-gray-100 transition"
+          >
+            Voltar
+          </button>
+
+          <button
+            onClick={() =>
+              router.push(`/funcionario/pacientes/${paciente._id}/editar`)
+            }
+            className="bg-blue-500 text-white px-6 py-2 rounded-lg hover:bg-blue-600 transition"
+          >
+            Editar
+          </button>
+
+        </div>
       </div>
     </div>
   );
