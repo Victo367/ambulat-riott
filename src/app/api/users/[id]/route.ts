@@ -5,11 +5,10 @@ import { buildUserUpdateData } from "@/lib/update-user";
 
 export async function GET(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // Adicione Promise aqui
 ) {
   try {
     await connectDB();
-
     const { id } = await context.params;
 
     const loggedUser = await getUserFromRequest();
