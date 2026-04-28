@@ -2,6 +2,7 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { generateToken } from "@/lib/auth";
+import { NextResponse } from "next/server";
 
 export async function POST(req: Request) {
   await connectDB();
@@ -11,19 +12,35 @@ export async function POST(req: Request) {
   const user = await User.findOne({ email }).lean();
 
   if (!user) {
-    return Response.json({ error: "Usuário não encontrado" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Usuário não encontrado" },
+      { status: 401 }
+    );
   }
 
   const senhaValida = await bcrypt.compare(senha, user.senha);
 
   if (!senhaValida) {
-    return Response.json({ error: "Senha incorreta" }, { status: 401 });
+    return NextResponse.json(
+      { error: "Senha incorreta" },
+      { status: 401 }
+    );
   }
 
   const token = generateToken({
     id: user._id.toString(),
-    tipo: user.tipo_usuario
+    tipo: user.tipo_usuario,
   });
- 
-  return Response.json({ token });
+
+  const response = NextResponse.json({ success: true });
+
+  response.cookies.set("token", token, {
+    httpOnly: true,
+    path: "/",
+    sameSite: "lax",
+    secure: process.env.NODE_ENV === "production",
+    maxAge: 60 * 60 * 24,
+  });
+
+  return response;
 }
