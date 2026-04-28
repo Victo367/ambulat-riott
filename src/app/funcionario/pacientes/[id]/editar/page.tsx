@@ -44,7 +44,7 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
         setErro("Erro ao conectar com o servidor");
       }
     }
-
+    
     fetchPaciente();
   }, [id]);
 

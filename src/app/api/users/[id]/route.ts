@@ -2,6 +2,8 @@ import { connectDB } from "@/lib/db";
 import User from "@/models/User";
 import { getUserFromRequest } from "@/lib/getUserFromRequest";
 import { buildUserUpdateData } from "@/lib/update-user";
+import Paciente from "@/models/Paciente";
+import Funcionario from "@/models/Funcionario";
 
 export async function GET(
   req: Request,
@@ -54,47 +56,69 @@ export async function PUT(
   try {
     await connectDB();
 
-    const { id } = await context.params; // ✅ AQUI
+    const { id } = await context.params;
     const body = await req.json();
 
     const loggedUser = await getUserFromRequest();
 
     if (!loggedUser) {
-      return Response.json({ error: "Não autenticado" }, { status: 401 });
+      return Response.json(
+        { error: "Não autenticado" },
+        { status: 401 }
+      );
     }
 
     if (loggedUser.tipo !== "funcionario") {
-      return Response.json({ error: "Acesso negado" }, { status: 403 });
+      return Response.json(
+        { error: "Acesso negado" },
+        { status: 403 }
+      );
     }
 
     const updatePayload = await buildUserUpdateData(id, body);
+
     if (!updatePayload.ok) {
-      return Response.json(updatePayload.data, { status: updatePayload.status });
+      return Response.json(
+        updatePayload.data,
+        { status: updatePayload.status }
+      );
     }
 
-    const user = await User.findByIdAndUpdate(
-      id,
-      updatePayload.data,
-      {
-        returnDocument: "after"
-      }
-    ).select("-senha");
+    const existingUser = await User.findById(id).select("tipo_usuario");
 
-    if (!user) {
+    if (!existingUser) {
       return Response.json(
         { error: "Usuário não encontrado" },
         { status: 404 }
       );
     }
+    
+    const Model =
+      existingUser.tipo_usuario === "paciente"
+        ? Paciente
+        : Funcionario;
+
+    const user = await Model.findByIdAndUpdate(
+      id,
+      { $set: updatePayload.data },
+      {
+        new: true,
+        runValidators: true
+      }
+    ).select("-senha");
 
     return Response.json(user);
 
   } catch (error: any) {
     if (error?.code === 11000) {
-      return Response.json({ error: "E-mail já cadastrado" }, { status: 409 });
+      return Response.json(
+        { error: "E-mail já cadastrado" },
+        { status: 409 }
+      );
     }
+
     return Response.json(
-      { error: error.message },
+      { error: error.message || "Erro interno no servidor" },
       { status: 500 }
     );
   }
@@ -107,7 +131,6 @@ export async function DELETE(req: Request, context: any) {
     const { id } = await context.params;
 
     const loggedUser = await getUserFromRequest();
-    console.log("USER:", loggedUser);
 
     if (!loggedUser) {
       return Response.json({ error: "Não autenticado" }, { status: 401 });
