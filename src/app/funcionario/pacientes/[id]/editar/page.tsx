@@ -100,111 +100,174 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
 
   return (
     <div className="p-6 bg-white shadow-md rounded-lg">
-      <h1 className="text-2xl font-bold text-blue-500 mb-4">Editar Paciente</h1>
+      {/* Cabeçalho */}
+      <div className="flex justify-between items-start mb-6">
+        <h1 className="text-2xl font-bold text-blue-500">
+          Editar Paciente
+        </h1>
 
-      {sucesso && <p className="text-green-500 mb-4">{sucesso}</p>}
+        <button
+          type="button"
+          onClick={async () => {
+            const confirmDelete = window.confirm(
+              "Tem certeza que deseja deletar este paciente?"
+            );
+            if (!confirmDelete) return;
+
+            try {
+              const res = await fetch(`/api/users/${id}`, {
+                method: "DELETE",
+              });
+
+              if (!res.ok) {
+                const data = await res.json().catch(() => ({}));
+                alert(data.error || "Erro ao deletar o paciente.");
+                return;
+              }
+
+              alert("Paciente deletado com sucesso!");
+              router.push("/funcionario/pacientes");
+            } catch (err) {
+              console.error("Erro ao deletar o paciente:", err);
+              alert("Erro ao conectar com o servidor.");
+            }
+          }}
+          className="text-red-600 font-semibold hover:underline cursor-pointer"
+        >
+          Deletar
+        </button>
+      </div>
+
+      {sucesso && (
+        <p className="text-green-500 mb-4">
+          {sucesso}
+        </p>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        {/* Campos organizados em duas colunas */}
-        <div className="grid grid-cols-2 gap-4">
+        {/* Campos */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {/* Nome */}
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Nome</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Nome
+            </label>
             <input
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              placeholder="Digite o nome do paciente"
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
               required
             />
           </div>
 
+          {/* Data de Nascimento */}
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Data de Nascimento</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Data de Nascimento
+            </label>
             <input
               type="date"
               value={dataNascimento}
-              onChange={(e) => setDataNascimento(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              required
+              onChange={(e) =>
+                setDataNascimento(e.target.value)
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
             />
           </div>
 
+          {/* Telefone */}
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Telefone</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Telefone
+            </label>
             <input
               type="text"
               value={telefone}
-              onChange={(e) => setTelefone(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              placeholder="Digite o telefone do paciente"
-              required
+              onChange={(e) =>
+                setTelefone(e.target.value)
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
             />
           </div>
 
+          {/* Email */}
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Email</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Email
+            </label>
             <input
               type="email"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              placeholder="Digite o email do paciente"
-              required
+              onChange={(e) =>
+                setEmail(e.target.value)
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
             />
           </div>
 
+          {/* Pronomes */}
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Pronomes</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Pronomes
+            </label>
             <input
               type="text"
               value={pronomes}
-              onChange={(e) => setPronomes(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              placeholder="Digite os pronomes (ex: ela/dela)"
-              required
+              onChange={(e) =>
+                setPronomes(e.target.value)
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
             />
           </div>
 
+          {/* Identidade de Gênero */}
           <div>
-            <label className="block text-gray-700 font-bold mb-2">Identidade de Gênero</label>
+            <label className="block text-gray-700 font-bold mb-2">
+              Identidade de Gênero
+            </label>
             <input
               type="text"
               value={identidadeGenero}
-              onChange={(e) => setIdentidadeGenero(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              placeholder="Digite a identidade de gênero (ex: Mulher)"
-              required
+              onChange={(e) =>
+                setIdentidadeGenero(e.target.value)
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
             />
           </div>
 
-          <div>
-            <label className="block text-gray-700 font-bold mb-2">Status</label>
+          {/* Status */}
+          <div className="md:col-span-2">
+            <label className="block text-gray-700 font-bold mb-2">
+              Status
+            </label>
             <input
               type="text"
               value={status}
-              onChange={(e) => setStatus(e.target.value)}
-              className="w-full p-3 border border-gray-700 rounded-lg placeholder-gray-600 text-gray-800"
-              placeholder="Digite o status (ex: ativo)"
-              required
+              onChange={(e) =>
+                setStatus(e.target.value)
+              }
+              className="w-full p-3 border border-gray-300 rounded-lg text-gray-800"
             />
           </div>
         </div>
 
-        {/* Botões de Cancelar e Salvar */}
-        <div className="flex justify-between mt-6">
+        {/* Rodapé */}
+        <div className="flex justify-between items-center mt-8 pt-6 border-t">
           <button
             type="button"
-            onClick={() => router.push(`/funcionario/pacientes/${id}`)} // Redireciona para a página de visualização do paciente
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            onClick={() =>
+              router.push(`/funcionario/pacientes/${id}`)
+            }
+            className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition shadow"
           >
             Cancelar
           </button>
 
-           <button
-              type="submit"
-              className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
-            >
+          <button
+            type="submit"
+            className="bg-green-600 text-white px-8 py-2 rounded-lg hover:bg-green-700 font-bold transition shadow"
+          >
             Salvar Alterações
           </button>
         </div>
