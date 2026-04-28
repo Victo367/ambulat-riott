@@ -62,7 +62,11 @@ export default function ListaPacientes() {
   <tbody>
     {pacientes.map((paciente) => (
       <tr key={paciente._id}>
-        <td className="border border-gray-300 px-4 py-2 text-blue-500">{paciente.nome}</td>
+        <td className="border border-gray-300 px-4 py-2 text-blue-500">
+          <a href={`/funcionario/pacientes/${paciente._id}`} className="hover:underline">
+            {paciente.nome}
+          </a>
+        </td>
         <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.email}</td>
         <td className="border border-gray-300 px-4 py-2 text-gray-900">{paciente.telefone}</td>
       </tr>
