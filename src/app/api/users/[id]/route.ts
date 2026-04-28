@@ -5,14 +5,13 @@ import { buildUserUpdateData } from "@/lib/update-user";
 
 export async function GET(
   req: Request,
-  context: { params: { id: string } }
+  context: { params: Promise<{ id: string }> } // Adicione Promise aqui
 ) {
   try {
     await connectDB();
-
     const { id } = await context.params;
 
-    const loggedUser = getUserFromRequest(req);
+    const loggedUser = await getUserFromRequest();
     console.log("USER:", loggedUser);
 
     if (!loggedUser) {
@@ -58,7 +57,7 @@ export async function PUT(
     const { id } = await context.params; // ✅ AQUI
     const body = await req.json();
 
-    const loggedUser = getUserFromRequest(req);
+    const loggedUser = await getUserFromRequest();
 
     if (!loggedUser) {
       return Response.json({ error: "Não autenticado" }, { status: 401 });
@@ -107,7 +106,7 @@ export async function DELETE(req: Request, context: any) {
 
     const { id } = await context.params;
 
-    const loggedUser = getUserFromRequest(req);
+    const loggedUser = await getUserFromRequest();
     console.log("USER:", loggedUser);
 
     if (!loggedUser) {

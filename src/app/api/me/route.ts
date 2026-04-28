@@ -6,7 +6,7 @@ export async function GET(req: Request) {
   try {
     await connectDB();
 
-    const loggedUser = getUserFromRequest(req);
+    const loggedUser = await getUserFromRequest();
 
     if (!loggedUser) {
       return Response.json(

@@ -32,9 +32,15 @@ export default function LoginPage() {
         return;
       }
 
+      if (!res.ok) {
+        setErro(data.error);
+        return;
+      }
+
       localStorage.setItem("token", data.token);
 
       router.push("/");
+      router.refresh();
 
     } catch (err) {
       setErro("Erro ao conectar com o servidor");

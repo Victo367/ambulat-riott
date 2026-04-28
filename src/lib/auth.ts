@@ -2,9 +2,9 @@ import jwt from "jsonwebtoken";
 
 const JWT_SECRET = process.env.JWT_SECRET || "segredo_super_secreto";
 
-type TokenPayload = {
+export type TokenPayload = {
   id: string;
-  tipo: string;
+  tipo: "paciente" | "funcionario";
 };
 
 export function generateToken(payload: TokenPayload) {
