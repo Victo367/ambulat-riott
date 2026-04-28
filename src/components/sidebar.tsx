@@ -3,7 +3,15 @@
 import Link from "next/link";
 import Image from "next/image";
 import { TokenPayload } from "@/lib/auth-usu";
-import { HomeIcon, UserIcon, DevicePhoneMobileIcon } from "@heroicons/react/24/outline";
+import {
+  HomeIcon,
+  UserIcon,
+  CalendarIcon,
+  ClipboardDocumentListIcon,
+  UserCircleIcon,
+  UsersIcon,
+  PhoneIcon,
+} from "@heroicons/react/24/outline";
 
 type SidebarProps = {
   user: TokenPayload | null;
@@ -12,6 +20,7 @@ type SidebarProps = {
 export default function Sidebar({ user }: SidebarProps) {
   return (
     <aside className="w-64 h-screen bg-cyan-600 text-white flex flex-col justify-between p-4 fixed left-0 top-0">
+
       <div>
         <h1 className="text-xl font-bold mb-8 flex items-center gap-3">
           <Image
@@ -25,38 +34,34 @@ export default function Sidebar({ user }: SidebarProps) {
         </h1>
 
         <nav className="flex flex-col gap-4">
-          <Link href="/" className="flex items-center gap-2">
-            <HomeIcon className="w-5 h-5" />
-            Página Inicial
-          </Link>
+
+          <NavItem href="/" icon={HomeIcon} label="Página Inicial" />
 
           {!user && (
-            <Link href="/login" className="flex items-center gap-2">
-              <UserIcon className="w-5 h-5" />
-              Login
-            </Link>
+            <NavItem href="/login" icon={UserIcon} label="Login" />
           )}
 
           {user?.tipo === "paciente" && (
             <>
-              <Link href="/historico-paciente">Histórico</Link>
-              <Link href="/agenda-paciente">Agenda</Link>
-              <Link href="/perfil-paciente">Perfil</Link>
+              <NavItem href="/historico-paciente" icon={ClipboardDocumentListIcon} label="Histórico" />
+              <NavItem href="/agenda-paciente" icon={CalendarIcon} label="Agenda" />
+              <NavItem href="/perfil-paciente" icon={UserCircleIcon} label="Perfil" />
             </>
           )}
 
           {user?.tipo === "funcionario" && (
             <>
-              <Link href="/agenda-funcionario">Agenda</Link>
-              <Link href="/funcionario/pacientes">Pacientes</Link>
+              <NavItem href="/agenda-funcionario" icon={CalendarIcon} label="Agenda" />
+              <NavItem href="/funcionario/pacientes" icon={UsersIcon} label="Pacientes" />
             </>
           )}
+
         </nav>
       </div>
 
       <div className="text-sm">
         <div className="flex items-center gap-2">
-          <DevicePhoneMobileIcon className="w-5 h-5" />
+          <PhoneIcon className="w-5 h-5" />
           <p>+55 83 8225-7290</p>
         </div>
 
@@ -65,5 +70,17 @@ export default function Sidebar({ user }: SidebarProps) {
         </p>
       </div>
     </aside>
+  );
+}
+
+function NavItem({ href, icon: Icon, label }: any) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 hover:bg-cyan-700 px-3 py-2 rounded-lg transition"
+    >
+      <Icon className="w-5 h-5" />
+      {label}
+    </Link>
   );
 }
