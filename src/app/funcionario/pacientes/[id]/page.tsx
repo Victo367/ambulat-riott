@@ -90,7 +90,7 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
       <div className="flex justify-between mt-6">
         <button
           onClick={() => router.push("/funcionario/pacientes")}
-          className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
         >
           Voltar
         </button>
