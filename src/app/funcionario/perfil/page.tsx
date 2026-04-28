@@ -21,13 +21,28 @@ export default function PerfilFuncionario() {
   };
 
   async function handleLogout() {
-    const confirmar = window.confirm("Deseja realmente sair do sistema?");
+    const confirmar = window.confirm(
+      "Deseja realmente sair?"
+    );
+
     if (!confirmar) return;
 
-    // futura integração real:
-    // await fetch("/api/logout", { method: "POST" });
+    try {
+      const res = await fetch("/api/logout", {
+        method: "POST",
+      });
 
-    router.push("/login");
+      if (!res.ok) {
+        alert("Erro ao sair");
+        return;
+      }
+
+      router.push("/login");
+      router.refresh();
+
+    } catch {
+      alert("Erro ao conectar com servidor");
+    }
   }
 
   const cardClass =
@@ -104,7 +119,7 @@ export default function PerfilFuncionario() {
         <div className="flex justify-between mt-10 pt-8 border-t border-gray-200">
 
           <button
-            onClick={() => router.push("/funcionario")}
+            onClick={() => router.push("/funcionario/agenda")}
             className="border border-gray-300 text-gray-600 px-6 py-2 rounded-lg hover:bg-gray-100 transition"
           >
             Voltar
