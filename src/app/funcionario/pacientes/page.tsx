@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Paciente = {
   _id: string;
@@ -45,12 +46,13 @@ export default function ListaPacientes() {
           className="w-[350px] px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
 
-        <button
-          onClick={() => router.push("/funcionario/pacientes/novo")}
+        <Link
+          href="/funcionario/pacientes/novo"
+          data-cy="novo-paciente"
           className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
         >
           Novo Paciente
-        </button>
+        </Link>
       </div>
 
       {erro && <p className="text-red-500 mb-4">{erro}</p>}

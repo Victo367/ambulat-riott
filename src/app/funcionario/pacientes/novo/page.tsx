@@ -93,42 +93,42 @@ export default function CriarPaciente() {
 
           <div className="md:col-span-2">
             <label className={labelClass}>Nome completo *</label>
-            <input type="text" value={nome} onChange={(e) => setNome(e.target.value)} className={inputClass} />
+            <input data-cy="nome" type="text" value={nome} onChange={(e) => setNome(e.target.value)} className={inputClass} />
           </div>
 
           <div>
             <label className={labelClass}>Identidade de gênero *</label>
-            <input type="text" value={identidadeGenero} onChange={(e) => setIdentidadeGenero(e.target.value)} className={inputClass} />
+            <input data-cy="identidade-genero" type="text" value={identidadeGenero} onChange={(e) => setIdentidadeGenero(e.target.value)} className={inputClass} />
           </div>
 
           <div>
             <label className={labelClass}>Data de Nascimento *</label>
-            <input type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className={inputClass} />
+            <input data-cy="data-nascimento" type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className={inputClass} />
           </div>
 
           <div>
             <label className={labelClass}>Pronomes *</label>
-            <input type="text" value={pronomes} onChange={(e) => setPronomes(e.target.value)} className={inputClass} />
+            <input data-cy="pronomes" type="text" value={pronomes} onChange={(e) => setPronomes(e.target.value)} className={inputClass} />
           </div>
 
           <div>
             <label className={labelClass}>Endereço *</label>
-            <input type="text" value={endereco} onChange={(e) => setEndereco(e.target.value)} className={inputClass} />
+            <input data-cy="endereco" type="text" value={endereco} onChange={(e) => setEndereco(e.target.value)} className={inputClass} />
           </div>
 
           <div>
             <label className={labelClass}>Telefone *</label>
-            <input type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)} className={inputClass} />
+            <input data-cy="telefone" type="text" value={telefone} onChange={(e) => setTelefone(e.target.value)} className={inputClass} />
           </div>
 
           <div className="md:col-span-2">
             <label className={labelClass}>E-mail *</label>
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+            <input data-cy="email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
           </div>
 
           <div className="md:col-span-2">
             <label className={labelClass}>Senha *</label>
-            <input type="password" value={senha} onChange={(e) => setSenha(e.target.value)} className={inputClass} />
+            <input data-cy="senha" type="password" value={senha} onChange={(e) => setSenha(e.target.value)} className={inputClass} />
           </div>
         </div>
 
@@ -142,6 +142,7 @@ export default function CriarPaciente() {
           </button>
 
           <button
+            data-cy="submit-paciente"
             type="submit"
             className="bg-green-500 text-white px-8 py-2 rounded-lg hover:bg-green-600"
           >
