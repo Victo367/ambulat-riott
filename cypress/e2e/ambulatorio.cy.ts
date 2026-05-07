@@ -34,29 +34,62 @@ describe('Fluxo completo com botões', () => {
     // abre paciente
     cy.contains('João Teste').click()
 
-    // 🔥 INTERCEPTA A API ANTES DE ENTRAR NA EDIÇÃO
+    // intercepta GET
     cy.intercept('GET', '/api/users/*').as('getPaciente')
 
     // editar
     cy.get('[data-cy="editar-paciente"]').should('be.visible').click()
 
-    // 🔥 ESPERA A API TERMINAR
-    cy.wait('@getPaciente')
+    // espera API
     cy.wait('@getPaciente')
 
+    // DELETE
     cy.intercept('DELETE', '/api/users/*').as('deletePaciente')
 
     cy.get('[data-cy="deletar"]').should('be.visible').click()
 
-    // 🔥 espera delete terminar
     cy.wait('@deletePaciente')
 
-    // 🔥 espera redirecionamento/DOM estabilizar
     cy.url().should('not.include', '/editar')
-    // CRIAR FUNCIONARIO
-    
+
+    // =========================
+    // 🔥 CRIAR FUNCIONÁRIO
+    // =========================
+
+    // ir para funcionários
+    cy.get('[data-cy="nav-funcionarios"]').should('be.visible').click()
+
+    // novo funcionário
+    cy.get('[data-cy="novo-funcionario"]').should('be.visible').click()
+
+    // espera form
+    cy.get('[data-cy="nome"]').should('be.visible')
+
+    // intercepta criação
+    cy.intercept('POST', '/api/register/funcionario').as('createFuncionario')
+
+    // preenche formulário
+    cy.get('[data-cy="nome"]').type('Maria Funcionaria')
+    cy.get('[data-cy="cargo"]').type('Recepcionista')
+    cy.get('[data-cy="data-admissao"]').type('2024-01-01')
+    cy.get('[data-cy="email"]').type('maria@teste.com')
+    cy.get('[data-cy="senha"]').type('12345678')
+
+    // envia
+    cy.get('[data-cy="criar-funcionario"]').click()
+
+    // espera backend
+    cy.wait('@createFuncionario')
+
+    // valida
+    cy.contains('Funcionário cadastrado com sucesso!').should('exist')
+
+    // valida redirecionamento
+    cy.url().should('include', '/funcionario/funcionarios')
+    cy.get('[data-cy="nome"]').should('be.visible')
     // agora sim navega
     cy.get('[data-cy="nav-perfil"]').should('be.visible').click()
     cy.get('[data-cy="logout"]').should('be.visible').click()
+
   })
 })

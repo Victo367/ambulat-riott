@@ -46,6 +46,7 @@ export default function ListaFuncionarios() {
         />
 
         <button
+          data-cy="novo-funcionario"
           onClick={() => router.push("/funcionario/funcionarios/novo")}
           className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
         >

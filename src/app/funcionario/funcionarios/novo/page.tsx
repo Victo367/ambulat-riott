@@ -100,6 +100,7 @@ export default function CriarFuncionario() {
             </label>
 
             <input
+              data-cy="nome"
               type="text"
               value={nome}
               onChange={(e) => setNome(e.target.value)}
@@ -113,6 +114,7 @@ export default function CriarFuncionario() {
             </label>
 
             <input
+              data-cy="cargo"
               type="text"
               value={cargo}
               onChange={(e) => setCargo(e.target.value)}
@@ -126,6 +128,7 @@ export default function CriarFuncionario() {
             </label>
 
             <input
+              data-cy="data-admissao"
               type="date"
               value={dataAdmissao}
               onChange={(e) => setDataAdmissao(e.target.value)}
@@ -139,6 +142,7 @@ export default function CriarFuncionario() {
             </label>
 
             <input
+              data-cy="email"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
@@ -152,6 +156,7 @@ export default function CriarFuncionario() {
             </label>
 
             <input
+              data-cy="senha"
               type="password"
               value={senha}
               onChange={(e) => setSenha(e.target.value)}
@@ -174,6 +179,7 @@ export default function CriarFuncionario() {
           </button>
 
           <button
+            data-cy="criar-funcionario"
             type="submit"
             className="bg-green-500 text-white px-8 py-2 rounded-lg hover:bg-green-600"
           >
