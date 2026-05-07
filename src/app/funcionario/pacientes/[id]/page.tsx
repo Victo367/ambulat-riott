@@ -127,6 +127,7 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
           </button>
 
           <button
+            data-cy="editar-paciente"
             onClick={() =>
               router.push(`/funcionario/pacientes/${paciente._id}/editar`)
             }
