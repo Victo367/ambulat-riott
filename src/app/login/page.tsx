@@ -37,10 +37,7 @@ export default function LoginPage() {
         return;
       }
 
-      localStorage.setItem("token", data.token);
-
-      router.push("/");
-      router.refresh();
+      window.location.href = "/";
 
     } catch (err) {
       setErro("Erro ao conectar com o servidor");
@@ -62,6 +59,7 @@ export default function LoginPage() {
         <form onSubmit={handleLogin} className="flex flex-col gap-4 w-full">
 
           <input
+            data-cy="email"
             type="email"
             placeholder="Email"
             value={email}
@@ -71,6 +69,7 @@ export default function LoginPage() {
 
           <input
             type="password"
+            data-cy="password"
             placeholder="Senha"
             value={senha}
             onChange={(e) => setSenha(e.target.value)}
@@ -79,13 +78,14 @@ export default function LoginPage() {
 
           <button
             type="submit"
+            data-cy="submit"
             className="bg-cyan-600 text-white p-3 rounded-lg hover:bg-cyan-700 cursor-pointer transition"
           >
             Login
           </button>
 
           {erro && (
-            <p className="text-red-500 text-sm">{erro}</p>
+            <p data-cy="error" className="text-red-500 text-sm">{erro}</p>
           )}
 
         </form>
