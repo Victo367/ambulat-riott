@@ -1,5 +1,3 @@
-"use client";
-
 import Link from "next/link";
 import Image from "next/image";
 import { TokenPayload } from "@/lib/auth-usu";
@@ -79,6 +77,7 @@ function NavItem({ href, icon: Icon, label }: any) {
   return (
     <Link
       href={href}
+      data-cy={`nav-${label.toLowerCase().replace(/\s/g, '-')}`}
       className="flex items-center gap-3 hover:bg-cyan-700 px-3 py-2 rounded-lg transition"
     >
       <Icon className="w-5 h-5" />
