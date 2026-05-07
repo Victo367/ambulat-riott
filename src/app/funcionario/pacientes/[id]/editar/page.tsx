@@ -44,7 +44,7 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
         setErro("Erro ao conectar com o servidor");
       }
     }
-    
+
     fetchPaciente();
   }, [id]);
 
@@ -111,6 +111,7 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
 
         {/* DELETE */}
         <button
+          data-cy="deletar"
           onClick={async () => {
             const confirmDelete = window.confirm("Deseja deletar este paciente?");
             if (!confirmDelete) return;
@@ -141,37 +142,37 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
 
             <div className="md:col-span-2">
               <label className={labelClass}>Nome completo *</label>
-              <input value={nome} onChange={(e) => setNome(e.target.value)} className={inputClass} />
+              <input data-cy="nome" value={nome} onChange={(e) => setNome(e.target.value)} className={inputClass} />
             </div>
 
             <div>
               <label className={labelClass}>Identidade de gênero *</label>
-              <input value={identidadeGenero} onChange={(e) => setIdentidadeGenero(e.target.value)} className={inputClass} />
+              <input data-cy="identidade-genero" value={identidadeGenero} onChange={(e) => setIdentidadeGenero(e.target.value)} className={inputClass} />
             </div>
 
             <div>
               <label className={labelClass}>Data de Nascimento</label>
-              <input type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className={inputClass} />
+              <input data-cy="data" type="date" value={dataNascimento} onChange={(e) => setDataNascimento(e.target.value)} className={inputClass} />
             </div>
 
             <div>
               <label className={labelClass}>Pronomes</label>
-              <input value={pronomes} onChange={(e) => setPronomes(e.target.value)} className={inputClass} />
+              <input data-cy="pronomes" value={pronomes} onChange={(e) => setPronomes(e.target.value)} className={inputClass} />
             </div>
 
             <div>
               <label className={labelClass}>Telefone</label>
-              <input value={telefone} onChange={(e) => setTelefone(e.target.value)} className={inputClass} />
+              <input data-cy="telefone" value={telefone} onChange={(e) => setTelefone(e.target.value)} className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
               <label className={labelClass}>E-mail</label>
-              <input value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
+              <input data-cy="email" value={email} onChange={(e) => setEmail(e.target.value)} className={inputClass} />
             </div>
 
             <div className="md:col-span-2">
               <label className={labelClass}>Status</label>
-              <input value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass} />
+              <input data-cy="status" value={status} onChange={(e) => setStatus(e.target.value)} className={inputClass} />
             </div>
 
           </div>
@@ -188,9 +189,9 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
             </button>
 
             <button
-              type="submit"
-              className="bg-green-500 text-white px-8 py-2 rounded-lg hover:bg-green-600 font-semibold"
-            >
+            data-cy="submit-editar"
+            className="bg-green-500 text-white px-8 py-2 rounded-lg hover:bg-green-600 font-semibold"
+            type="submit">
               Salvar Alterações
             </button>
 
