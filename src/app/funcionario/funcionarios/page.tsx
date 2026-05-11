@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Funcionario = {
@@ -10,10 +10,25 @@ type Funcionario = {
   email: string;
 };
 
+function funcionarioCombinaBusca(f: Funcionario, busca: string) {
+  const q = busca.trim().toLowerCase();
+  if (!q) return true;
+  const nome = (f.nome || "").toLowerCase();
+  const cargo = (f.cargo || "").toLowerCase();
+  const email = (f.email || "").toLowerCase();
+  return nome.includes(q) || cargo.includes(q) || email.includes(q);
+}
+
 export default function ListaFuncionarios() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
+  const [busca, setBusca] = useState("");
   const [erro, setErro] = useState("");
   const router = useRouter();
+
+  const funcionariosFiltrados = useMemo(
+    () => funcionarios.filter((f) => funcionarioCombinaBusca(f, busca)),
+    [funcionarios, busca]
+  );
 
   useEffect(() => {
     async function fetchFuncionarios() {
@@ -40,8 +55,11 @@ export default function ListaFuncionarios() {
 
       <div className="flex justify-between items-center mb-6">
         <input
-          type="text"
+          type="search"
+          value={busca}
+          onChange={(e) => setBusca(e.target.value)}
           placeholder="Nome, cargo ou email..."
+          aria-label="Buscar funcionário por nome, cargo ou email"
           className="w-[350px] px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
         />
 
@@ -68,31 +86,46 @@ export default function ListaFuncionarios() {
           </thead>
 
           <tbody>
-            {funcionarios.map((funcionario) => (
-              <tr
-                key={funcionario._id}
-                className="border-t border-gray-200 hover:bg-gray-50 transition"
-              >
-                <td className="px-6 py-3 text-blue-600 font-medium">
-                  <button
-                    onClick={() =>
-                      router.push(`/funcionario/funcionarios/${funcionario._id}`)
-                    }
-                    className="hover:underline"
-                  >
-                    {funcionario.nome}
-                  </button>
-                </td>
-
-                <td className="px-6 py-3 text-gray-700">
-                  {funcionario.cargo || "-"}
-                </td>
-
-                <td className="px-6 py-3 text-gray-700">
-                  {funcionario.email || "-"}
+            {funcionariosFiltrados.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={3}
+                  className="px-6 py-8 text-center text-gray-500"
+                >
+                  {funcionarios.length === 0
+                    ? "Nenhum funcionário cadastrado."
+                    : "Nenhum funcionário encontrado para esta busca."}
                 </td>
               </tr>
-            ))}
+            ) : (
+              funcionariosFiltrados.map((funcionario) => (
+                <tr
+                  key={funcionario._id}
+                  className="border-t border-gray-200 hover:bg-gray-50 transition"
+                >
+                  <td className="px-6 py-3 text-blue-600 font-medium">
+                    <button
+                      onClick={() =>
+                        router.push(
+                          `/funcionario/funcionarios/${funcionario._id}`
+                        )
+                      }
+                      className="hover:underline"
+                    >
+                      {funcionario.nome}
+                    </button>
+                  </td>
+
+                  <td className="px-6 py-3 text-gray-700">
+                    {funcionario.cargo || "-"}
+                  </td>
+
+                  <td className="px-6 py-3 text-gray-700">
+                    {funcionario.email || "-"}
+                  </td>
+                </tr>
+              ))
+            )}
           </tbody>
 
         </table>
