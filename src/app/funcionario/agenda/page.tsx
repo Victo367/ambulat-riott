@@ -181,7 +181,7 @@ export default function AgendaFuncionario() {
 
                   {/* Coluna: Ações */}
                   <td className="px-8 py-5 whitespace-nowrap text-right">
-                    <button onClick={() => router.push('/funcionario/agenda/detalhes')} className="text-cyan-600 font-semibold hover:text-cyan-800 text-sm cursor-pointer hover:underline transition-all">
+                    <button onClick={() => router.push('/funcionario/agenda/detalhes')} className="text-cyan-600 hover:text-cyan-800 font-semibold transition-colors">
                       Detalhes
                     </button>
                   </td>

@@ -12,6 +12,7 @@ import {
   UserCircleIcon,
   UsersIcon,
   PhoneIcon,
+  DocumentTextIcon // <-- Adicionado o ícone para a área de conteúdo
 } from "@heroicons/react/24/outline";
 
 type SidebarProps = {
@@ -66,6 +67,8 @@ export default function Sidebar({ user }: SidebarProps) {
                 <NavItem href="/funcionario/agenda" icon={CalendarIcon} label="Agenda" />
                 <NavItem href="/funcionario/pacientes" icon={UsersIcon} label="Pacientes" />
                 <NavItem href="/funcionario/funcionarios" icon={UsersIcon} label="Funcionários" />
+                {/* NOVO ITEM PARA GERENCIAR OS CARDS DA HOME */}
+                <NavItem href="/funcionario/conteudo" icon={DocumentTextIcon} label="Conteúdo do Site" />
                 <NavItem href="/funcionario/perfil" icon={UserCircleIcon} label="Perfil" />
               </>
             )}

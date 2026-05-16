@@ -1,3 +1,7 @@
+"use client";
+
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { 
   ArrowUpRightIcon, 
@@ -7,9 +11,44 @@ import {
   SparklesIcon 
 } from "@heroicons/react/24/outline";
 
+// URL DO SEU BACKEND
+const API_URL = "http://localhost:3333/conteudo"; 
+
+type MateriaProps = {
+  id: string;
+  title: string;
+  description: string;
+  image: string;
+  slug: string;
+};
+
 export default function Home() {
+  const router = useRouter();
+  
+  // Estados para gerenciar os artigos vindos do backend
+  const [artigosDinamicos, setArtigosDinamicos] = useState<MateriaProps[]>([]);
+  const [carregando, setCarregando] = useState(true);
+
+  // Busca os artigos novos assim que a página carrega
+  useEffect(() => {
+    async function carregarArtigos() {
+      try {
+        const response = await fetch(API_URL);
+        if (response.ok) {
+          const data = await response.json();
+          setArtigosDinamicos(data);
+        }
+      } catch (error) {
+        console.error("Erro ao carregar artigos dinâmicos:", error);
+      } finally {
+        setCarregando(false);
+      }
+    }
+    carregarArtigos();
+  }, []);
+
   return (
-    <div className="space-y-12">
+    <div className="space-y-12 animate-fade-in pb-12">
       
       {/* SEÇÃO HERO (ASSIMÉTRICA) */}
       <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-8 rounded-[32px] shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-slate-100">
@@ -28,10 +67,16 @@ export default function Home() {
             Integrado à rede hospitalar do Governo da Paraíba no Hospital de Emergência e Trauma Dom Luiz Gonzaga Fernandes, em Campina Grande. Nosso propósito é oferecer atenção básica humanizada e especializada para a comunidade de travestis e transexuais.
           </p>
           <div className="pt-2 flex flex-wrap gap-3">
-            <button className="bg-cyan-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-md shadow-cyan-600/10 hover:bg-cyan-700 transition cursor-pointer">
+            <button 
+              onClick={() => router.push('/paciente/agenda/novo')} 
+              className="bg-cyan-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-md shadow-cyan-600/10 hover:bg-cyan-700 transition cursor-pointer"
+            >
               Agendar Atendimento
             </button>
-            <button className="border border-slate-200 text-slate-600 text-sm font-semibold px-5 py-3 rounded-xl hover:bg-slate-50 transition cursor-pointer">
+            <button 
+              onClick={() => router.push('/especialidades')} 
+              className="border border-slate-200 text-slate-600 text-sm font-semibold px-5 py-3 rounded-xl hover:bg-slate-50 transition cursor-pointer"
+            >
               Conhecer Especialidades
             </button>
           </div>
@@ -59,8 +104,15 @@ export default function Home() {
 
         <section className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
+          {/* ========================================= */}
+          {/* CARDS FIXOS / PADRÃO DA PÁGINA            */}
+          {/* ========================================= */}
+          
           {/* CARD 1: TERAPIA HORMONAL */}
-          <div className="md:col-span-2 group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer">
+          <div 
+            onClick={() => router.push('/guias/terapia-hormonal')}
+            className="md:col-span-2 group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+          >
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-3">
                 <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl w-fit">
@@ -81,7 +133,10 @@ export default function Home() {
           </div>
 
           {/* CARD 2: TRANSGENERIDADE */}
-          <div className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer">
+          <div 
+            onClick={() => router.push('/guias/identidade')}
+            className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+          >
             <div className="space-y-3">
               <div className="p-2.5 bg-cyan-50 text-cyan-600 rounded-xl w-fit">
                 <BookOpenIcon className="w-5 h-5" />
@@ -100,7 +155,10 @@ export default function Home() {
           </div>
 
           {/* CARD 3: RETIFICAÇÃO DE NOME E GÊNERO */}
-          <div className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer">
+          <div 
+            onClick={() => router.push('/guias/retificacao')}
+            className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+          >
             <div className="space-y-3">
               <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl w-fit">
                 <IdentificationIcon className="w-5 h-5" />
@@ -117,8 +175,11 @@ export default function Home() {
             </div>
           </div>
 
-          {/* CARD 4: PROCEDIMENTOS CIRÚRGICOS SUS (AGORA CLARO) */}
-          <div className="md:col-span-2 group bg-white border border-slate-100 rounded-3xl p-6 flex flex-col md:flex-row justify-between gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer">
+          {/* CARD 4: PROCEDIMENTOS CIRÚRGICOS SUS */}
+          <div 
+            onClick={() => router.push('/guias/sus')}
+            className="md:col-span-2 group bg-white border border-slate-100 rounded-3xl p-6 flex flex-col md:flex-row justify-between gap-6 shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+          >
             <div className="flex-1 flex flex-col justify-between space-y-4">
               <div className="space-y-2">
                 <span className="text-[10px] font-bold text-cyan-600 uppercase tracking-widest bg-cyan-50 px-2 py-1 rounded-md w-fit inline-block">Acesso Público</span>
@@ -137,6 +198,42 @@ export default function Home() {
               <Image src="/cirurgia.jpg" alt="Equipe Cirúrgica" fill className="object-cover" />
             </div>
           </div>
+
+          {/* ========================================= */}
+          {/* CARDS DINÂMICOS (VINDOS DO BANCO DE DADOS)  */}
+          {/* ========================================= */}
+          
+          {artigosDinamicos.map((artigo) => (
+            <div 
+              key={artigo.id}
+              onClick={() => router.push(`/guias/${artigo.slug}`)}
+              className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+            >
+              <div className="space-y-3">
+                <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl w-fit">
+                  <BookOpenIcon className="w-5 h-5" />
+                </div>
+                <h3 className="text-lg font-bold text-slate-900 group-hover:text-cyan-700 transition-colors line-clamp-2">
+                  {artigo.title}
+                </h3>
+                <p className="text-xs text-slate-500 leading-relaxed line-clamp-3">
+                  {artigo.description}
+                </p>
+              </div>
+              
+              {/* Se o artigo tiver imagem, exibe ela aqui em baixo */}
+              {artigo.image && (
+                <div className="mt-4 h-28 relative rounded-xl overflow-hidden shrink-0">
+                  <Image src={artigo.image} alt={artigo.title} fill className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-300" />
+                </div>
+              )}
+
+              <div className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-semibold text-cyan-600">
+                <span>Ler artigo completo</span>
+                <ArrowUpRightIcon className="w-4 h-4" />
+              </div>
+            </div>
+          ))}
 
         </section>
       </div>
