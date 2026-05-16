@@ -1,7 +1,8 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
 import {
   ArrowLeftIcon,
   ChevronDownIcon,
@@ -27,27 +28,33 @@ interface FuncionarioOption {
   cargo?: string;
 }
 
+function dataIsoLocal() {
+  const hoje = new Date();
+  const y = hoje.getFullYear();
+  const m = String(hoje.getMonth() + 1).padStart(2, "0");
+  const d = String(hoje.getDate()).padStart(2, "0");
+  return `${y}-${m}-${d}`;
+}
+
 export default function NovoAgendamento() {
   const router = useRouter();
+  const pathname = usePathname();
 
   const [pacientes, setPacientes] = useState<PacienteOption[]>([]);
   const [funcionarios, setFuncionarios] = useState<FuncionarioOption[]>([]);
   const [loadingDados, setLoadingDados] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const [pacienteId, setPacienteId] = useState("");
-  const [profissionalId, setProfissionalId] = useState("");
-  const [data, setData] = useState(() => {
-    const hoje = new Date();
-    const y = hoje.getFullYear();
-    const m = String(hoje.getMonth() + 1).padStart(2, "0");
-    const d = String(hoje.getDate()).padStart(2, "0");
-    return `${y}-${m}-${d}`;
-  });
-  const [hora, setHora] = useState("");
-  const [status, setStatus] = useState("confirmado");
-  const [tipo, setTipo] = useState("Consulta Inicial");
-  const [observacoes, setObservacoes] = useState("");
+  const [pacienteId, setPacienteId] = usePersistedState("pacienteId", "");
+  const [profissionalId, setProfissionalId] = usePersistedState(
+    "profissionalId",
+    ""
+  );
+  const [data, setData] = usePersistedState("data", dataIsoLocal());
+  const [hora, setHora] = usePersistedState("hora", "");
+  const [status, setStatus] = usePersistedState("status", "confirmado");
+  const [tipo, setTipo] = usePersistedState("tipo", "Consulta Inicial");
+  const [observacoes, setObservacoes] = usePersistedState("observacoes", "");
 
   const pacienteSelecionado = pacientes.find((p) => p._id === pacienteId);
   const possuiTerapia =
@@ -107,6 +114,7 @@ export default function NovoAgendamento() {
         throw new Error(err.error || "Erro ao agendar");
       }
       alert("Agendamento criado com sucesso!");
+      clearPageState(pathname);
       router.push(`/funcionario/agenda?data=${data}`);
       router.refresh();
     } catch (error: unknown) {

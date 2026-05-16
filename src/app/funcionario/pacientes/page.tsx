@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePersistedState } from "@/hooks/usePersistedState";
 import Link from "next/link";
 import { 
   PlusIcon, 
@@ -36,7 +37,7 @@ function pacienteCombinaBusca(p: Paciente, busca: string) {
 
 export default function ListaPacientes() {
   const [pacientes, setPacientes] = useState<Paciente[]>([]);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = usePersistedState("busca", "");
   const [erro, setErro] = useState("");
   const router = useRouter();
 

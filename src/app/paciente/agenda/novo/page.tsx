@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
 import {
   ArrowLeftIcon,
   CalendarDaysIcon,
@@ -18,13 +19,13 @@ interface Profissional {
 
 export default function NovoAgendamentoPaciente() {
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Estados do formulário
-  const [especialidade, setEspecialidade] = useState("");
-  const [medico, setMedico] = useState("");
-  const [data, setData] = useState("");
-  const [hora, setHora] = useState("");
-  const [observacoes, setObservacoes] = useState("");
+  const [especialidade, setEspecialidade] = usePersistedState("especialidade", "");
+  const [medico, setMedico] = usePersistedState("medico", "");
+  const [data, setData] = usePersistedState("data", "");
+  const [hora, setHora] = usePersistedState("hora", "");
+  const [observacoes, setObservacoes] = usePersistedState("observacoes", "");
   
   // Estados de controle da API
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
@@ -101,8 +102,9 @@ export default function NovoAgendamentoPaciente() {
       }
 
       alert("Consulta agendada com sucesso!");
+      clearPageState(pathname);
       router.push("/paciente/agenda");
-      router.refresh(); // Atualiza os dados da listagem da agenda
+      router.refresh();
 
     } catch (error) {
       console.error(error);

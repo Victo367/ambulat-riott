@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { usePersistedState } from "@/hooks/usePersistedState";
 import {
   MagnifyingGlassIcon,
   FunnelIcon,
@@ -27,8 +27,11 @@ interface ItemHistorico {
 }
 
 export default function HistoricoPaciente() {
-  const [busca, setBusca] = useState("");
-  const [filtroEspecialidade, setFiltroEspecialidade] = useState("todos");
+  const [busca, setBusca] = usePersistedState("busca", "");
+  const [filtroEspecialidade, setFiltroEspecialidade] = usePersistedState(
+    "filtroEspecialidade",
+    "todos"
+  );
 
   // Mock de histórico: Agora TODAS as consultas mostram o que a paciente estava tomando na data
   const historicoCompleto: ItemHistorico[] = [

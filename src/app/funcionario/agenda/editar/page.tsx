@@ -1,7 +1,12 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import {
+  clearPageState,
+  hasPersistedPageState,
+  usePersistedState,
+} from "@/hooks/usePersistedState";
 import {
   ArrowLeftIcon,
   ChevronDownIcon,
@@ -29,10 +34,11 @@ interface AgendamentoForm {
 
 function EditarConteudo() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [form, setForm] = useState<AgendamentoForm | null>(null);
+  const [form, setForm] = usePersistedState<AgendamentoForm | null>("form", null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erro, setErro] = useState("");
@@ -48,24 +54,26 @@ function EditarConteudo() {
       const res = await fetch(`/api/agendamentos/${id}`);
       if (!res.ok) throw new Error("Não encontrado");
       const dados = await res.json();
-      setForm({
-        pacienteNome: dados.paciente,
-        medicoNome: dados.profissional,
-        data: dados.data,
-        horario: dados.hora,
-        status: dados.statusValue,
-        observacoes: dados.observacoes || "",
-        pacienteTerapia: dados.pacienteTerapia || {
-          dosagem_hormonio: "",
-          bloqueador_hormonal: "",
-        },
-      });
+      if (!hasPersistedPageState(pathname)) {
+        setForm({
+          pacienteNome: dados.paciente,
+          medicoNome: dados.profissional,
+          data: dados.data,
+          horario: dados.hora,
+          status: dados.statusValue,
+          observacoes: dados.observacoes || "",
+          pacienteTerapia: dados.pacienteTerapia || {
+            dosagem_hormonio: "",
+            bloqueador_hormonal: "",
+          },
+        });
+      }
     } catch {
       setErro("Não foi possível carregar o agendamento.");
     } finally {
       setLoading(false);
     }
-  }, [id]);
+  }, [id, pathname]);
 
   useEffect(() => {
     carregar();
@@ -101,6 +109,7 @@ function EditarConteudo() {
         throw new Error(err.error || "Erro ao salvar");
       }
       alert("Agendamento atualizado com sucesso!");
+      clearPageState(pathname);
       router.push(`/funcionario/agenda/detalhes?id=${id}`);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Erro ao salvar";

@@ -28,6 +28,14 @@ function dataIsoLocal(date = new Date()) {
   return `${y}-${m}-${d}`;
 }
 
+const AGENDA_QUERY_KEY = "page-state:/funcionario/agenda:__query";
+
+function salvarUltimaVisaoAgenda(query: string) {
+  if (typeof window !== "undefined" && query) {
+    sessionStorage.setItem(AGENDA_QUERY_KEY, query);
+  }
+}
+
 function formatarDataExibicao(iso: string) {
   const [year, month, day] = iso.split("-").map(Number);
   return new Intl.DateTimeFormat("pt-BR", {
@@ -74,6 +82,18 @@ function AgendaConteudo() {
   }, [dataFiltro, verTodos]);
 
   useEffect(() => {
+    const temData = searchParams.has("data");
+    const temTodos = searchParams.get("todos") === "1";
+    if (!temData && !temTodos && typeof window !== "undefined") {
+      const ultima = sessionStorage.getItem(AGENDA_QUERY_KEY);
+      if (ultima) {
+        router.replace(`/funcionario/agenda?${ultima}`);
+        return;
+      }
+    }
+  }, [searchParams, router]);
+
+  useEffect(() => {
     carregarAgenda();
   }, [carregarAgenda]);
 
@@ -97,6 +117,7 @@ function AgendaConteudo() {
       params.set("data", novaData);
     }
     const query = params.toString();
+    salvarUltimaVisaoAgenda(query);
     router.push(query ? `/funcionario/agenda?${query}` : "/funcionario/agenda");
   }
 
@@ -112,6 +133,7 @@ function AgendaConteudo() {
       }
     }
     const query = params.toString();
+    salvarUltimaVisaoAgenda(query);
     router.push(query ? `/funcionario/agenda?${query}` : "/funcionario/agenda");
   }
 

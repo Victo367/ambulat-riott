@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  clearPageState,
+  hasPersistedPageState,
+  usePersistedState,
+} from "@/hooks/usePersistedState";
 import { 
   ArrowLeftIcon, 
   TrashIcon, 
@@ -12,19 +17,30 @@ import {
 export default function EditarPaciente({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Estados de Dados Pessoais
-  const [nome, setNome] = useState("");
-  const [dataNascimento, setDataNascimento] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [email, setEmail] = useState("");
-  const [pronomes, setPronomes] = useState("");
-  const [identidadeGenero, setIdentidadeGenero] = useState("");
-  const [status, setStatus] = useState("");
+  const [nome, setNome] = usePersistedState("nome", "");
+  const [dataNascimento, setDataNascimento] = usePersistedState(
+    "dataNascimento",
+    ""
+  );
+  const [telefone, setTelefone] = usePersistedState("telefone", "");
+  const [email, setEmail] = usePersistedState("email", "");
+  const [pronomes, setPronomes] = usePersistedState("pronomes", "");
+  const [identidadeGenero, setIdentidadeGenero] = usePersistedState(
+    "identidadeGenero",
+    ""
+  );
+  const [status, setStatus] = usePersistedState("status", "");
 
-  // Novos Estados: Terapia Hormonal
-  const [dosagemHormonio, setDosagemHormonio] = useState("");
-  const [bloqueadorHormonal, setBloqueadorHormonal] = useState("");
+  const [dosagemHormonio, setDosagemHormonio] = usePersistedState(
+    "dosagemHormonio",
+    ""
+  );
+  const [bloqueadorHormonal, setBloqueadorHormonal] = usePersistedState(
+    "bloqueadorHormonal",
+    ""
+  );
 
   // Estados de UI
   const [erro, setErro] = useState("");
@@ -46,17 +62,17 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
 
         const data = await res.json();
 
-        setNome(data.nome || "");
-        setDataNascimento(data.data_nascimento?.split("T")[0] || "");
-        setTelefone(data.telefone || "");
-        setEmail(data.email || "");
-        setPronomes(data.pronomes || "");
-        setIdentidadeGenero(data.identidade_genero || "");
-        setStatus(data.status || "");
-        
-        // Populando dados de Terapia Hormonal
-        setDosagemHormonio(data.dosagem_hormonio || "");
-        setBloqueadorHormonal(data.bloqueador_hormonal || "");
+        if (!hasPersistedPageState(pathname)) {
+          setNome(data.nome || "");
+          setDataNascimento(data.data_nascimento?.split("T")[0] || "");
+          setTelefone(data.telefone || "");
+          setEmail(data.email || "");
+          setPronomes(data.pronomes || "");
+          setIdentidadeGenero(data.identidade_genero || "");
+          setStatus(data.status || "");
+          setDosagemHormonio(data.dosagem_hormonio || "");
+          setBloqueadorHormonal(data.bloqueador_hormonal || "");
+        }
 
       } catch {
         setErro("Erro ao conectar com o servidor");
@@ -66,7 +82,7 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
     }
 
     fetchPaciente();
-  }, [id]);
+  }, [id, pathname]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -99,6 +115,7 @@ export default function EditarPaciente({ params }: { params: Promise<{ id: strin
       }
 
       setSucesso("Paciente atualizado com sucesso!");
+      clearPageState(pathname);
 
       setTimeout(() => {
         router.push(`/funcionario/pacientes/${id}`);

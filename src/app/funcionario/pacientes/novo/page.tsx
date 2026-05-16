@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
 import { 
   ArrowLeftIcon,
   CheckCircleIcon,
@@ -10,20 +11,31 @@ import {
 
 export default function CriarPaciente() {
   // Estados de Dados Pessoais
-  const [nome, setNome] = useState("");
-  const [dataNascimento, setDataNascimento] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [pronomes, setPronomes] = useState("");
-  const [identidadeGenero, setIdentidadeGenero] = useState("");
-  const [endereco, setEndereco] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [status, setStatus] = useState("ativo");
+  const [nome, setNome] = usePersistedState("nome", "");
+  const [dataNascimento, setDataNascimento] = usePersistedState(
+    "dataNascimento",
+    ""
+  );
+  const [telefone, setTelefone] = usePersistedState("telefone", "");
+  const [email, setEmail] = usePersistedState("email", "");
+  const [senha, setSenha] = usePersistedState("senha", "");
+  const [pronomes, setPronomes] = usePersistedState("pronomes", "");
+  const [identidadeGenero, setIdentidadeGenero] = usePersistedState(
+    "identidadeGenero",
+    ""
+  );
+  const [endereco, setEndereco] = usePersistedState("endereco", "");
+  const [cpf, setCpf] = usePersistedState("cpf", "");
+  const [status, setStatus] = usePersistedState("status", "ativo");
 
-  // Estados de Terapia Hormonal
-  const [dosagemHormonio, setDosagemHormonio] = useState("");
-  const [bloqueadorHormonal, setBloqueadorHormonal] = useState("");
+  const [dosagemHormonio, setDosagemHormonio] = usePersistedState(
+    "dosagemHormonio",
+    ""
+  );
+  const [bloqueadorHormonal, setBloqueadorHormonal] = usePersistedState(
+    "bloqueadorHormonal",
+    ""
+  );
 
   // Estados de UI
   const [erro, setErro] = useState("");
@@ -31,6 +43,7 @@ export default function CriarPaciente() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -77,8 +90,8 @@ export default function CriarPaciente() {
       }
 
       setSucesso("Paciente cadastrado com sucesso!");
-      
-      // Pequeno delay para exibir a mensagem de sucesso antes do redirecionamento
+      clearPageState(pathname);
+
       setTimeout(() => {
         router.push("/funcionario/pacientes");
       }, 1000);
