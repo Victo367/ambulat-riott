@@ -1,23 +1,24 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { usePathname, useRouter } from "next/navigation";
-import { clearPageState } from "@/hooks/usePersistedState";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
   TrashIcon,
   CheckCircleIcon,
   ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
+import {
+  TerapiaHormonalFields,
+  terapiaFromPaciente,
+  terapiaToApiPayload,
+  type TerapiaHormonalValues,
+} from "@/components/TerapiaHormonalFields";
 
-export default function EditarPaciente({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function EditarPaciente() {
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : "";
   const router = useRouter();
-  const pathname = usePathname();
 
   const [nome, setNome] = useState("");
   const [dataNascimento, setDataNascimento] = useState("");
@@ -26,6 +27,11 @@ export default function EditarPaciente({
   const [pronomes, setPronomes] = useState("");
   const [identidadeGenero, setIdentidadeGenero] = useState("");
   const [status, setStatus] = useState("");
+  const [terapia, setTerapia] = useState<TerapiaHormonalValues>({
+    terapia_hormonal: false,
+    dosagem_hormonio: "",
+    bloqueador_hormonal: "",
+  });
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
@@ -33,42 +39,61 @@ export default function EditarPaciente({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    clearPageState(pathname);
-  }, [pathname, id]);
+    if (!id) {
+      setErro("Identificador do paciente inválido.");
+      setIsFetching(false);
+      return;
+    }
 
-  useEffect(() => {
+    let ativo = true;
+
     async function fetchPaciente() {
+      setIsFetching(true);
+      setErro("");
       try {
         const res = await fetch(`/api/users/${id}`);
 
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
-          setErro(errorData.error || "Erro ao buscar paciente");
-          setIsFetching(false);
+          if (ativo) {
+            setErro(errorData.error || "Erro ao buscar paciente");
+          }
           return;
         }
 
         const data = await res.json();
+        if (!ativo) return;
 
         setNome(data.nome || "");
-        setDataNascimento(data.data_nascimento?.split("T")[0] || "");
+        setDataNascimento(
+          data.data_nascimento
+            ? String(data.data_nascimento).split("T")[0]
+            : ""
+        );
         setTelefone(data.telefone || "");
         setEmail(data.email || "");
         setPronomes(data.pronomes || "");
         setIdentidadeGenero(data.identidade_genero || "");
         setStatus(data.status || "");
+        setTerapia(terapiaFromPaciente(data));
       } catch {
-        setErro("Erro ao conectar com o servidor");
+        if (ativo) setErro("Erro ao conectar com o servidor");
       } finally {
-        setIsFetching(false);
+        if (ativo) setIsFetching(false);
       }
     }
 
     fetchPaciente();
+
+    return () => {
+      ativo = false;
+    };
   }, [id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!id) return;
+
     setErro("");
     setSucesso("");
     setIsSubmitting(true);
@@ -85,6 +110,7 @@ export default function EditarPaciente({
           pronomes,
           identidade_genero: identidadeGenero,
           status,
+          ...terapiaToApiPayload(terapia),
         }),
       });
 
@@ -96,7 +122,6 @@ export default function EditarPaciente({
       }
 
       setSucesso("Paciente atualizado com sucesso!");
-      clearPageState(pathname);
 
       setTimeout(() => {
         router.push(`/funcionario/pacientes/${id}`);
@@ -108,6 +133,8 @@ export default function EditarPaciente({
   }
 
   async function handleDelete() {
+    if (!id) return;
+
     const confirmDelete = window.confirm(
       "Atenção: Deseja realmente deletar este paciente? Esta ação não pode ser desfeita."
     );
@@ -132,10 +159,28 @@ export default function EditarPaciente({
   const labelClass =
     "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
 
+  if (!id && !isFetching) {
+    return (
+      <div className="p-8 max-w-4xl mx-auto mt-8">
+        <div className="flex items-center gap-3 bg-rose-50 border border-rose-100 text-rose-600 p-6 rounded-2xl">
+          <ExclamationCircleIcon className="w-8 h-8 shrink-0" />
+          <p className="font-semibold">{erro || "Paciente não encontrado."}</p>
+        </div>
+        <button
+          type="button"
+          onClick={() => router.push("/funcionario/pacientes")}
+          className="mt-6 text-slate-500 hover:text-cyan-600 font-semibold"
+        >
+          Voltar para a lista
+        </button>
+      </div>
+    );
+  }
+
   if (isFetching) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-cyan-600 rounded-full animate-spin"></div>
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-cyan-600 rounded-full animate-spin" />
         <p className="text-slate-500 font-medium animate-pulse">
           Carregando dados do paciente...
         </p>
@@ -271,6 +316,16 @@ export default function EditarPaciente({
                 />
               </div>
             </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-100">
+            <TerapiaHormonalFields
+              values={terapia}
+              onChange={setTerapia}
+              inputClass={inputClass}
+              labelClass={labelClass}
+              title="Terapia Hormonal"
+            />
           </div>
 
           <div className="flex flex-col-reverse md:flex-row justify-end items-center gap-4 mt-10 pt-8 border-t border-slate-100">

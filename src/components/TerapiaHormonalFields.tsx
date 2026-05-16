@@ -12,29 +12,30 @@ export function pacienteEmTerapia(
   if (!p) return false;
   return (
     Boolean(p.terapia_hormonal) ||
-    Boolean(p.dosagem_hormonio) ||
-    Boolean(p.bloqueador_hormonal)
+    Boolean(p.dosagem_hormonio?.trim()) ||
+    Boolean(p.bloqueador_hormonal?.trim())
   );
 }
 
 export function terapiaFromPaciente(
   p: Partial<TerapiaHormonalValues> | null | undefined
 ): TerapiaHormonalValues {
-  const ativo = pacienteEmTerapia(p);
   return {
-    terapia_hormonal: ativo,
+    terapia_hormonal: pacienteEmTerapia(p),
     dosagem_hormonio: p?.dosagem_hormonio || "",
     bloqueador_hormonal: p?.bloqueador_hormonal || "",
   };
 }
 
 export function terapiaToApiPayload(values: TerapiaHormonalValues) {
+  const dosagem = (values.dosagem_hormonio || "").trim();
+  const bloqueador = (values.bloqueador_hormonal || "").trim();
+  const emTerapia = Boolean(dosagem || bloqueador);
+
   return {
-    terapia_hormonal: values.terapia_hormonal,
-    dosagem_hormonio: values.terapia_hormonal ? values.dosagem_hormonio : "",
-    bloqueador_hormonal: values.terapia_hormonal
-      ? values.bloqueador_hormonal
-      : "",
+    terapia_hormonal: emTerapia,
+    dosagem_hormonio: dosagem,
+    bloqueador_hormonal: bloqueador,
   };
 }
 
@@ -55,6 +56,21 @@ export function TerapiaHormonalFields({
   title = "Terapia Hormonal",
   disabled = false,
 }: TerapiaHormonalFieldsProps) {
+  function atualizarCampo(
+    campo: "dosagem_hormonio" | "bloqueador_hormonal",
+    valor: string
+  ) {
+    const atualizado = { ...values, [campo]: valor };
+    const dosagem =
+      campo === "dosagem_hormonio" ? valor : values.dosagem_hormonio;
+    const bloqueador =
+      campo === "bloqueador_hormonal" ? valor : values.bloqueador_hormonal;
+    atualizado.terapia_hormonal = Boolean(
+      dosagem.trim() || bloqueador.trim()
+    );
+    onChange(atualizado);
+  }
+
   return (
     <div className="space-y-6">
       {title ? (
@@ -63,55 +79,32 @@ export function TerapiaHormonalFields({
         </h2>
       ) : null}
 
-      <label className="flex items-center gap-3 cursor-pointer w-fit group">
-        <input
-          type="checkbox"
-          data-cy="terapia-hormonal"
-          checked={values.terapia_hormonal}
-          disabled={disabled}
-          onChange={(e) =>
-            onChange({
-              ...values,
-              terapia_hormonal: e.target.checked,
-            })
-          }
-          className="w-5 h-5 rounded border-slate-300 text-cyan-600 focus:ring-cyan-600/20 cursor-pointer disabled:opacity-50"
-        />
-        <span className="text-sm font-semibold text-slate-700 group-hover:text-cyan-700 transition-colors">
-          Paciente realiza terapia hormonal
-        </span>
-      </label>
-
-      {values.terapia_hormonal && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fade-in">
-          <div>
-            <label className={labelClass}>Dosagem do Hormônio</label>
-            <input
-              data-cy="dosagem-hormonio"
-              value={values.dosagem_hormonio}
-              disabled={disabled}
-              onChange={(e) =>
-                onChange({ ...values, dosagem_hormonio: e.target.value })
-              }
-              placeholder="Ex: 2mg Valerato de Estradiol / dia"
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Bloqueador Hormonal</label>
-            <input
-              data-cy="bloqueador-hormonal"
-              value={values.bloqueador_hormonal}
-              disabled={disabled}
-              onChange={(e) =>
-                onChange({ ...values, bloqueador_hormonal: e.target.value })
-              }
-              placeholder="Ex: 50mg Espironolactona / dia"
-              className={inputClass}
-            />
-          </div>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div>
+          <label className={labelClass}>Dosagem do Hormônio</label>
+          <input
+            data-cy="dosagem-hormonio"
+            value={values.dosagem_hormonio}
+            disabled={disabled}
+            onChange={(e) => atualizarCampo("dosagem_hormonio", e.target.value)}
+            placeholder="Ex: 2mg Valerato de Estradiol / dia"
+            className={inputClass}
+          />
         </div>
-      )}
+        <div>
+          <label className={labelClass}>Bloqueador Hormonal</label>
+          <input
+            data-cy="bloqueador-hormonal"
+            value={values.bloqueador_hormonal}
+            disabled={disabled}
+            onChange={(e) =>
+              atualizarCampo("bloqueador_hormonal", e.target.value)
+            }
+            placeholder="Ex: 50mg Espironolactona / dia"
+            className={inputClass}
+          />
+        </div>
+      </div>
     </div>
   );
 }

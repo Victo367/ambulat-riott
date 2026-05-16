@@ -235,22 +235,6 @@ export default function NovoAgendamento() {
             </div>
           </div>
 
-          {pacienteId && (
-            <div className="pt-2 border-t border-slate-100">
-              <TerapiaHormonalFields
-                values={terapia}
-                onChange={setTerapia}
-                inputClass={thInputClass}
-                labelClass={thLabelClass}
-                title="Terapia Hormonal do Paciente"
-              />
-              <p className="text-xs text-slate-500 ml-1 mt-2">
-                Os dados de terapia são salvos no cadastro do paciente ao
-                confirmar o agendamento.
-              </p>
-            </div>
-          )}
-
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="space-y-1">
               <label className={labelClass}>Data da Consulta *</label>
@@ -311,6 +295,22 @@ export default function NovoAgendamento() {
                 <ChevronDownIcon className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
             </div>
+
+            {pacienteId && (
+              <div className="md:col-span-3 pt-4 border-t border-slate-100 space-y-4">
+                <TerapiaHormonalFields
+                  values={terapia}
+                  onChange={setTerapia}
+                  inputClass={thInputClass}
+                  labelClass={thLabelClass}
+                  title="Terapia Hormonal do Paciente"
+                />
+                <p className="text-xs text-slate-500 ml-1">
+                  Os dados de terapia são salvos no cadastro do paciente ao
+                  confirmar o agendamento.
+                </p>
+              </div>
+            )}
           </div>
 
           <div className="space-y-1">

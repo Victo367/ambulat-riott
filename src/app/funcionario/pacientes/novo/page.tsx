@@ -3,11 +3,16 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
-import { 
+import {
   ArrowLeftIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
+import {
+  TerapiaHormonalFields,
+  terapiaToApiPayload,
+  type TerapiaHormonalValues,
+} from "@/components/TerapiaHormonalFields";
 
 export default function CriarPaciente() {
   // Estados de Dados Pessoais
@@ -27,6 +32,14 @@ export default function CriarPaciente() {
   const [endereco, setEndereco] = usePersistedState("endereco", "");
   const [cpf, setCpf] = usePersistedState("cpf", "");
   const [status, setStatus] = usePersistedState("status", "ativo");
+  const [terapia, setTerapia] = usePersistedState<TerapiaHormonalValues>(
+    "terapia",
+    {
+      terapia_hormonal: false,
+      dosagem_hormonio: "",
+      bloqueador_hormonal: "",
+    }
+  );
 
   // Estados de UI
   const [erro, setErro] = useState("");
@@ -64,6 +77,7 @@ export default function CriarPaciente() {
           data_nascimento: dataNascimento,
           telefone,
           status,
+          ...terapiaToApiPayload(terapia),
           // Caso a sua API espere endereço e CPF futuramente, eles já estão no state:
           // endereco,
           // cpf
@@ -245,6 +259,16 @@ export default function CriarPaciente() {
                 />
               </div>
             </div>
+          </div>
+
+          <div className="pt-8 border-t border-slate-100">
+            <TerapiaHormonalFields
+              values={terapia}
+              onChange={setTerapia}
+              inputClass={inputClass}
+              labelClass={labelClass}
+              title="Terapia Hormonal"
+            />
           </div>
 
           {/* BOTÕES DE AÇÃO */}

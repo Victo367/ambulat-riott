@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
   PencilIcon,
@@ -41,9 +41,9 @@ function getIniciais(nome: string) {
   return (partes[0].charAt(0) + partes[partes.length - 1].charAt(0)).toUpperCase();
 }
 
-export default function VisualizarPaciente({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const id = resolvedParams.id;
+export default function VisualizarPaciente() {
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : "";
 
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [loading, setLoading] = useState(true);
@@ -74,6 +74,12 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
   };
 
   useEffect(() => {
+    if (!id) {
+      setErro("Identificador do paciente inválido.");
+      setLoading(false);
+      return;
+    }
+
     async function fetchPaciente() {
       try {
         const res = await fetch(`/api/users/${id}`);
@@ -115,7 +121,7 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
     setSalvandoTerapia(true);
     setMsgTerapia("");
     try {
-      const res = await fetch(`/api/users/${paciente._id}`, {
+      const res = await fetch(`/api/users/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(terapiaToApiPayload(terapiaForm)),
