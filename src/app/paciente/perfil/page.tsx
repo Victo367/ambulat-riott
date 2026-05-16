@@ -4,28 +4,28 @@ import { useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
   EnvelopeIcon,
-  BriefcaseIcon,
+  PhoneIcon,
   PowerIcon,
   UserIcon,
-  UserCircleIcon // <-- Ícone importado da Sidebar
+  UserCircleIcon // <-- Ícone importado para manter o padrão da Sidebar
 } from "@heroicons/react/24/outline";
 
 // Função auxiliar para pegar as iniciais do nome
 function getIniciais(nome: string) {
-  if (!nome) return "F";
+  if (!nome) return "P";
   const partes = nome.trim().split(" ");
   if (partes.length === 1) return partes[0].charAt(0).toUpperCase();
   return (partes[0].charAt(0) + partes[partes.length - 1].charAt(0)).toUpperCase();
 }
 
-export default function PerfilFuncionario() {
+export default function PerfilPaciente() {
   const router = useRouter();
 
   // Dados estáticos só para demonstração
-  const funcionario = {
-    nome: "Alice Dias",
-    email: "alicedias@gmail.com",
-    cargo: "Desenvolvedor",
+  const paciente = {
+    nome: "Julia Mendes",
+    email: "julia12@gmail.com",
+    telefone: "83923549878",
     status: "Ativo",
   };
 
@@ -64,7 +64,6 @@ export default function PerfilFuncionario() {
       {/* HEADER DA PÁGINA */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
         <div className="flex items-center gap-4 sm:gap-5">
-          
           {/* NOVO ÍCONE PADRONIZADO DA SIDEBAR */}
           <div className="hidden sm:flex items-center justify-center w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 shadow-sm shrink-0">
             <UserCircleIcon className="w-6 h-6" />
@@ -88,21 +87,21 @@ export default function PerfilFuncionario() {
         <div className="bg-slate-50/50 border-b border-slate-100 p-8 md:p-10 flex flex-col md:flex-row items-center md:items-start gap-6">
           
           <div className="w-24 h-24 rounded-full bg-cyan-100 text-cyan-600 flex items-center justify-center text-3xl font-bold shadow-sm shrink-0">
-            {getIniciais(funcionario.nome)}
+            {getIniciais(paciente.nome)}
           </div>
           
           <div className="text-center md:text-left pt-2">
             <h2 className="text-3xl font-extrabold text-slate-900 tracking-tight mb-2">
-              {funcionario.nome}
+              {paciente.nome}
             </h2>
             <div className="flex items-center justify-center md:justify-start gap-2">
               <span className="inline-flex items-center px-3 py-1 text-xs font-bold rounded-lg bg-emerald-50 text-emerald-600 border border-emerald-100">
                 <span className="w-2 h-2 rounded-full bg-emerald-500 mr-2"></span>
-                {funcionario.status}
+                {paciente.status}
               </span>
               <span className="inline-flex items-center gap-1.5 px-3 py-1 text-xs font-bold rounded-lg bg-slate-100 text-slate-600 border border-slate-200">
                 <UserIcon className="w-3.5 h-3.5" />
-                Funcionário
+                Paciente
               </span>
             </div>
           </div>
@@ -120,17 +119,17 @@ export default function PerfilFuncionario() {
               </div>
               <div>
                 <p className={labelClass}>E-mail de Acesso</p>
-                <p className={valueClass}>{funcionario.email}</p>
+                <p className={valueClass}>{paciente.email}</p>
               </div>
             </div>
 
             <div className="flex items-start gap-4">
               <div className="p-2.5 bg-slate-50 rounded-xl border border-slate-100 text-cyan-600 shrink-0">
-                <BriefcaseIcon className="w-5 h-5" />
+                <PhoneIcon className="w-5 h-5" />
               </div>
               <div>
-                <p className={labelClass}>Cargo Atual</p>
-                <p className={valueClass}>{funcionario.cargo}</p>
+                <p className={labelClass}>Telefone</p>
+                <p className={valueClass}>{paciente.telefone}</p>
               </div>
             </div>
 

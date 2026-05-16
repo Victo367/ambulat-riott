@@ -2,6 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { 
+  PlusIcon, 
+  MagnifyingGlassIcon, 
+  UsersIcon,
+  ExclamationCircleIcon,
+  UserGroupIcon
+} from "@heroicons/react/24/outline";
 
 type Funcionario = {
   _id: string;
@@ -51,86 +58,126 @@ export default function ListaFuncionarios() {
   }, []);
 
   return (
-    <div className="p-6">
-
-      <div className="flex justify-between items-center mb-6">
-        <input
-          type="search"
-          value={busca}
-          onChange={(e) => setBusca(e.target.value)}
-          placeholder="Nome, cargo ou email..."
-          aria-label="Buscar funcionário por nome, cargo ou email"
-          className="w-[350px] px-4 py-2 border border-gray-300 rounded-lg text-sm text-gray-700 focus:outline-none focus:ring-1 focus:ring-blue-500"
-        />
+    <div className="space-y-8 animate-fade-in pb-12">
+      
+      {/* HEADER DA PÁGINA */}
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
+        <div className="flex items-center gap-5">
+          <div className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 shadow-sm">
+            <UsersIcon className="w-6 h-6" />
+          </div>
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Gestão de Equipe
+            </h1>
+            <p className="text-sm text-slate-500 font-medium mt-0.5">
+              Visualize e gerencie os profissionais da unidade
+            </p>
+          </div>
+        </div>
 
         <button
           data-cy="novo-funcionario"
           onClick={() => router.push("/funcionario/funcionarios/novo")}
-          className="bg-blue-500 text-white px-5 py-2 rounded-lg text-sm font-semibold hover:bg-blue-600 transition"
+          className="bg-cyan-600 text-white px-5 py-3 rounded-xl text-sm font-bold shadow-md shadow-cyan-600/20 hover:bg-cyan-700 hover:shadow-lg transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
         >
+          <PlusIcon className="w-5 h-5" />
           Novo Funcionário
         </button>
+      </header>
+
+      {/* CONTROLES (Busca e Erro) */}
+      <div className="flex flex-col gap-4">
+        
+        {/* Erro Banner */}
+        {erro && (
+          <div className="flex items-center gap-2 bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl text-sm animate-fade-in">
+            <ExclamationCircleIcon className="w-5 h-5 shrink-0" />
+            <p className="font-semibold">{erro}</p>
+          </div>
+        )}
+
+        {/* Input de Busca */}
+        <div className="relative group max-w-md w-full">
+          <MagnifyingGlassIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-cyan-600 transition-colors" />
+          <input
+            type="search"
+            value={busca}
+            onChange={(e) => setBusca(e.target.value)}
+            placeholder="Buscar por nome, cargo ou email..."
+            aria-label="Buscar funcionário"
+            className="w-full bg-white border border-slate-200 text-slate-900 text-sm rounded-2xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400 shadow-sm"
+          />
+        </div>
       </div>
 
-      {erro && <p className="text-red-500 mb-4">{erro}</p>}
-
-      <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
-        <table className="w-full text-sm">
-
-          <thead className="bg-gray-100 text-gray-600 uppercase text-xs">
-            <tr>
-              <th className="text-left px-6 py-3">Nome</th>
-              <th className="text-left px-6 py-3">Cargo</th>
-              <th className="text-left px-6 py-3">Email</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {funcionariosFiltrados.length === 0 ? (
+      {/* ÁREA DA TABELA */}
+      <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden">
+        
+        <div className="overflow-x-auto">
+          <table className="w-full text-sm text-left">
+            <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
               <tr>
-                <td
-                  colSpan={3}
-                  className="px-6 py-8 text-center text-gray-500"
-                >
-                  {funcionarios.length === 0
-                    ? "Nenhum funcionário cadastrado."
-                    : "Nenhum funcionário encontrado para esta busca."}
-                </td>
+                <th className="px-8 py-5">Nome do Profissional</th>
+                <th className="px-8 py-5">Cargo / Função</th>
+                <th className="px-8 py-5">E-mail de Contato</th>
               </tr>
-            ) : (
-              funcionariosFiltrados.map((funcionario) => (
-                <tr
-                  key={funcionario._id}
-                  className="border-t border-gray-200 hover:bg-gray-50 transition"
-                >
-                  <td className="px-6 py-3 text-blue-600 font-medium">
-                    <button
-                      onClick={() =>
-                        router.push(
-                          `/funcionario/funcionarios/${funcionario._id}`
-                        )
-                      }
-                      className="hover:underline"
-                    >
-                      {funcionario.nome}
-                    </button>
-                  </td>
+            </thead>
 
-                  <td className="px-6 py-3 text-gray-700">
-                    {funcionario.cargo || "-"}
-                  </td>
-
-                  <td className="px-6 py-3 text-gray-700">
-                    {funcionario.email || "-"}
+            <tbody className="divide-y divide-slate-100">
+              {funcionariosFiltrados.length === 0 ? (
+                <tr>
+                  <td colSpan={3} className="px-8 py-16 text-center">
+                    <div className="flex flex-col items-center justify-center text-slate-400">
+                      <UserGroupIcon className="w-12 h-12 mb-3 text-slate-300" />
+                      <p className="text-base font-semibold text-slate-600">
+                        {funcionarios.length === 0
+                          ? "Nenhum funcionário cadastrado ainda."
+                          : "Nenhum funcionário encontrado."}
+                      </p>
+                      <p className="text-sm mt-1">
+                        {funcionarios.length === 0
+                          ? "Clique em 'Novo Funcionário' para começar."
+                          : "Tente ajustar os termos da sua busca."}
+                      </p>
+                    </div>
                   </td>
                 </tr>
-              ))
-            )}
-          </tbody>
+              ) : (
+                funcionariosFiltrados.map((funcionario) => (
+                  <tr
+                    key={funcionario._id}
+                    className="hover:bg-slate-50/80 transition-colors duration-150 group"
+                  >
+                    {/* Nome (Clicável) */}
+                    <td className="px-8 py-5 whitespace-nowrap">
+                      <button
+                        onClick={() => router.push(`/funcionario/funcionarios/${funcionario._id}`)}
+                        className="font-bold text-slate-900 group-hover:text-cyan-600 transition-colors text-left focus:outline-none focus:underline"
+                      >
+                        {funcionario.nome}
+                      </button>
+                    </td>
 
-        </table>
+                    {/* Cargo */}
+                    <td className="px-8 py-5 whitespace-nowrap text-slate-600 font-medium">
+                      <span className="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-semibold">
+                        {funcionario.cargo || "Não definido"}
+                      </span>
+                    </td>
+
+                    {/* Email */}
+                    <td className="px-8 py-5 whitespace-nowrap text-slate-500">
+                      {funcionario.email || "-"}
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+
       </div>
-
     </div>
   );
 }

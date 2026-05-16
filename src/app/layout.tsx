@@ -19,7 +19,6 @@ export const metadata: Metadata = {
   description: "Cadastro de pacientes do ambulatório",
 };
 
-// 👇 AQUI MUDA
 export default async function RootLayout({
   children,
 }: {
@@ -32,11 +31,14 @@ export default async function RootLayout({
       lang="pt-BR"
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex">
+      {/* Aqui aplicamos o bg-slate-100 (cinza claro) que vai destacar os cards brancos */}
+      <body className="min-h-full flex bg-slate-100 text-slate-800">
         <Sidebar user={user ?? null} />
 
-        <main className="flex-1 bg-gray-100 p-8 overflow-y-auto ml-64">
-          {children}
+        <main className="flex-1 ml-68 min-h-screen overflow-x-hidden">
+          <div className="w-full max-w-[1400px] mx-auto p-6 md:p-10 lg:p-12 animate-fade-in">
+            {children}
+          </div>
         </main>
       </body>
     </html>

@@ -2,7 +2,11 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { ArrowLeftIcon } from "@heroicons/react/24/outline";
+import { 
+  ArrowLeftIcon, 
+  CheckCircleIcon, 
+  ExclamationCircleIcon 
+} from "@heroicons/react/24/outline";
 
 export default function CriarFuncionario() {
   const [nome, setNome] = useState("");
@@ -10,10 +14,11 @@ export default function CriarFuncionario() {
   const [dataAdmissao, setDataAdmissao] = useState("");
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [status, setStatus] = useState("ativo");
+  const [status] = useState("ativo"); // Mantendo o default ativo
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
 
@@ -27,6 +32,8 @@ export default function CriarFuncionario() {
       setErro("Por favor, preencha todos os campos obrigatórios.");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       const res = await fetch("/api/register/funcionario", {
@@ -49,145 +56,158 @@ export default function CriarFuncionario() {
 
       if (!res.ok) {
         setErro(data.error || "Erro ao cadastrar funcionário");
+        setIsSubmitting(false);
         return;
       }
 
-      setSucesso("Funcionário cadastrado com sucesso!");
+      setSucesso("Profissional cadastrado com sucesso!");
 
-      router.push("/funcionario/funcionarios");
+      // Pequeno delay para o usuário ver a mensagem de sucesso antes de redirecionar
+      setTimeout(() => {
+        router.push("/funcionario/funcionarios");
+      }, 1000);
 
     } catch (error) {
       setErro("Erro ao conectar com o servidor");
+      setIsSubmitting(false);
     }
   }
 
-  const inputClass =
-    "w-full px-4 py-3 border border-gray-300 rounded-lg text-sm text-gray-700 bg-white placeholder-gray-400 shadow-sm focus:border-blue-500 focus:ring-1 focus:ring-blue-500 outline-none";
-
-  const labelClass =
-    "block text-sm font-bold text-blue-500 mb-1";
+  // Estilos Padronizados
+  const inputClass = "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl px-4 py-3.5 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400";
+  const labelClass = "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
 
   return (
-    <div className="min-h-screen bg-gray-100 p-8">
+    <div className="space-y-8 animate-fade-in pb-12 max-w-4xl mx-auto mt-8">
 
-      <div className="flex items-center gap-3 mb-8">
-        <button
-          onClick={() => router.back()}
-          className="flex items-center justify-center w-10 h-10 rounded-full bg-white shadow hover:bg-gray-100 transition"
-        >
-          <ArrowLeftIcon className="w-5 h-5 text-blue-500" />
-        </button>
+      {/* HEADER */}
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => router.back()}
+            className="flex items-center justify-center w-11 h-11 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-cyan-600 transition-colors shadow-sm cursor-pointer"
+          >
+            <ArrowLeftIcon className="w-5 h-5" />
+          </button>
+          <div>
+            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+              Cadastro de Funcionário
+            </h1>
+            <p className="text-sm text-slate-500 font-medium mt-0.5">
+              Adicione um novo profissional ao sistema
+            </p>
+          </div>
+        </div>
+      </header>
 
-        <h1 className="text-2xl font-bold text-blue-500">
-          Cadastro de Funcionário
-        </h1>
-      </div>
-
+      {/* ALERTAS DE FEEDBACK */}
       {erro && (
-        <p className="text-red-500 mb-4">{erro}</p>
+        <div className="flex items-center gap-3 bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl text-sm animate-fade-in">
+          <ExclamationCircleIcon className="w-6 h-6 shrink-0" />
+          <p className="font-semibold">{erro}</p>
+        </div>
       )}
 
       {sucesso && (
-        <p className="text-green-500 mb-4">{sucesso}</p>
+        <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 text-emerald-600 p-4 rounded-2xl text-sm animate-fade-in">
+          <CheckCircleIcon className="w-6 h-6 shrink-0" />
+          <p className="font-semibold">{sucesso}</p>
+        </div>
       )}
 
-      <form onSubmit={handleSubmit}>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* FORMULÁRIO */}
+      <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
+        <form onSubmit={handleSubmit} className="space-y-6">
+          
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-          <div className="md:col-span-2">
-            <label className={labelClass}>
-              Nome completo *
-            </label>
+            <div className="md:col-span-2">
+              <label className={labelClass}>Nome completo *</label>
+              <input
+                data-cy="nome"
+                required
+                type="text"
+                value={nome}
+                onChange={(e) => setNome(e.target.value)}
+                className={inputClass}
+                placeholder="Ex: Ana Silva"
+              />
+            </div>
 
-            <input
-              data-cy="nome"
-              type="text"
-              value={nome}
-              onChange={(e) => setNome(e.target.value)}
-              className={inputClass}
-            />
+            <div>
+              <label className={labelClass}>Cargo *</label>
+              <input
+                data-cy="cargo"
+                required
+                type="text"
+                value={cargo}
+                onChange={(e) => setCargo(e.target.value)}
+                className={inputClass}
+                placeholder="Ex: Desenvolvedor Front-end"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Data de Admissão *</label>
+              <input
+                data-cy="data-admissao"
+                required
+                type="date"
+                value={dataAdmissao}
+                onChange={(e) => setDataAdmissao(e.target.value)}
+                className={inputClass}
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>E-mail Corporativo *</label>
+              <input
+                data-cy="email"
+                required
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                className={inputClass}
+                placeholder="ana.silva@empresa.com"
+              />
+            </div>
+
+            <div>
+              <label className={labelClass}>Senha Temporária *</label>
+              <input
+                data-cy="senha"
+                required
+                type="password"
+                value={senha}
+                onChange={(e) => setSenha(e.target.value)}
+                className={inputClass}
+                placeholder="Mínimo de 6 caracteres"
+              />
+            </div>
+
           </div>
 
-          <div>
-            <label className={labelClass}>
-              Cargo *
-            </label>
+          <div className="flex flex-col-reverse md:flex-row justify-end items-center gap-4 mt-10 pt-8 border-t border-slate-100">
+            <button
+              type="button"
+              onClick={() => router.push("/funcionario/funcionarios")}
+              className="w-full md:w-auto px-8 py-3.5 rounded-2xl text-sm font-bold text-slate-500 bg-white border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+            >
+              Cancelar
+            </button>
 
-            <input
-              data-cy="cargo"
-              type="text"
-              value={cargo}
-              onChange={(e) => setCargo(e.target.value)}
-              className={inputClass}
-            />
+            <button
+              data-cy="criar-funcionario"
+              type="submit"
+              disabled={isSubmitting}
+              className="w-full md:w-auto bg-cyan-600 text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-cyan-600/20 hover:bg-cyan-700 active:scale-95 transition-all disabled:opacity-70 disabled:cursor-not-allowed cursor-pointer"
+            >
+              {isSubmitting ? "Cadastrando..." : "Finalizar Cadastro"}
+            </button>
           </div>
-
-          <div>
-            <label className={labelClass}>
-              Data de Admissão *
-            </label>
-
-            <input
-              data-cy="data-admissao"
-              type="date"
-              value={dataAdmissao}
-              onChange={(e) => setDataAdmissao(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className={labelClass}>
-              E-mail *
-            </label>
-
-            <input
-              data-cy="email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-          <div className="md:col-span-2">
-            <label className={labelClass}>
-              Senha *
-            </label>
-
-            <input
-              data-cy="senha"
-              type="password"
-              value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className={inputClass}
-            />
-          </div>
-
-        </div>
-
-        <div className="flex justify-between mt-10">
-
-          <button
-            type="button"
-            onClick={() =>
-              router.push("/funcionario/funcionarios")
-            }
-            className="border border-red-400 text-red-500 px-6 py-2 rounded-lg hover:bg-red-50"
-          >
-            Cancelar
-          </button>
-
-          <button
-            data-cy="criar-funcionario"
-            type="submit"
-            className="bg-green-500 text-white px-8 py-2 rounded-lg hover:bg-green-600"
-          >
-            Finalizar
-          </button>
-
-        </div>
-      </form>
+          
+        </form>
+      </div>
     </div>
   );
 }
