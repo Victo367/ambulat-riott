@@ -5,8 +5,6 @@ import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
 import { ArrowLeftIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 
-const API_URL = "http://localhost:3333/conteudo"; // Ajuste para sua API
-
 type MateriaProps = {
   title: string;
   content: string;
@@ -23,7 +21,9 @@ export default function LerGuia() {
     async function buscarMateriaPorSlug() {
       try {
         // O seu backend precisa ter uma rota que busque pela slug!
-        const response = await fetch(`${API_URL}/slug/${params.slug}`);
+        const response = await fetch(
+          `/api/conteudo/slug/${encodeURIComponent(String(params.slug))}`
+        );
         if (response.ok) {
           const data = await response.json();
           setMateria(data);

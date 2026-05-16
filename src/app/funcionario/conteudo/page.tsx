@@ -9,9 +9,6 @@ import {
   ArrowUpTrayIcon 
 } from "@heroicons/react/24/outline";
 
-// URL DO SEU BACKEND (Ajuste para a sua rota real)
-const API_URL = "http://localhost:3333/conteudo"; 
-
 type MateriaProps = {
   id: string;
   title: string;
@@ -36,7 +33,7 @@ export default function GerenciarCards() {
   useEffect(() => {
     async function carregarConteudo() {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch("/api/conteudo");
         if (response.ok) {
           const data = await response.json();
           setMaterias(data);
@@ -72,7 +69,7 @@ export default function GerenciarCards() {
     }
 
     try {
-      const response = await fetch(API_URL, {
+      const response = await fetch("/api/conteudo", {
         method: "POST",
         // O navegador define o Content-Type automaticamente para multipart/form-data
         body: formData, 
@@ -103,7 +100,7 @@ export default function GerenciarCards() {
     if (!confirmou) return;
 
     try {
-      const response = await fetch(`${API_URL}/${id}`, {
+      const response = await fetch(`/api/conteudo/${id}`, {
         method: "DELETE",
       });
 

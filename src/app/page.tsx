@@ -11,9 +11,6 @@ import {
   SparklesIcon 
 } from "@heroicons/react/24/outline";
 
-// URL DO SEU BACKEND
-const API_URL = "http://localhost:3333/conteudo"; 
-
 type MateriaProps = {
   id: string;
   title: string;
@@ -33,7 +30,7 @@ export default function Home() {
   useEffect(() => {
     async function carregarArtigos() {
       try {
-        const response = await fetch(API_URL);
+        const response = await fetch("/api/conteudo");
         if (response.ok) {
           const data = await response.json();
           setArtigosDinamicos(data);
