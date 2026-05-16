@@ -7,6 +7,9 @@ const pacienteFields = [
   "identidade_genero",
   "data_nascimento",
   "telefone",
+  "terapia_hormonal",
+  "dosagem_hormonio",
+  "bloqueador_hormonal",
 ];
 const funcionarioFields = [...baseFields, "cargo", "data_admissao"];
 

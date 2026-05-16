@@ -14,6 +14,8 @@ type RegisterInput = {
   data_nascimento?: string | Date;
   telefone?: string;
   terapia_hormonal?: boolean;
+  dosagem_hormonio?: string;
+  bloqueador_hormonal?: string;
   cargo?: string;
   data_admissao?: string | Date;
 };
@@ -87,6 +89,8 @@ function buildPacientePayload(body: RegisterInput) {
     data_nascimento: new Date(body.data_nascimento as string | Date),
     telefone: sanitizeText(body.telefone),
     terapia_hormonal: Boolean(body.terapia_hormonal),
+    dosagem_hormonio: sanitizeText(body.dosagem_hormonio),
+    bloqueador_hormonal: sanitizeText(body.bloqueador_hormonal),
   };
 }
 
