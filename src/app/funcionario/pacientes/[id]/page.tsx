@@ -1,13 +1,22 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
-import { 
-  ArrowLeftIcon, 
-  PencilIcon, 
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
+import {
+  ArrowLeftIcon,
+  PencilIcon,
   ExclamationCircleIcon,
-  UserIcon
+  UserIcon,
+  CheckIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
+import {
+  TerapiaHormonalFields,
+  pacienteEmTerapia,
+  terapiaFromPaciente,
+  terapiaToApiPayload,
+  type TerapiaHormonalValues,
+} from "@/components/TerapiaHormonalFields";
 
 type Paciente = {
   _id: string;
@@ -19,6 +28,7 @@ type Paciente = {
   data_nascimento: string;
   telefone: string;
   status: string;
+  terapia_hormonal?: boolean;
   dosagem_hormonio?: string;
   bloqueador_hormonal?: string;
 };
@@ -31,14 +41,27 @@ function getIniciais(nome: string) {
   return (partes[0].charAt(0) + partes[partes.length - 1].charAt(0)).toUpperCase();
 }
 
-export default function VisualizarPaciente({ params }: { params: Promise<{ id: string }> }) {
-  const resolvedParams = use(params);
-  const id = resolvedParams.id;
+export default function VisualizarPaciente() {
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : "";
 
   const [paciente, setPaciente] = useState<Paciente | null>(null);
   const [loading, setLoading] = useState(true);
   const [erro, setErro] = useState("");
+  const [editandoTerapia, setEditandoTerapia] = useState(false);
+  const [terapiaForm, setTerapiaForm] = useState<TerapiaHormonalValues>({
+    terapia_hormonal: false,
+    dosagem_hormonio: "",
+    bloqueador_hormonal: "",
+  });
+  const [salvandoTerapia, setSalvandoTerapia] = useState(false);
+  const [msgTerapia, setMsgTerapia] = useState("");
   const router = useRouter();
+
+  const inputClassForm =
+    "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl px-4 py-3.5 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400";
+  const labelClassForm =
+    "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
 
   const formatarData = (dataISO: string) => {
     if (!dataISO) return "Não informada";
@@ -51,6 +74,12 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
   };
 
   useEffect(() => {
+    if (!id) {
+      setErro("Identificador do paciente inválido.");
+      setLoading(false);
+      return;
+    }
+
     async function fetchPaciente() {
       try {
         const res = await fetch(`/api/users/${id}`);
@@ -63,7 +92,8 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
         }
 
         setPaciente(data);
-      } catch (err) {
+        setTerapiaForm(terapiaFromPaciente(data));
+      } catch {
         setErro("Erro ao conectar com o servidor");
       } finally {
         setLoading(false);
@@ -72,6 +102,45 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
 
     fetchPaciente();
   }, [id]);
+
+  function iniciarEdicaoTerapia() {
+    if (!paciente) return;
+    setTerapiaForm(terapiaFromPaciente(paciente));
+    setMsgTerapia("");
+    setEditandoTerapia(true);
+  }
+
+  function cancelarEdicaoTerapia() {
+    if (paciente) setTerapiaForm(terapiaFromPaciente(paciente));
+    setMsgTerapia("");
+    setEditandoTerapia(false);
+  }
+
+  async function salvarTerapia() {
+    if (!paciente) return;
+    setSalvandoTerapia(true);
+    setMsgTerapia("");
+    try {
+      const res = await fetch(`/api/users/${id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(terapiaToApiPayload(terapiaForm)),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setMsgTerapia(data.error || "Erro ao salvar terapia hormonal");
+        return;
+      }
+      setPaciente(data);
+      setTerapiaForm(terapiaFromPaciente(data));
+      setEditandoTerapia(false);
+      setMsgTerapia("Terapia hormonal atualizada com sucesso.");
+    } catch {
+      setMsgTerapia("Erro ao conectar com o servidor");
+    } finally {
+      setSalvandoTerapia(false);
+    }
+  }
 
   // ESTADO DE ERRO INICIAL
   if (erro) {
@@ -105,12 +174,12 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
     );
   }
 
-  // Estilos padronizados
-  const labelClass = "block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1";
+  const labelDisplayClass =
+    "block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-1";
   const valueClass = "text-slate-900 text-base font-medium";
 
-  // Verificação se existe alguma informação de Terapia Hormonal
-  const possuiTerapiaHormonal = paciente.dosagem_hormonio || paciente.bloqueador_hormonal;
+  const possuiTerapiaHormonal = pacienteEmTerapia(paciente);
+  const pacienteId = String(paciente._id);
 
   return (
     <div className="space-y-8 animate-fade-in pb-12 max-w-4xl mx-auto mt-8">
@@ -166,58 +235,115 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
           {/* SESSÃO: DADOS PESSOAIS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-y-8 gap-x-6">
             <div className="col-span-1 sm:col-span-2 md:col-span-1">
-              <p className={labelClass}>Email</p>
+              <p className={labelDisplayClass}>Email</p>
               <p className={valueClass}>{paciente.email || "Não informado"}</p>
             </div>
 
             <div>
-              <p className={labelClass}>Telefone</p>
+              <p className={labelDisplayClass}>Telefone</p>
               <p className={valueClass}>{paciente.telefone || "Não informado"}</p>
             </div>
 
             <div>
-              <p className={labelClass}>Data de Nascimento</p>
+              <p className={labelDisplayClass}>Data de Nascimento</p>
               <p className={valueClass}>
                 {formatarData(paciente.data_nascimento)}
               </p>
             </div>
 
             <div>
-              <p className={labelClass}>Pronomes</p>
+              <p className={labelDisplayClass}>Pronomes</p>
               <p className={valueClass}>{paciente.pronomes || "Não informado"}</p>
             </div>
 
             <div className="col-span-1 sm:col-span-2">
-              <p className={labelClass}>Identidade de Gênero</p>
+              <p className={labelDisplayClass}>Identidade de Gênero</p>
               <p className={valueClass}>{paciente.identidade_genero || "Não informada"}</p>
             </div>
           </div>
 
-          {/* SESSÃO CONDICIONAL: TERAPIA HORMONAL */}
-          {possuiTerapiaHormonal && (
-            <div className="mt-10 pt-8 border-t border-slate-100">
-              <h3 className="text-lg font-extrabold text-slate-800 tracking-tight mb-6 ml-1">
-                Terapia Hormonal Atual
+          <div className="mt-10 pt-8 border-t border-slate-100">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6">
+              <h3 className="text-lg font-extrabold text-slate-800 tracking-tight ml-1">
+                Terapia Hormonal
               </h3>
+              {!editandoTerapia && (
+                <button
+                  type="button"
+                  data-cy="editar-terapia"
+                  onClick={iniciarEdicaoTerapia}
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-xl text-sm font-bold text-cyan-700 bg-cyan-50 hover:bg-cyan-100 border border-cyan-100 transition-colors"
+                >
+                  <PencilIcon className="w-4 h-4" />
+                  {possuiTerapiaHormonal ? "Editar terapia" : "Registrar terapia"}
+                </button>
+              )}
+            </div>
+
+            {msgTerapia && (
+              <p
+                className={`text-sm font-medium mb-4 ml-1 ${
+                  msgTerapia.includes("sucesso")
+                    ? "text-emerald-600"
+                    : "text-rose-600"
+                }`}
+              >
+                {msgTerapia}
+              </p>
+            )}
+
+            {editandoTerapia ? (
+              <div className="space-y-6">
+                <TerapiaHormonalFields
+                  values={terapiaForm}
+                  onChange={setTerapiaForm}
+                  inputClass={inputClassForm}
+                  labelClass={labelClassForm}
+                  title=""
+                />
+                <div className="flex flex-col sm:flex-row gap-3 justify-end">
+                  <button
+                    type="button"
+                    onClick={cancelarEdicaoTerapia}
+                    disabled={salvandoTerapia}
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50"
+                  >
+                    <XMarkIcon className="w-4 h-4" />
+                    Cancelar
+                  </button>
+                  <button
+                    type="button"
+                    data-cy="salvar-terapia"
+                    onClick={salvarTerapia}
+                    disabled={salvandoTerapia}
+                    className="flex items-center justify-center gap-2 px-5 py-3 rounded-2xl text-sm font-bold text-white bg-cyan-600 hover:bg-cyan-700 disabled:opacity-50"
+                  >
+                    <CheckIcon className="w-4 h-4" />
+                    {salvandoTerapia ? "Salvando..." : "Salvar terapia"}
+                  </button>
+                </div>
+              </div>
+            ) : possuiTerapiaHormonal ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-y-8 gap-x-6">
-                
                 {paciente.dosagem_hormonio && (
                   <div>
-                    <p className={labelClass}>Dosagem do Hormônio</p>
+                    <p className={labelDisplayClass}>Dosagem do Hormônio</p>
                     <p className={valueClass}>{paciente.dosagem_hormonio}</p>
                   </div>
                 )}
-
                 {paciente.bloqueador_hormonal && (
                   <div>
-                    <p className={labelClass}>Bloqueador Hormonal</p>
+                    <p className={labelDisplayClass}>Bloqueador Hormonal</p>
                     <p className={valueClass}>{paciente.bloqueador_hormonal}</p>
                   </div>
                 )}
-                
               </div>
-            </div>
-          )}
+            ) : (
+              <p className="text-sm text-slate-500 ml-1">
+                Nenhuma terapia hormonal registrada para este paciente.
+              </p>
+            )}
+          </div>
 
           {/* Botões de Ação */}
           <div className="flex flex-col-reverse md:flex-row justify-end items-center gap-4 mt-12 pt-8 border-t border-slate-100">
@@ -230,7 +356,9 @@ export default function VisualizarPaciente({ params }: { params: Promise<{ id: s
 
             <button
               data-cy="editar-paciente"
-              onClick={() => router.push(`/funcionario/pacientes/${paciente._id}/editar`)}
+              onClick={() =>
+                router.push(`/funcionario/pacientes/${pacienteId}/editar`)
+              }
               className="w-full md:w-auto flex items-center justify-center gap-2 bg-cyan-600 text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-cyan-600/20 hover:bg-cyan-700 active:scale-95 transition-all cursor-pointer"
             >
               <PencilIcon className="w-4 h-4" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { usePersistedState } from "@/hooks/usePersistedState";
 import { useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
@@ -22,8 +23,8 @@ export default function RemarcarConsulta() {
   };
 
   // Estados para a NOVA data e horário
-  const [novaData, setNovaData] = useState("");
-  const [novaHora, setNovaHora] = useState("");
+  const [novaData, setNovaData] = usePersistedState("novaData", "");
+  const [novaHora, setNovaHora] = usePersistedState("novaHora", "");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const horariosDisponiveis = ["08:00", "09:00", "10:30", "11:00", "14:00", "15:00", "16:30"];

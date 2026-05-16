@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
+import { usePersistedState } from "@/hooks/usePersistedState";
 import { 
   PlusIcon, 
   MagnifyingGlassIcon, 
@@ -28,7 +29,7 @@ function funcionarioCombinaBusca(f: Funcionario, busca: string) {
 
 export default function ListaFuncionarios() {
   const [funcionarios, setFuncionarios] = useState<Funcionario[]>([]);
-  const [busca, setBusca] = useState("");
+  const [busca, setBusca] = usePersistedState("busca", "");
   const [erro, setErro] = useState("");
   const router = useRouter();
 

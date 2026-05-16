@@ -1,7 +1,12 @@
 "use client";
 
 import { useEffect, useState, use } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import {
+  clearPageState,
+  hasPersistedPageState,
+  usePersistedState,
+} from "@/hooks/usePersistedState";
 import { 
   ArrowLeftIcon, 
   TrashIcon, 
@@ -16,13 +21,13 @@ export default function EditarFuncionario({
 }) {
   const { id } = use(params);
   const router = useRouter();
+  const pathname = usePathname();
 
-  // Estados do Formulário
-  const [nome, setNome] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [dataAdmissao, setDataAdmissao] = useState("");
-  const [email, setEmail] = useState("");
-  const [status, setStatus] = useState("");
+  const [nome, setNome] = usePersistedState("nome", "");
+  const [cargo, setCargo] = usePersistedState("cargo", "");
+  const [dataAdmissao, setDataAdmissao] = usePersistedState("dataAdmissao", "");
+  const [email, setEmail] = usePersistedState("email", "");
+  const [status, setStatus] = usePersistedState("status", "");
 
   // Estados da UI
   const [loading, setLoading] = useState(true);
@@ -44,11 +49,13 @@ export default function EditarFuncionario({
 
         const data = await res.json();
 
-        setNome(data.nome || "");
-        setCargo(data.cargo || "");
-        setDataAdmissao(data.data_admissao?.split("T")[0] || "");
-        setEmail(data.email || "");
-        setStatus(data.status || "");
+        if (!hasPersistedPageState(pathname)) {
+          setNome(data.nome || "");
+          setCargo(data.cargo || "");
+          setDataAdmissao(data.data_admissao?.split("T")[0] || "");
+          setEmail(data.email || "");
+          setStatus(data.status || "");
+        }
       } catch {
         setErro("Erro ao conectar com o servidor");
       } finally {
@@ -57,7 +64,7 @@ export default function EditarFuncionario({
     }
 
     fetchFuncionario();
-  }, [id]);
+  }, [id, pathname]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -86,6 +93,7 @@ export default function EditarFuncionario({
       }
 
       setSucesso("Informações atualizadas com sucesso!");
+      clearPageState(pathname);
 
       setTimeout(() => {
         router.push(`/funcionario/funcionarios/${id}`);

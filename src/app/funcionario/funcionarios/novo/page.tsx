@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
+import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
 import { 
   ArrowLeftIcon, 
   CheckCircleIcon, 
@@ -9,18 +10,19 @@ import {
 } from "@heroicons/react/24/outline";
 
 export default function CriarFuncionario() {
-  const [nome, setNome] = useState("");
-  const [cargo, setCargo] = useState("");
-  const [dataAdmissao, setDataAdmissao] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [status] = useState("ativo"); // Mantendo o default ativo
+  const [nome, setNome] = usePersistedState("nome", "");
+  const [cargo, setCargo] = usePersistedState("cargo", "");
+  const [dataAdmissao, setDataAdmissao] = usePersistedState("dataAdmissao", "");
+  const [email, setEmail] = usePersistedState("email", "");
+  const [senha, setSenha] = usePersistedState("senha", "");
+  const [status] = usePersistedState("status", "ativo");
 
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -61,8 +63,8 @@ export default function CriarFuncionario() {
       }
 
       setSucesso("Profissional cadastrado com sucesso!");
+      clearPageState(pathname);
 
-      // Pequeno delay para o usuário ver a mensagem de sucesso antes de redirecionar
       setTimeout(() => {
         router.push("/funcionario/funcionarios");
       }, 1000);

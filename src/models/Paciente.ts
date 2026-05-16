@@ -6,7 +6,9 @@ const PacienteSchema = new mongoose.Schema({
   identidade_genero: {type: String, required:true},
   data_nascimento: {type: Date, required: true},
   telefone: {type: String, required: true, trim:true},
-  terapia_hormonal: { type: Boolean, default: false }
+  terapia_hormonal: { type: Boolean, default: false },
+  dosagem_hormonio: { type: String, default: "" },
+  bloqueador_hormonal: { type: String, default: "" },
 })
 
 const Paciente =

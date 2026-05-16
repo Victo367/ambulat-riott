@@ -1,29 +1,45 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
-import { 
+import { usePathname, useRouter } from "next/navigation";
+import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
+import {
   ArrowLeftIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
+import {
+  TerapiaHormonalFields,
+  terapiaToApiPayload,
+  type TerapiaHormonalValues,
+} from "@/components/TerapiaHormonalFields";
 
 export default function CriarPaciente() {
   // Estados de Dados Pessoais
-  const [nome, setNome] = useState("");
-  const [dataNascimento, setDataNascimento] = useState("");
-  const [telefone, setTelefone] = useState("");
-  const [email, setEmail] = useState("");
-  const [senha, setSenha] = useState("");
-  const [pronomes, setPronomes] = useState("");
-  const [identidadeGenero, setIdentidadeGenero] = useState("");
-  const [endereco, setEndereco] = useState("");
-  const [cpf, setCpf] = useState("");
-  const [status, setStatus] = useState("ativo");
-
-  // Estados de Terapia Hormonal
-  const [dosagemHormonio, setDosagemHormonio] = useState("");
-  const [bloqueadorHormonal, setBloqueadorHormonal] = useState("");
+  const [nome, setNome] = usePersistedState("nome", "");
+  const [dataNascimento, setDataNascimento] = usePersistedState(
+    "dataNascimento",
+    ""
+  );
+  const [telefone, setTelefone] = usePersistedState("telefone", "");
+  const [email, setEmail] = usePersistedState("email", "");
+  const [senha, setSenha] = usePersistedState("senha", "");
+  const [pronomes, setPronomes] = usePersistedState("pronomes", "");
+  const [identidadeGenero, setIdentidadeGenero] = usePersistedState(
+    "identidadeGenero",
+    ""
+  );
+  const [endereco, setEndereco] = usePersistedState("endereco", "");
+  const [cpf, setCpf] = usePersistedState("cpf", "");
+  const [status, setStatus] = usePersistedState("status", "ativo");
+  const [terapia, setTerapia] = usePersistedState<TerapiaHormonalValues>(
+    "terapia",
+    {
+      terapia_hormonal: false,
+      dosagem_hormonio: "",
+      bloqueador_hormonal: "",
+    }
+  );
 
   // Estados de UI
   const [erro, setErro] = useState("");
@@ -31,6 +47,7 @@ export default function CriarPaciente() {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
+  const pathname = usePathname();
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -60,8 +77,7 @@ export default function CriarPaciente() {
           data_nascimento: dataNascimento,
           telefone,
           status,
-          dosagem_hormonio: dosagemHormonio, // Enviando para o backend
-          bloqueador_hormonal: bloqueadorHormonal, // Enviando para o backend
+          ...terapiaToApiPayload(terapia),
           // Caso a sua API espere endereço e CPF futuramente, eles já estão no state:
           // endereco,
           // cpf
@@ -77,8 +93,8 @@ export default function CriarPaciente() {
       }
 
       setSucesso("Paciente cadastrado com sucesso!");
-      
-      // Pequeno delay para exibir a mensagem de sucesso antes do redirecionamento
+      clearPageState(pathname);
+
       setTimeout(() => {
         router.push("/funcionario/pacientes");
       }, 1000);
@@ -245,33 +261,14 @@ export default function CriarPaciente() {
             </div>
           </div>
 
-          {/* SESSÃO: TERAPIA HORMONAL ATUAL */}
-          <div className="pt-8 border-t border-slate-100 space-y-6">
-            <h2 className="text-lg font-extrabold text-slate-800 tracking-tight ml-1">Terapia Hormonal Atual (Opcional)</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className={labelClass}>Dosagem do Hormônio</label>
-                <input 
-                  data-cy="dosagem-hormonio" 
-                  value={dosagemHormonio} 
-                  onChange={(e) => setDosagemHormonio(e.target.value)}
-                  placeholder="Ex: 2mg Valerato de Estradiol / dia" 
-                  className={inputClass} 
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Bloqueador Hormonal</label>
-                <input 
-                  data-cy="bloqueador-hormonal" 
-                  value={bloqueadorHormonal} 
-                  onChange={(e) => setBloqueadorHormonal(e.target.value)}
-                  placeholder="Ex: 50mg Espironolactona / dia" 
-                  className={inputClass} 
-                />
-              </div>
-            </div>
+          <div className="pt-8 border-t border-slate-100">
+            <TerapiaHormonalFields
+              values={terapia}
+              onChange={setTerapia}
+              inputClass={inputClass}
+              labelClass={labelClass}
+              title="Terapia Hormonal"
+            />
           </div>
 
           {/* BOTÕES DE AÇÃO */}
