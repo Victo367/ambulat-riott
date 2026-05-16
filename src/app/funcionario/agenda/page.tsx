@@ -31,8 +31,11 @@ function dataIsoLocal(date = new Date()) {
 const AGENDA_QUERY_KEY = "page-state:/funcionario/agenda:__query";
 
 function salvarUltimaVisaoAgenda(query: string) {
-  if (typeof window !== "undefined" && query) {
+  if (typeof window === "undefined") return;
+  if (query) {
     sessionStorage.setItem(AGENDA_QUERY_KEY, query);
+  } else {
+    sessionStorage.removeItem(AGENDA_QUERY_KEY);
   }
 }
 
@@ -122,19 +125,15 @@ function AgendaConteudo() {
   }
 
   function alterarVisao(todos: boolean) {
-    const params = new URLSearchParams(searchParams.toString());
+    const params = new URLSearchParams();
     if (todos) {
       params.set("todos", "1");
-      params.delete("data");
     } else {
-      params.delete("todos");
-      if (!params.get("data")) {
-        params.delete("data");
-      }
+      params.set("data", hoje);
     }
     const query = params.toString();
     salvarUltimaVisaoAgenda(query);
-    router.push(query ? `/funcionario/agenda?${query}` : "/funcionario/agenda");
+    router.replace(`/funcionario/agenda?${query}`);
   }
 
   const totalAgendamentos = horarios.length;
