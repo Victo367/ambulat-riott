@@ -1,12 +1,7 @@
 "use client";
 
 import { Suspense, useCallback, useEffect, useState } from "react";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import {
-  clearPageState,
-  hasPersistedPageState,
-  usePersistedState,
-} from "@/hooks/usePersistedState";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeftIcon,
   ChevronDownIcon,
@@ -32,13 +27,31 @@ interface AgendamentoForm {
   };
 }
 
+function formFromApi(dados: Record<string, unknown>): AgendamentoForm {
+  const terapia = dados.pacienteTerapia as
+    | { dosagem_hormonio?: string; bloqueador_hormonal?: string }
+    | undefined;
+
+  return {
+    pacienteNome: String(dados.paciente || ""),
+    medicoNome: String(dados.profissional || ""),
+    data: String(dados.data || "").split("T")[0],
+    horario: String(dados.hora || ""),
+    status: String(dados.statusValue || "confirmado"),
+    observacoes: String(dados.observacoes || ""),
+    pacienteTerapia: {
+      dosagem_hormonio: terapia?.dosagem_hormonio || "",
+      bloqueador_hormonal: terapia?.bloqueador_hormonal || "",
+    },
+  };
+}
+
 function EditarConteudo() {
   const router = useRouter();
-  const pathname = usePathname();
   const searchParams = useSearchParams();
   const id = searchParams.get("id");
 
-  const [form, setForm] = usePersistedState<AgendamentoForm | null>("form", null);
+  const [form, setForm] = useState<AgendamentoForm | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erro, setErro] = useState("");
@@ -46,34 +59,24 @@ function EditarConteudo() {
   const carregar = useCallback(async () => {
     if (!id) {
       setErro("Agendamento não informado.");
+      setForm(null);
       setLoading(false);
       return;
     }
     setLoading(true);
+    setErro("");
     try {
       const res = await fetch(`/api/agendamentos/${id}`);
       if (!res.ok) throw new Error("Não encontrado");
       const dados = await res.json();
-      if (!hasPersistedPageState(pathname)) {
-        setForm({
-          pacienteNome: dados.paciente,
-          medicoNome: dados.profissional,
-          data: dados.data,
-          horario: dados.hora,
-          status: dados.statusValue,
-          observacoes: dados.observacoes || "",
-          pacienteTerapia: dados.pacienteTerapia || {
-            dosagem_hormonio: "",
-            bloqueador_hormonal: "",
-          },
-        });
-      }
+      setForm(formFromApi(dados));
     } catch {
       setErro("Não foi possível carregar o agendamento.");
+      setForm(null);
     } finally {
       setLoading(false);
     }
-  }, [id, pathname]);
+  }, [id]);
 
   useEffect(() => {
     carregar();
@@ -109,7 +112,6 @@ function EditarConteudo() {
         throw new Error(err.error || "Erro ao salvar");
       }
       alert("Agendamento atualizado com sucesso!");
-      clearPageState(pathname);
       router.push(`/funcionario/agenda/detalhes?id=${id}`);
     } catch (error: unknown) {
       const msg = error instanceof Error ? error.message : "Erro ao salvar";
@@ -125,11 +127,14 @@ function EditarConteudo() {
     );
   }
 
-  if (erro || !form) {
+  if (!loading && (erro || !form)) {
     return (
       <section className="text-center py-20 space-y-4">
-        <p className="text-rose-600 font-medium">{erro}</p>
+        <p className="text-rose-600 font-medium">
+          {erro || "Agendamento não encontrado."}
+        </p>
         <button
+          type="button"
           onClick={() => router.push("/funcionario/agenda")}
           className="text-cyan-600 font-semibold hover:underline cursor-pointer"
         >
@@ -137,6 +142,10 @@ function EditarConteudo() {
         </button>
       </section>
     );
+  }
+
+  if (!form) {
+    return null;
   }
 
   const possuiTerapia =
