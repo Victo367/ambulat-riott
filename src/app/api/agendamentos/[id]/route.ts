@@ -70,17 +70,119 @@ export async function PATCH(
       return Response.json({ error: "Não autenticado" }, { status: 401 });
     }
 
+    const { id } = await params;
+    const body = await req.json();
+
+    if (loggedUser.tipo === "paciente") {
+      const authResult = await getAgendamentoAutorizado(
+        id,
+        loggedUser.id,
+        "paciente"
+      );
+      if ("error" in authResult) {
+        return Response.json(
+          { error: authResult.error },
+          { status: authResult.status }
+        );
+      }
+
+      const agendamento = await Agendamento.findById(id);
+      if (!agendamento) {
+        return Response.json(
+          { error: "Agendamento não encontrado" },
+          { status: 404 }
+        );
+      }
+
+      if (["cancelado", "realizado", "ausente"].includes(agendamento.status)) {
+        return Response.json(
+          { error: "Este agendamento não pode mais ser alterado" },
+          { status: 400 }
+        );
+      }
+
+      const usuarioNome = await getNomeUsuario(loggedUser.id);
+      const historico = [...(agendamento.historico || [])];
+
+      if (body.status !== undefined) {
+        const novoStatus = normalizeStatus(body.status);
+        if (novoStatus !== "cancelado") {
+          return Response.json(
+            { error: "Paciente só pode cancelar o agendamento" },
+            { status: 400 }
+          );
+        }
+        if (novoStatus !== agendamento.status) {
+          historico.push({
+            acao: "Consulta cancelada pelo paciente",
+            usuarioId: loggedUser.id,
+            usuarioNome,
+            data: new Date(),
+          });
+          agendamento.status = novoStatus;
+        }
+      } else {
+        if (body.data === undefined && body.hora === undefined) {
+          return Response.json(
+            { error: "Informe a nova data ou horário" },
+            { status: 400 }
+          );
+        }
+
+        const dataAntiga = agendamento.data;
+        const horaAntiga = agendamento.hora;
+
+        if (body.data !== undefined) {
+          agendamento.data = normalizarDataIso(body.data);
+        }
+        if (body.hora !== undefined) {
+          agendamento.hora = normalizarHora(body.hora);
+        }
+
+        historico.push({
+          acao: `Remarcado de ${dataAntiga} ${horaAntiga} para ${agendamento.data} ${agendamento.hora}`,
+          usuarioId: loggedUser.id,
+          usuarioNome,
+          data: new Date(),
+        });
+      }
+
+      const profissionalId = String(agendamento.profissional);
+      const conflito = await verificarConflitoHorario(
+        profissionalId,
+        agendamento.data,
+        agendamento.hora,
+        id
+      );
+      if (conflito && agendamento.status !== "cancelado") {
+        return Response.json(
+          { error: "Horário já ocupado para este profissional" },
+          { status: 409 }
+        );
+      }
+
+      agendamento.historico = historico;
+      await agendamento.save();
+
+      const populado = await findAgendamentoPopulado(id);
+      return Response.json(
+        serializeAgendamento(populado as Record<string, unknown>),
+        { status: 200 }
+      );
+    }
+
     if (loggedUser.tipo !== "funcionario") {
       return Response.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    const { id } = await params;
     const agendamento = await Agendamento.findById(id);
     if (!agendamento) {
-      return Response.json({ error: "Agendamento não encontrado" }, { status: 404 });
+      return Response.json(
+        { error: "Agendamento não encontrado" },
+        { status: 404 }
+      );
     }
 
-    const body = await req.json();
     const usuarioNome = await getNomeUsuario(loggedUser.id);
     const historico = [...(agendamento.historico || [])];
 
@@ -117,14 +219,11 @@ export async function PATCH(
       }
     }
 
-    const dataFinal = agendamento.data;
-    const horaFinal = agendamento.hora;
     const profissionalId = String(agendamento.profissional);
-
     const conflito = await verificarConflitoHorario(
       profissionalId,
-      dataFinal,
-      horaFinal,
+      agendamento.data,
+      agendamento.hora,
       id
     );
     if (conflito && agendamento.status !== "cancelado") {
