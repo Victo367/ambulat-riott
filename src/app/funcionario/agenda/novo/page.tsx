@@ -12,12 +12,18 @@ import {
   ChatBubbleLeftRightIcon,
   CheckIcon,
   BeakerIcon,
-  InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import {
+  TerapiaHormonalFields,
+  terapiaFromPaciente,
+  terapiaToApiPayload,
+  type TerapiaHormonalValues,
+} from "@/components/TerapiaHormonalFields";
 
 interface PacienteOption {
   _id: string;
   nome: string;
+  terapia_hormonal?: boolean;
   dosagem_hormonio?: string;
   bloqueador_hormonal?: string;
 }
@@ -55,12 +61,18 @@ export default function NovoAgendamento() {
   const [status, setStatus] = usePersistedState("status", "confirmado");
   const [tipo, setTipo] = usePersistedState("tipo", "Consulta Inicial");
   const [observacoes, setObservacoes] = usePersistedState("observacoes", "");
+  const [terapia, setTerapia] = useState<TerapiaHormonalValues>({
+    terapia_hormonal: false,
+    dosagem_hormonio: "",
+    bloqueador_hormonal: "",
+  });
 
   const pacienteSelecionado = pacientes.find((p) => p._id === pacienteId);
-  const possuiTerapia =
-    pacienteSelecionado &&
-    (pacienteSelecionado.dosagem_hormonio ||
-      pacienteSelecionado.bloqueador_hormonal);
+
+  const thInputClass =
+    "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl px-4 py-3.5 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400";
+  const thLabelClass =
+    "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
 
   const inputClass =
     "w-full pl-11 pr-4 py-3.5 bg-slate-50 border border-slate-200 rounded-2xl text-sm text-slate-700 placeholder-slate-400 focus:bg-white focus:border-cyan-600 focus:ring-4 focus:ring-cyan-600/10 outline-none transition-all appearance-none";
@@ -87,6 +99,18 @@ export default function NovoAgendamento() {
     carregarDados();
   }, []);
 
+  useEffect(() => {
+    if (!pacienteSelecionado) {
+      setTerapia({
+        terapia_hormonal: false,
+        dosagem_hormonio: "",
+        bloqueador_hormonal: "",
+      });
+      return;
+    }
+    setTerapia(terapiaFromPaciente(pacienteSelecionado));
+  }, [pacienteId, pacientes]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (!pacienteId || !profissionalId || !data || !hora) {
@@ -96,6 +120,18 @@ export default function NovoAgendamento() {
 
     setIsSubmitting(true);
     try {
+      const resTerapia = await fetch(`/api/users/${pacienteId}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(terapiaToApiPayload(terapia)),
+      });
+      if (!resTerapia.ok) {
+        const errTh = await resTerapia.json().catch(() => ({}));
+        throw new Error(
+          errTh.error || "Erro ao salvar dados de terapia hormonal"
+        );
+      }
+
       const res = await fetch("/api/agendamentos", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -199,37 +235,19 @@ export default function NovoAgendamento() {
             </div>
           </div>
 
-          {possuiTerapia && pacienteSelecionado && (
-            <div className="bg-cyan-50/50 border border-cyan-100 rounded-[20px] p-6 animate-fade-in flex gap-4">
-              <InformationCircleIcon className="w-6 h-6 text-cyan-600 shrink-0 mt-0.5" />
-              <div>
-                <h4 className="text-sm font-bold text-slate-800 mb-1">
-                  Terapia Hormonal em Andamento
-                </h4>
-                <p className="text-xs text-slate-500 mb-3">
-                  Informações de protocolo ativas no cadastro deste paciente:
-                </p>
-                <div className="flex flex-col sm:flex-row gap-y-2 gap-x-6">
-                  {pacienteSelecionado.dosagem_hormonio && (
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                      <span className="text-sm font-medium text-slate-700">
-                        <span className="text-slate-500 mr-1">Dosagem:</span>
-                        {pacienteSelecionado.dosagem_hormonio}
-                      </span>
-                    </div>
-                  )}
-                  {pacienteSelecionado.bloqueador_hormonal && (
-                    <div className="flex items-center gap-2">
-                      <span className="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
-                      <span className="text-sm font-medium text-slate-700">
-                        <span className="text-slate-500 mr-1">Bloqueador:</span>
-                        {pacienteSelecionado.bloqueador_hormonal}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              </div>
+          {pacienteId && (
+            <div className="pt-2 border-t border-slate-100">
+              <TerapiaHormonalFields
+                values={terapia}
+                onChange={setTerapia}
+                inputClass={thInputClass}
+                labelClass={thLabelClass}
+                title="Terapia Hormonal do Paciente"
+              />
+              <p className="text-xs text-slate-500 ml-1 mt-2">
+                Os dados de terapia são salvos no cadastro do paciente ao
+                confirmar o agendamento.
+              </p>
             </div>
           )}
 

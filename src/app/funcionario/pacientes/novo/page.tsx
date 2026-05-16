@@ -28,15 +28,6 @@ export default function CriarPaciente() {
   const [cpf, setCpf] = usePersistedState("cpf", "");
   const [status, setStatus] = usePersistedState("status", "ativo");
 
-  const [dosagemHormonio, setDosagemHormonio] = usePersistedState(
-    "dosagemHormonio",
-    ""
-  );
-  const [bloqueadorHormonal, setBloqueadorHormonal] = usePersistedState(
-    "bloqueadorHormonal",
-    ""
-  );
-
   // Estados de UI
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
@@ -73,8 +64,6 @@ export default function CriarPaciente() {
           data_nascimento: dataNascimento,
           telefone,
           status,
-          dosagem_hormonio: dosagemHormonio, // Enviando para o backend
-          bloqueador_hormonal: bloqueadorHormonal, // Enviando para o backend
           // Caso a sua API espere endereço e CPF futuramente, eles já estão no state:
           // endereco,
           // cpf
@@ -253,35 +242,6 @@ export default function CriarPaciente() {
                   onChange={(e) => setSenha(e.target.value)} 
                   className={inputClass} 
                   placeholder="Mínimo de 6 caracteres"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* SESSÃO: TERAPIA HORMONAL ATUAL */}
-          <div className="pt-8 border-t border-slate-100 space-y-6">
-            <h2 className="text-lg font-extrabold text-slate-800 tracking-tight ml-1">Terapia Hormonal Atual (Opcional)</h2>
-            
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
-                <label className={labelClass}>Dosagem do Hormônio</label>
-                <input 
-                  data-cy="dosagem-hormonio" 
-                  value={dosagemHormonio} 
-                  onChange={(e) => setDosagemHormonio(e.target.value)}
-                  placeholder="Ex: 2mg Valerato de Estradiol / dia" 
-                  className={inputClass} 
-                />
-              </div>
-
-              <div>
-                <label className={labelClass}>Bloqueador Hormonal</label>
-                <input 
-                  data-cy="bloqueador-hormonal" 
-                  value={bloqueadorHormonal} 
-                  onChange={(e) => setBloqueadorHormonal(e.target.value)}
-                  placeholder="Ex: 50mg Espironolactona / dia" 
-                  className={inputClass} 
                 />
               </div>
             </div>

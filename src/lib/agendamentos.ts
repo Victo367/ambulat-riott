@@ -61,6 +61,11 @@ export function normalizarDataIso(data: string) {
 
 function getTerapiaPaciente(paciente: Record<string, unknown> | null) {
   if (!paciente) return { dosagem_hormonio: "", bloqueador_hormonal: "" };
+  const emTerapia =
+    Boolean(paciente.terapia_hormonal) ||
+    Boolean(paciente.dosagem_hormonio) ||
+    Boolean(paciente.bloqueador_hormonal);
+  if (!emTerapia) return { dosagem_hormonio: "", bloqueador_hormonal: "" };
   return {
     dosagem_hormonio: String(paciente.dosagem_hormonio || ""),
     bloqueador_hormonal: String(paciente.bloqueador_hormonal || ""),
