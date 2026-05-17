@@ -16,6 +16,7 @@ import {
   formatDiaSemana,
   partesDataCard,
 } from "@/lib/agendamentos-utils";
+import InlineErrorState from "@/components/errors/InlineErrorState";
 
 type AgendamentoItem = {
   id: string;
@@ -155,16 +156,7 @@ export default function AgendaPaciente() {
 
   if (erro) {
     return (
-      <div className="text-center py-20 space-y-4 max-w-5xl mx-auto">
-        <p className="text-rose-600 font-medium">{erro}</p>
-        <button
-          type="button"
-          onClick={carregar}
-          className="text-cyan-600 font-semibold hover:underline"
-        >
-          Tentar novamente
-        </button>
-      </div>
+      <InlineErrorState message={erro} onRetry={carregar} className="max-w-5xl" />
     );
   }
 
