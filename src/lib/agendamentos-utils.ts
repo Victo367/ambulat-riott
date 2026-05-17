@@ -69,12 +69,92 @@ function getTerapiaPaciente(paciente: Record<string, unknown> | null) {
   };
 }
 
+export const ESPECIALIDADE_KEYS = [
+  "clinico",
+  "psicologia",
+  "hormonal",
+  "nutricao",
+] as const;
+
+export type EspecialidadeKey = (typeof ESPECIALIDADE_KEYS)[number];
+
 export const ESPECIALIDADE_CARGO: Record<string, string[]> = {
   clinico: ["clínico", "clinico", "geral"],
   psicologia: ["psicolog", "psicólog"],
   hormonal: ["endocrin", "hormon"],
   nutricao: ["nutric"],
 };
+
+/** Cargos administrativos/TI que não realizam atendimento clínico */
+export const CARGOS_EXCLUIDOS_ATENDIMENTO = [
+  "desenvolvedor",
+  "developer",
+  "dev ",
+  "programador",
+  "recepcion",
+  "recepção",
+  "recepcao",
+  "administr",
+  "administrativo",
+  "admin ",
+  "ti ",
+  "suporte",
+  "estagiár",
+  "estagiario",
+  "estágio",
+  "rh",
+  "recursos humanos",
+  "secretár",
+  "secretaria",
+  "auxiliar administr",
+];
+
+type FuncionarioFiltro = {
+  cargo?: string;
+  especialidades?: string[];
+};
+
+export function cargoPermiteAtendimentoClinico(cargo: string) {
+  const normalizado = cargo.toLowerCase().trim();
+  if (!normalizado) return false;
+  return !CARGOS_EXCLUIDOS_ATENDIMENTO.some((termo) =>
+    normalizado.includes(termo)
+  );
+}
+
+export function funcionarioAtendeEspecialidade(
+  funcionario: FuncionarioFiltro,
+  especialidade: string
+) {
+  const esp = especialidade.toLowerCase().trim();
+  if (!esp) return false;
+
+  const cargo = funcionario.cargo || "";
+  if (!cargoPermiteAtendimentoClinico(cargo)) return false;
+
+  const vinculos = funcionario.especialidades || [];
+  if (vinculos.some((item) => item.toLowerCase() === esp)) return true;
+
+  const termos = ESPECIALIDADE_CARGO[esp];
+  if (!termos?.length) return false;
+
+  const cargoLower = cargo.toLowerCase();
+  return termos.some((termo) => cargoLower.includes(termo));
+}
+
+export function filtrarFuncionariosPorEspecialidade<T extends FuncionarioFiltro>(
+  funcionarios: T[],
+  especialidade: string
+) {
+  const esp = especialidade.toLowerCase().trim();
+  const apenasClinicos = funcionarios.filter((f) =>
+    cargoPermiteAtendimentoClinico(f.cargo || "")
+  );
+
+  if (!esp) return apenasClinicos;
+
+  return apenasClinicos.filter((f) => funcionarioAtendeEspecialidade(f, esp));
+}
 
 export const ESPECIALIDADE_LABELS: Record<string, string> = {
   clinico: "Clínico Geral",

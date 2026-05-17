@@ -3,7 +3,11 @@ import mongoose from "mongoose";
 
 const FuncionarioSchema = new mongoose.Schema({
   cargo: { type: String, required: true },
-  data_admissao: { type: Date, required: true }
+  data_admissao: { type: Date, required: true },
+  especialidades: {
+    type: [String],
+    default: [],
+  },
 });
 
 // Verifica se o modelo já existe no cache do Mongoose

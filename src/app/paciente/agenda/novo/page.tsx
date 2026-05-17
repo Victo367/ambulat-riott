@@ -30,6 +30,7 @@ export default function NovoAgendamentoPaciente() {
   // Estados de controle da API
   const [profissionais, setProfissionais] = useState<Profissional[]>([]);
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
+  const [erroProfissionais, setErroProfissionais] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Mocks de horários disponíveis (Em um sistema completo, estes horários também viriam 
@@ -45,17 +46,32 @@ export default function NovoAgendamentoPaciente() {
 
     async function buscarProfissionais() {
       setLoadingProfissionais(true);
+      setErroProfissionais("");
       try {
-        // Faz a requisição para a sua API passando a especialidade selecionada
-        const res = await fetch(`/api/profissionais?especialidade=${especialidade}`);
-        
-        if (!res.ok) throw new Error("Erro ao buscar profissionais");
-        
+        const res = await fetch(
+          `/api/profissionais?especialidade=${encodeURIComponent(especialidade)}`
+        );
+
+        if (!res.ok) {
+          const data = await res.json().catch(() => ({}));
+          throw new Error(data.error || "Erro ao buscar profissionais");
+        }
+
         const dados: Profissional[] = await res.json();
         setProfissionais(dados);
+        if (dados.length === 0) {
+          setErroProfissionais(
+            "Nenhum profissional disponível para esta especialidade no momento."
+          );
+        }
       } catch (error) {
         console.error("Erro na requisição:", error);
-        alert("Não foi possível carregar a lista de médicos. Tente novamente.");
+        const msg =
+          error instanceof Error
+            ? error.message
+            : "Não foi possível carregar a lista de médicos.";
+        setErroProfissionais(msg);
+        setProfissionais([]);
       } finally {
         setLoadingProfissionais(false);
       }
@@ -192,6 +208,11 @@ export default function NovoAgendamentoPaciente() {
                   </option>
                 ))}
               </select>
+              {erroProfissionais && (
+                <p className="text-xs text-amber-700 font-medium mt-2 ml-1">
+                  {erroProfissionais}
+                </p>
+              )}
             </div>
 
             {/* Data */}

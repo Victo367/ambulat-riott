@@ -1,7 +1,7 @@
 import { connectDB } from "@/lib/db";
 import { getUserFromRequest } from "@/lib/getUserFromRequest";
 import Funcionario from "@/models/Funcionario";
-import { ESPECIALIDADE_CARGO } from "@/lib/agendamentos";
+import { filtrarFuncionariosPorEspecialidade } from "@/lib/agendamentos-utils";
 
 export async function GET(req: Request) {
   try {
@@ -13,18 +13,25 @@ export async function GET(req: Request) {
     }
 
     const { searchParams } = new URL(req.url);
-    const especialidade = searchParams.get("especialidade")?.toLowerCase() || "";
+    const especialidade = searchParams.get("especialidade")?.toLowerCase().trim() || "";
 
-    let funcionarios = await Funcionario.find({ status: "ativo" })
-      .select("nome cargo")
+    let funcionarios = await Funcionario.find({
+      status: { $ne: "inativo" },
+    })
+      .select("nome cargo especialidades")
+      .sort({ nome: 1 })
       .lean();
 
-    if (especialidade && ESPECIALIDADE_CARGO[especialidade]) {
-      const termos = ESPECIALIDADE_CARGO[especialidade];
-      funcionarios = funcionarios.filter((f) => {
-        const cargo = (f.cargo || "").toLowerCase();
-        return termos.some((termo) => cargo.includes(termo));
-      });
+    if (especialidade) {
+      funcionarios = filtrarFuncionariosPorEspecialidade(
+        funcionarios as Array<{
+          _id: unknown;
+          nome: string;
+          cargo?: string;
+          especialidades?: string[];
+        }>,
+        especialidade
+      );
     }
 
     const resultado = funcionarios.map((f) => ({

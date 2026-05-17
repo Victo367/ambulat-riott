@@ -50,13 +50,17 @@ export function usePersistedState<T>(
 ): [T, Dispatch<SetStateAction<T>>] {
   const pathname = usePathname();
 
-  const [state, setState] = useState<T>(() => {
-    if (typeof window === "undefined") return initialValue;
-    return readPersistedValue<T>(pathname, key) ?? initialValue;
-  });
+  const [state, setState] = useState<T>(initialValue);
+  const [hydrated, setHydrated] = useState(false);
 
   useEffect(() => {
-    if (typeof window === "undefined") return;
+    const stored = readPersistedValue<T>(pathname, key);
+    if (stored !== undefined) setState(stored);
+    setHydrated(true);
+  }, [pathname, key]);
+
+  useEffect(() => {
+    if (!hydrated || typeof window === "undefined") return;
     try {
       sessionStorage.setItem(
         buildStorageKey(pathname, key),
@@ -65,7 +69,7 @@ export function usePersistedState<T>(
     } catch {
       // quota ou serializacao invalida
     }
-  }, [pathname, key, state]);
+  }, [pathname, key, state, hydrated]);
 
   return [state, setState];
 }
