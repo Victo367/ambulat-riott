@@ -1,73 +1,81 @@
 "use client";
 
-import { useEffect, useState, use } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
+import { useParams, useRouter } from "next/navigation";
 import {
-  clearPageState,
-  hasPersistedPageState,
-  usePersistedState,
-} from "@/hooks/usePersistedState";
-import { 
-  ArrowLeftIcon, 
-  TrashIcon, 
-  CheckCircleIcon, 
-  ExclamationCircleIcon 
+  ArrowLeftIcon,
+  TrashIcon,
+  CheckCircleIcon,
+  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 
-export default function EditarFuncionario({
-  params,
-}: {
-  params: Promise<{ id: string }>;
-}) {
-  const { id } = use(params);
+export default function EditarFuncionario() {
+  const params = useParams();
+  const id = typeof params.id === "string" ? params.id : "";
   const router = useRouter();
-  const pathname = usePathname();
 
-  const [nome, setNome] = usePersistedState("nome", "");
-  const [cargo, setCargo] = usePersistedState("cargo", "");
-  const [dataAdmissao, setDataAdmissao] = usePersistedState("dataAdmissao", "");
-  const [email, setEmail] = usePersistedState("email", "");
-  const [status, setStatus] = usePersistedState("status", "");
+  const [nome, setNome] = useState("");
+  const [cargo, setCargo] = useState("");
+  const [dataAdmissao, setDataAdmissao] = useState("");
+  const [email, setEmail] = useState("");
+  const [status, setStatus] = useState("");
 
-  // Estados da UI
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
 
   useEffect(() => {
+    if (!id) {
+      setErro("Identificador do funcionário inválido.");
+      setLoading(false);
+      return;
+    }
+
+    let ativo = true;
+
     async function fetchFuncionario() {
+      setLoading(true);
+      setErro("");
       try {
         const res = await fetch(`/api/users/${id}`);
 
         if (!res.ok) {
           const errorData = await res.json().catch(() => ({}));
-          setErro(errorData.error || "Erro ao buscar dados do funcionário");
-          setLoading(false);
+          if (ativo) {
+            setErro(errorData.error || "Erro ao buscar dados do funcionário");
+          }
           return;
         }
 
         const data = await res.json();
+        if (!ativo) return;
 
-        if (!hasPersistedPageState(pathname)) {
-          setNome(data.nome || "");
-          setCargo(data.cargo || "");
-          setDataAdmissao(data.data_admissao?.split("T")[0] || "");
-          setEmail(data.email || "");
-          setStatus(data.status || "");
-        }
+        setNome(data.nome || "");
+        setCargo(data.cargo || "");
+        setDataAdmissao(
+          data.data_admissao ? String(data.data_admissao).split("T")[0] : ""
+        );
+        setEmail(data.email || "");
+        setStatus(data.status || "ativo");
       } catch {
-        setErro("Erro ao conectar com o servidor");
+        if (ativo) setErro("Erro ao conectar com o servidor");
       } finally {
-        setLoading(false);
+        if (ativo) setLoading(false);
       }
     }
 
     fetchFuncionario();
-  }, [id, pathname]);
+
+    return () => {
+      ativo = false;
+    };
+  }, [id]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    if (!id) return;
+
     setErro("");
     setSucesso("");
     setIsSubmitting(true);
@@ -93,7 +101,6 @@ export default function EditarFuncionario({
       }
 
       setSucesso("Informações atualizadas com sucesso!");
-      clearPageState(pathname);
 
       setTimeout(() => {
         router.push(`/funcionario/funcionarios/${id}`);
@@ -105,7 +112,9 @@ export default function EditarFuncionario({
   }
 
   async function handleDelete() {
-    const confirmDelete = window.confirm("Atenção: Deseja realmente deletar este funcionário? Esta ação não pode ser desfeita.");
+    const confirmDelete = window.confirm(
+      "Atenção: Deseja realmente deletar este funcionário? Esta ação não pode ser desfeita."
+    );
     if (!confirmDelete) return;
 
     try {
@@ -120,27 +129,28 @@ export default function EditarFuncionario({
     }
   }
 
-  // Estilos Padronizados
-  const inputClass = "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl px-4 py-3.5 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400";
-  const labelClass = "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
+  const inputClass =
+    "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl px-4 py-3.5 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400";
+  const labelClass =
+    "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
 
-  // ESTADO DE CARREGAMENTO INICIAL
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-4">
-        <div className="w-10 h-10 border-4 border-slate-200 border-t-cyan-600 rounded-full animate-spin"></div>
-        <p className="text-slate-500 font-medium animate-pulse">Carregando dados...</p>
+        <div className="w-10 h-10 border-4 border-slate-200 border-t-cyan-600 rounded-full animate-spin" />
+        <p className="text-slate-500 font-medium animate-pulse">
+          Carregando dados...
+        </p>
       </div>
     );
   }
 
   return (
     <div className="space-y-8 animate-fade-in pb-12 max-w-4xl mx-auto">
-      
-      {/* HEADER */}
       <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
         <div className="flex items-center gap-4">
           <button
+            type="button"
             onClick={() => router.back()}
             className="flex items-center justify-center w-11 h-11 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-cyan-600 transition-colors shadow-sm cursor-pointer"
           >
@@ -157,6 +167,7 @@ export default function EditarFuncionario({
         </div>
 
         <button
+          type="button"
           onClick={handleDelete}
           className="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-rose-600 bg-rose-50 hover:bg-rose-100 transition-colors cursor-pointer"
         >
@@ -165,7 +176,6 @@ export default function EditarFuncionario({
         </button>
       </header>
 
-      {/* ALERTAS DE FEEDBACK */}
       {erro && (
         <div className="flex items-center gap-3 bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl text-sm animate-fade-in">
           <ExclamationCircleIcon className="w-6 h-6 shrink-0" />
@@ -180,12 +190,9 @@ export default function EditarFuncionario({
         </div>
       )}
 
-      {/* FORMULÁRIO */}
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            
             <div className="md:col-span-2">
               <label className={labelClass}>Nome completo *</label>
               <input
@@ -231,12 +238,14 @@ export default function EditarFuncionario({
 
             <div>
               <label className={labelClass}>Status</label>
-              <input
+              <select
                 value={status}
                 onChange={(e) => setStatus(e.target.value)}
                 className={inputClass}
-                placeholder="Ex: Ativo, Férias, Inativo..."
-              />
+              >
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
             </div>
           </div>
 
@@ -257,7 +266,6 @@ export default function EditarFuncionario({
               {isSubmitting ? "Salvando..." : "Salvar Alterações"}
             </button>
           </div>
-          
         </form>
       </div>
     </div>

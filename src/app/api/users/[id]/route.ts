@@ -29,14 +29,20 @@ export async function GET(
       return Response.json({ error: "Acesso negado" }, { status: 403 });
     }
 
-    const user = await User.findById(id).select("-senha");
+    const base = await User.findById(id).select("-senha").lean();
 
-    if (!user) {
+    if (!base) {
       return Response.json(
         { error: "Usuário não encontrado" },
         { status: 404 }
       );
     }
+
+    const Model =
+      base.tipo_usuario === "paciente" ? Paciente : Funcionario;
+
+    const user =
+      (await Model.findById(id).select("-senha").lean()) ?? base;
 
     return Response.json(user);
 
