@@ -9,7 +9,8 @@ import {
   UserIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { formatDataCurta } from "@/lib/agendamentos-utils";
+import { formatDataCurta, lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
+import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
 
 type AgendamentoDetalhe = {
   id: string;
@@ -47,6 +48,8 @@ function RemarcarConsultaContent() {
   const [novaData, setNovaData] = useState("");
   const [novaHora, setNovaHora] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [erroRemarcar, setErroRemarcar] = useState("");
+  const [erroConflito, setErroConflito] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!agendamentoId) {
@@ -94,6 +97,8 @@ function RemarcarConsultaContent() {
       return;
     }
 
+    setErroRemarcar("");
+    setErroConflito(false);
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/agendamentos/${consulta.id}`, {
@@ -102,13 +107,26 @@ function RemarcarConsultaContent() {
         body: JSON.stringify({ data: novaData, hora: novaHora }),
       });
       if (!res.ok) {
-        const data = await res.json().catch(() => ({}));
-        throw new Error(data.error || "Erro ao remarcar consulta");
+        try {
+          const data = await res.json();
+          if (typeof data?.error === "string") {
+            setErroRemarcar(data.error);
+            setErroConflito(data?.code === "CONFLITO_HORARIO");
+            return;
+          }
+        } catch {
+          // ignora parse
+        }
+        setErroRemarcar(await lerMensagemErroAgendamento(res, "Erro ao remarcar consulta"));
+        setErroConflito(res.status === 409);
+        return;
       }
       router.push("/paciente/agenda");
-    } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : "Erro ao remarcar";
-      alert(msg);
+    } catch {
+      setErroRemarcar(
+        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
+      );
+      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -177,6 +195,13 @@ function RemarcarConsultaContent() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleUpdate} className="space-y-8">
+          {erroRemarcar && (
+            <AgendamentoErroAlert
+              titulo={erroConflito ? "Horário indisponível" : "Não foi possível remarcar"}
+              mensagem={erroRemarcar}
+              variante={erroConflito ? "conflito" : "erro"}
+            />
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="md:col-span-2">
               <label className={labelClass}>Especialidade</label>

@@ -13,6 +13,8 @@ import {
   BeakerIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
+import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
+import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
 
 interface AgendamentoForm {
   pacienteNome: string;
@@ -55,6 +57,8 @@ function EditarConteudo() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erro, setErro] = useState("");
+  const [erroSalvar, setErroSalvar] = useState("");
+  const [erroConflito, setErroConflito] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!id) {
@@ -95,6 +99,8 @@ function EditarConteudo() {
     e.preventDefault();
     if (!id || !form) return;
 
+    setErroSalvar("");
+    setErroConflito(false);
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/agendamentos/${id}`, {
@@ -108,14 +114,27 @@ function EditarConteudo() {
         }),
       });
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erro ao salvar");
+        try {
+          const data = await res.json();
+          if (typeof data?.error === "string") {
+            setErroSalvar(data.error);
+            setErroConflito(data?.code === "CONFLITO_HORARIO");
+            return;
+          }
+        } catch {
+          // ignora parse
+        }
+        setErroSalvar(await lerMensagemErroAgendamento(res, "Erro ao salvar"));
+        setErroConflito(res.status === 409);
+        return;
       }
       alert("Agendamento atualizado com sucesso!");
       router.push(`/funcionario/agenda/detalhes?id=${id}`);
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "Erro ao salvar";
-      alert(msg);
+    } catch {
+      setErroSalvar(
+        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
+      );
+      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -173,6 +192,12 @@ function EditarConteudo() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10 max-w-5xl mx-auto">
         <form className="space-y-8" onSubmit={handleSubmit}>
+          {erroSalvar && (
+            <AgendamentoErroAlert
+              mensagem={erroSalvar}
+              variante={erroConflito ? "conflito" : "erro"}
+            />
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1 opacity-80">
               <label className={labelClass}>Nome Paciente *</label>

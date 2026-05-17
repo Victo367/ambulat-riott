@@ -27,7 +27,10 @@ export async function findAgendamentoPopulado(id: string) {
     .lean();
 }
 
-export async function verificarConflitoHorario(
+export type { ConflitoHorarioDetalhes } from "@/lib/agendamentos-utils";
+export { montarMensagemConflitoHorario } from "@/lib/agendamentos-utils";
+
+export async function buscarConflitoHorario(
   profissionalId: string,
   data: string,
   hora: string,
@@ -41,8 +44,47 @@ export async function verificarConflitoHorario(
   };
   if (excludeId) query._id = { $ne: excludeId };
 
-  const existente = await Agendamento.findOne(query).lean();
-  return Boolean(existente);
+  const existente = await Agendamento.findOne(query)
+    .populate("paciente", "nome")
+    .populate("profissional", "nome cargo")
+    .lean();
+
+  if (!existente) return null;
+
+  const paciente = existente.paciente as { nome?: string } | null;
+  const profissional = existente.profissional as {
+    nome?: string;
+    cargo?: string;
+  } | null;
+
+  const profissionalNome = profissional?.nome
+    ? profissional.cargo
+      ? `${profissional.nome} (${profissional.cargo})`
+      : String(profissional.nome)
+    : "o profissional selecionado";
+
+  return {
+    data: String(existente.data),
+    hora: String(existente.hora),
+    profissionalNome,
+    pacienteNome: paciente?.nome ? String(paciente.nome) : "outro paciente",
+    status: String(existente.status),
+  };
+}
+
+export async function verificarConflitoHorario(
+  profissionalId: string,
+  data: string,
+  hora: string,
+  excludeId?: string
+) {
+  const conflito = await buscarConflitoHorario(
+    profissionalId,
+    data,
+    hora,
+    excludeId
+  );
+  return Boolean(conflito);
 }
 
 export async function getNomeUsuario(usuarioId: string) {

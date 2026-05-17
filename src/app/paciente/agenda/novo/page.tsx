@@ -8,8 +8,10 @@ import {
   CalendarDaysIcon,
   ClockIcon,
   UserIcon,
-  ChatBubbleBottomCenterTextIcon
+  ChatBubbleBottomCenterTextIcon,
 } from "@heroicons/react/24/outline";
+import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
+import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
 
 // Interface para tipar o médico que vem do banco de dados
 interface Profissional {
@@ -32,6 +34,8 @@ export default function NovoAgendamentoPaciente() {
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
   const [erroProfissionais, setErroProfissionais] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [erroAgendamento, setErroAgendamento] = useState("");
+  const [erroConflito, setErroConflito] = useState(false);
 
   // Mocks de horários disponíveis (Em um sistema completo, estes horários também viriam 
   // de uma API baseada na data e no médico selecionado)
@@ -96,6 +100,8 @@ export default function NovoAgendamentoPaciente() {
       return;
     }
 
+    setErroAgendamento("");
+    setErroConflito(false);
     setIsSubmitting(true);
 
     try {
@@ -106,7 +112,7 @@ export default function NovoAgendamentoPaciente() {
         },
         body: JSON.stringify({
           especialidade,
-          profissionalId: medico, // Envia o ID correto do médico para o relacionamento no banco
+          profissionalId: medico,
           data,
           hora,
           observacoes,
@@ -114,17 +120,30 @@ export default function NovoAgendamentoPaciente() {
       });
 
       if (!res.ok) {
-        throw new Error("Erro ao salvar agendamento");
+        try {
+          const data = await res.json();
+          if (typeof data?.error === "string") {
+            setErroAgendamento(data.error);
+            setErroConflito(data?.code === "CONFLITO_HORARIO");
+            return;
+          }
+        } catch {
+          // ignora parse
+        }
+        setErroAgendamento(await lerMensagemErroAgendamento(res));
+        setErroConflito(res.status === 409);
+        return;
       }
 
       alert("Consulta agendada com sucesso!");
       clearPageState(pathname);
       router.push("/paciente/agenda");
       router.refresh();
-
-    } catch (error) {
-      console.error(error);
-      alert("Erro ao conectar com o servidor. Tente novamente.");
+    } catch {
+      setErroAgendamento(
+        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
+      );
+      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -158,7 +177,13 @@ export default function NovoAgendamentoPaciente() {
       {/* FORMULÁRIO */}
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleSubmit} className="space-y-8">
-          
+          {erroAgendamento && (
+            <AgendamentoErroAlert
+              mensagem={erroAgendamento}
+              variante={erroConflito ? "conflito" : "erro"}
+            />
+          )}
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             
             {/* Especialidade */}

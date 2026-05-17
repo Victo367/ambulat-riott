@@ -5,11 +5,28 @@ import {
   serializeAgendamento,
   normalizeStatus,
   findAgendamentoPopulado,
-  verificarConflitoHorario,
+  buscarConflitoHorario,
+  montarMensagemConflitoHorario,
   getNomeUsuario,
   normalizarHora,
   normalizarDataIso,
 } from "@/lib/agendamentos";
+
+function respostaConflitoHorario(
+  conflito: NonNullable<Awaited<ReturnType<typeof buscarConflitoHorario>>>,
+  tipoUsuario: string
+) {
+  return Response.json(
+    {
+      error: montarMensagemConflitoHorario(conflito, {
+        omitirNomePaciente: tipoUsuario === "paciente",
+      }),
+      code: "CONFLITO_HORARIO",
+      conflito,
+    },
+    { status: 409 }
+  );
+}
 
 async function getAgendamentoAutorizado(id: string, userId: string, tipo: string) {
   const agendamento = await findAgendamentoPopulado(id);
@@ -148,17 +165,14 @@ export async function PATCH(
       }
 
       const profissionalId = String(agendamento.profissional);
-      const conflito = await verificarConflitoHorario(
+      const conflito = await buscarConflitoHorario(
         profissionalId,
         agendamento.data,
         agendamento.hora,
         id
       );
       if (conflito && agendamento.status !== "cancelado") {
-        return Response.json(
-          { error: "Horário já ocupado para este profissional" },
-          { status: 409 }
-        );
+        return respostaConflitoHorario(conflito, loggedUser.tipo);
       }
 
       agendamento.historico = historico;
@@ -220,17 +234,14 @@ export async function PATCH(
     }
 
     const profissionalId = String(agendamento.profissional);
-    const conflito = await verificarConflitoHorario(
+    const conflito = await buscarConflitoHorario(
       profissionalId,
       agendamento.data,
       agendamento.hora,
       id
     );
     if (conflito && agendamento.status !== "cancelado") {
-      return Response.json(
-        { error: "Horário já ocupado para este profissional" },
-        { status: 409 }
-      );
+      return respostaConflitoHorario(conflito, loggedUser.tipo);
     }
 
     agendamento.historico = historico;

@@ -13,6 +13,8 @@ import {
   CheckIcon,
   BeakerIcon,
 } from "@heroicons/react/24/outline";
+import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
+import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
 
 interface PacienteOption {
   _id: string;
@@ -41,6 +43,8 @@ export default function NovoAgendamento() {
   const [funcionarios, setFuncionarios] = useState<FuncionarioOption[]>([]);
   const [loadingDados, setLoadingDados] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [erroAgendamento, setErroAgendamento] = useState("");
+  const [erroConflito, setErroConflito] = useState(false);
 
   const [pacienteId, setPacienteId] = usePersistedState("pacienteId", "");
   const [profissionalId, setProfissionalId] = usePersistedState(
@@ -85,6 +89,8 @@ export default function NovoAgendamento() {
       return;
     }
 
+    setErroAgendamento("");
+    setErroConflito(false);
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/agendamentos", {
@@ -101,16 +107,31 @@ export default function NovoAgendamento() {
         }),
       });
       if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || "Erro ao agendar");
+        let code = "";
+        try {
+          const data = await res.json();
+          code = typeof data?.code === "string" ? data.code : "";
+          if (typeof data?.error === "string") {
+            setErroAgendamento(data.error);
+            setErroConflito(code === "CONFLITO_HORARIO");
+            return;
+          }
+        } catch {
+          // ignora parse
+        }
+        setErroAgendamento(await lerMensagemErroAgendamento(res));
+        setErroConflito(res.status === 409);
+        return;
       }
       alert("Agendamento criado com sucesso!");
       clearPageState(pathname);
       router.push(`/funcionario/agenda?data=${data}`);
       router.refresh();
-    } catch (error: unknown) {
-      const msg = error instanceof Error ? error.message : "Erro ao agendar";
-      alert(msg);
+    } catch {
+      setErroAgendamento(
+        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
+      );
+      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -138,6 +159,12 @@ export default function NovoAgendamento() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10 max-w-5xl mx-auto">
         <form className="space-y-8" onSubmit={handleSubmit}>
+          {erroAgendamento && (
+            <AgendamentoErroAlert
+              mensagem={erroAgendamento}
+              variante={erroConflito ? "conflito" : "erro"}
+            />
+          )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1">
               <label className={labelClass}>Paciente Atendido *</label>

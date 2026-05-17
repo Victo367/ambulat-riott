@@ -28,6 +28,63 @@ export function normalizeStatus(status: unknown): StatusAgendamento | null {
     : null;
 }
 
+export type ConflitoHorarioDetalhes = {
+  data: string;
+  hora: string;
+  profissionalNome: string;
+  pacienteNome: string;
+  status: string;
+};
+
+export function montarMensagemConflitoHorario(
+  info: ConflitoHorarioDetalhes,
+  opcoes?: { omitirNomePaciente?: boolean }
+) {
+  const dataFmt = formatDataExibicao(info.data);
+  const statusFmt = formatStatusLabel(info.status);
+
+  if (opcoes?.omitirNomePaciente) {
+    return (
+      `Este horário não está disponível. O(a) profissional ${info.profissionalNome} já possui ` +
+      `um atendimento agendado em ${dataFmt} às ${info.hora} (situação: ${statusFmt}). ` +
+      `Por favor, escolha outra data ou outro horário.`
+    );
+  }
+
+  return (
+    `Este horário já está ocupado. Em ${dataFmt} às ${info.hora}, o(a) profissional ` +
+    `${info.profissionalNome} já atende ${info.pacienteNome} (status: ${statusFmt}). ` +
+    `Para marcar uma nova consulta, selecione outro horário, outra data ou outro profissional.`
+  );
+}
+
+export async function lerMensagemErroAgendamento(
+  res: Response,
+  fallback = "Não foi possível concluir o agendamento."
+): Promise<string> {
+  try {
+    const data = await res.json();
+    if (typeof data?.error === "string" && data.error.trim()) {
+      return data.error;
+    }
+  } catch {
+    // corpo vazio ou não JSON
+  }
+
+  if (res.status === 409) {
+    return (
+      "Este horário já está reservado para o profissional escolhido. " +
+      "Selecione outra data ou outro horário."
+    );
+  }
+  if (res.status === 401) return "Sua sessão expirou. Faça login novamente.";
+  if (res.status === 403) return "Você não tem permissão para esta ação.";
+  if (res.status === 404) return "Paciente ou profissional não encontrado.";
+  if (res.status >= 500) return "Erro no servidor. Tente novamente em instantes.";
+
+  return fallback;
+}
+
 export function formatDataExibicao(dataIso: string) {
   const [year, month, day] = dataIso.split("-").map(Number);
   const date = new Date(year, month - 1, day);

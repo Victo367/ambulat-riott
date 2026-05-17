@@ -9,7 +9,8 @@ import {
   hojeIso,
   normalizarHora,
   normalizarDataIso,
-  verificarConflitoHorario,
+  buscarConflitoHorario,
+  montarMensagemConflitoHorario,
   getNomeUsuario,
 } from "@/lib/agendamentos";
 
@@ -101,14 +102,16 @@ export async function POST(req: Request) {
       );
     }
 
-    const conflito = await verificarConflitoHorario(
-      profissionalId,
-      data,
-      hora
-    );
+    const conflito = await buscarConflitoHorario(profissionalId, data, hora);
     if (conflito) {
       return Response.json(
-        { error: "Horário já ocupado para este profissional" },
+        {
+          error: montarMensagemConflitoHorario(conflito, {
+            omitirNomePaciente: loggedUser.tipo === "paciente",
+          }),
+          code: "CONFLITO_HORARIO",
+          conflito,
+        },
         { status: 409 }
       );
     }
