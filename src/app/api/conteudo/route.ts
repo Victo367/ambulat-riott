@@ -2,18 +2,23 @@ import { connectDB } from "@/lib/db";
 import { getUserFromRequest } from "@/lib/getUserFromRequest";
 import Conteudo from "@/models/Conteudo";
 import { serializeConteudo } from "@/lib/conteudo-utils";
-import { gerarSlugUnico, salvarImagemConteudo } from "@/lib/conteudo-server";
+import {
+  ensureConteudoPadrao,
+  gerarSlugUnico,
+  ordenarConteudoHome,
+  salvarImagemConteudo,
+} from "@/lib/conteudo-server";
 
 export async function GET() {
   try {
     await connectDB();
+    await ensureConteudoPadrao();
 
-    const itens = await Conteudo.find().sort({ createdAt: -1 }).lean();
+    const itens = await Conteudo.find().lean();
 
-    return Response.json(
-      itens.map((item) => serializeConteudo(item as Record<string, unknown>)),
-      { status: 200 }
-    );
+    return Response.json(ordenarConteudoHome(itens as Record<string, unknown>[]), {
+      status: 200,
+    });
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : "Erro interno";
     return Response.json({ error: message }, { status: 500 });

@@ -1,6 +1,7 @@
 import { connectDB } from "@/lib/db";
 import Conteudo from "@/models/Conteudo";
 import { serializeConteudo } from "@/lib/conteudo-utils";
+import { ensureConteudoPadrao } from "@/lib/conteudo-server";
 
 export async function GET(
   _req: Request,
@@ -8,6 +9,7 @@ export async function GET(
 ) {
   try {
     await connectDB();
+    await ensureConteudoPadrao();
 
     const { slug } = await params;
     const item = await Conteudo.findOne({ slug }).lean();
