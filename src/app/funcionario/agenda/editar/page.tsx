@@ -7,18 +7,18 @@ import {
   ChevronDownIcon,
   UserIcon,
   CalendarIcon,
-  ClockIcon,
   ChatBubbleLeftRightIcon,
   CheckIcon,
   BeakerIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
+import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
 import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
 
 interface AgendamentoForm {
   pacienteNome: string;
   medicoNome: string;
+  profissionalId: string;
   data: string;
   horario: string;
   status: string;
@@ -37,6 +37,7 @@ function formFromApi(dados: Record<string, unknown>): AgendamentoForm {
   return {
     pacienteNome: String(dados.paciente || ""),
     medicoNome: String(dados.profissional || ""),
+    profissionalId: String(dados.profissionalId || ""),
     data: String(dados.data || "").split("T")[0],
     horario: String(dados.hora || ""),
     status: String(dados.statusValue || "confirmado"),
@@ -58,7 +59,6 @@ function EditarConteudo() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erro, setErro] = useState("");
   const [erroSalvar, setErroSalvar] = useState("");
-  const [erroConflito, setErroConflito] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!id) {
@@ -100,7 +100,6 @@ function EditarConteudo() {
     if (!id || !form) return;
 
     setErroSalvar("");
-    setErroConflito(false);
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/agendamentos/${id}`, {
@@ -114,18 +113,7 @@ function EditarConteudo() {
         }),
       });
       if (!res.ok) {
-        try {
-          const data = await res.json();
-          if (typeof data?.error === "string") {
-            setErroSalvar(data.error);
-            setErroConflito(data?.code === "CONFLITO_HORARIO");
-            return;
-          }
-        } catch {
-          // ignora parse
-        }
         setErroSalvar(await lerMensagemErroAgendamento(res, "Erro ao salvar"));
-        setErroConflito(res.status === 409);
         return;
       }
       alert("Agendamento atualizado com sucesso!");
@@ -134,7 +122,6 @@ function EditarConteudo() {
       setErroSalvar(
         "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
       );
-      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -193,10 +180,9 @@ function EditarConteudo() {
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10 max-w-5xl mx-auto">
         <form className="space-y-8" onSubmit={handleSubmit}>
           {erroSalvar && (
-            <AgendamentoErroAlert
-              mensagem={erroSalvar}
-              variante={erroConflito ? "conflito" : "erro"}
-            />
+            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
+              {erroSalvar}
+            </p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1 opacity-80">
@@ -249,7 +235,7 @@ function EditarConteudo() {
             </div>
           )}
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1">
               <label className={labelClass}>Data *</label>
               <div className="relative group">
@@ -257,20 +243,9 @@ function EditarConteudo() {
                 <input
                   type="date"
                   value={form.data}
-                  onChange={(e) => setForm({ ...form, data: e.target.value })}
-                  className={inputClass}
-                  required
-                />
-              </div>
-            </div>
-            <div className="space-y-1">
-              <label className={labelClass}>Horário *</label>
-              <div className="relative group">
-                <ClockIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-cyan-600 transition-colors" />
-                <input
-                  type="time"
-                  value={form.horario}
-                  onChange={(e) => setForm({ ...form, horario: e.target.value })}
+                  onChange={(e) =>
+                    setForm({ ...form, data: e.target.value, horario: "" })
+                  }
                   className={inputClass}
                   required
                 />
@@ -295,6 +270,15 @@ function EditarConteudo() {
             </div>
           </div>
 
+          <HorariosDisponiveisPicker
+            profissionalId={form.profissionalId}
+            data={form.data}
+            value={form.horario}
+            onChange={(horario) => setForm({ ...form, horario })}
+            excludeAgendamentoId={id ?? undefined}
+            labelClass={`${labelClass} flex items-center gap-2`}
+          />
+
           <div className="space-y-1">
             <label className={labelClass}>Observações</label>
             <div className="relative group">
@@ -318,7 +302,7 @@ function EditarConteudo() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !form.horario}
               className="w-full md:w-auto bg-cyan-600 text-white px-12 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-cyan-600/20 hover:bg-cyan-700 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <CheckIcon className="w-5 h-5" />

@@ -306,68 +306,92 @@ function AgendaConteudo() {
                 : "Nenhum agendamento nesta data."}
           </p>
         ) : (
-          <section className="overflow-x-auto">
-            <table className="w-full text-sm text-left">
-              <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
-                <tr>
-                  {verTodos && <th className="px-8 py-4">Data</th>}
-                  <th className="px-8 py-4">Horario</th>
-                  <th className="px-8 py-4">Paciente</th>
-                  <th className="px-8 py-4">Procedimento / Tipo</th>
-                  <th className="px-8 py-4">Status</th>
-                  <th className="px-8 py-4 text-right">Acoes</th>
+          <section className="overflow-hidden">
+          <table className="w-full text-sm text-left table-auto">
+            <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest hidden md:table-header-group">
+              <tr>
+                {verTodos && <th className="px-4 lg:px-8 py-4">Data</th>}
+                <th className="px-4 lg:px-8 py-4">Horário</th>
+                <th className="px-4 lg:px-8 py-4">Paciente</th>
+                <th className="px-4 lg:px-8 py-4">Procedimento / Tipo</th>
+                <th className="px-4 lg:px-8 py-4">Status</th>
+                <th className="px-4 lg:px-8 py-4 text-right">Ações</th>
+              </tr>
+            </thead>
+        
+            <tbody className="divide-y divide-slate-100 block md:table-row-group">
+              {horarios.map((item) => (
+                <tr
+                  key={item.id}
+                  className="block md:table-row p-4 md:p-0 hover:bg-slate-50/80 transition-colors duration-150 group"
+                >
+                  {verTodos && (
+                    <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5">
+                      <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                        Data
+                      </div>
+        
+                      <span className="text-sm font-semibold text-slate-700 break-words">
+                        {item.dataFormatada}
+                      </span>
+                    </td>
+                  )}
+        
+                  <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5">
+                    <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                      Horário
+                    </div>
+        
+                    <span className="font-mono text-sm font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md inline-block">
+                      {item.hora}
+                    </span>
+                  </td>
+        
+                  <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5">
+                    <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                      Paciente
+                    </div>
+        
+                    <span className="font-semibold text-slate-900 group-hover:text-cyan-700 transition-colors break-words">
+                      {item.paciente}
+                    </span>
+                  </td>
+        
+                  <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5 text-slate-500 font-medium">
+                    <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                      Procedimento
+                    </div>
+        
+                    <span className="break-words">{item.tipo}</span>
+                  </td>
+        
+                  <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5">
+                    <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                      Status
+                    </div>
+        
+                    <span
+                      className={`inline-flex items-center px-3 py-1 text-xs rounded-full font-bold border ${getStatusStyle(item.status)}`}
+                    >
+                      {item.status}
+                    </span>
+                  </td>
+        
+                  <td className="block md:table-cell px-4 lg:px-8 py-3 md:py-5 text-left md:text-right">
+                    <button
+                      onClick={() =>
+                        router.push(`/funcionario/agenda/detalhes?id=${item.id}`)
+                      }
+                      className="text-cyan-600 font-semibold hover:text-cyan-800 text-sm cursor-pointer hover:underline transition-all"
+                    >
+                      Detalhes
+                    </button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-100">
-                {horarios.map((item) => (
-                  <tr
-                    key={item.id}
-                    className="hover:bg-slate-50/80 transition-colors duration-150 group"
-                  >
-                    {verTodos && (
-                      <td className="px-8 py-5 whitespace-nowrap">
-                        <span className="text-sm font-semibold text-slate-700">
-                          {item.dataFormatada}
-                        </span>
-                      </td>
-                    )}
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <span className="font-mono text-sm font-semibold text-slate-700 bg-slate-100 px-2.5 py-1 rounded-md">
-                        {item.hora}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <span className="font-semibold text-slate-900 group-hover:text-cyan-700 transition-colors">
-                        {item.paciente}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 whitespace-nowrap text-slate-500 font-medium">
-                      {item.tipo}
-                    </td>
-                    <td className="px-8 py-5 whitespace-nowrap">
-                      <span
-                        className={`inline-flex items-center px-3 py-1 text-xs rounded-full font-bold border ${getStatusStyle(item.status)}`}
-                      >
-                        {item.status}
-                      </span>
-                    </td>
-                    <td className="px-8 py-5 whitespace-nowrap text-right">
-                      <button
-                        onClick={() =>
-                          router.push(
-                            `/funcionario/agenda/detalhes?id=${item.id}`
-                          )
-                        }
-                        className="text-cyan-600 font-semibold hover:text-cyan-800 text-sm cursor-pointer hover:underline transition-all"
-                      >
-                        Detalhes
-                      </button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </section>
+              ))}
+            </tbody>
+          </table>
+        </section>
         )}
       </section>
     </section>

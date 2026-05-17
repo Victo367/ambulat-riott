@@ -5,37 +5,21 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   ArrowLeftIcon,
   CalendarDaysIcon,
-  ClockIcon,
   UserIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import { formatDataCurta, lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
-import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
+import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
 
 type AgendamentoDetalhe = {
   id: string;
   data: string;
   hora: string;
   profissional: string;
+  profissionalId: string;
   especialidadeLabel: string;
   statusValue: string;
 };
-
-const HORARIOS_DISPONIVEIS = [
-  "08:00",
-  "09:00",
-  "09:30",
-  "10:00",
-  "10:30",
-  "11:00",
-  "13:30",
-  "14:00",
-  "14:30",
-  "15:00",
-  "15:30",
-  "16:00",
-  "16:30",
-];
 
 function RemarcarConsultaContent() {
   const router = useRouter();
@@ -49,7 +33,6 @@ function RemarcarConsultaContent() {
   const [novaHora, setNovaHora] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erroRemarcar, setErroRemarcar] = useState("");
-  const [erroConflito, setErroConflito] = useState(false);
 
   const carregar = useCallback(async () => {
     if (!agendamentoId) {
@@ -98,7 +81,6 @@ function RemarcarConsultaContent() {
     }
 
     setErroRemarcar("");
-    setErroConflito(false);
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/agendamentos/${consulta.id}`, {
@@ -107,18 +89,7 @@ function RemarcarConsultaContent() {
         body: JSON.stringify({ data: novaData, hora: novaHora }),
       });
       if (!res.ok) {
-        try {
-          const data = await res.json();
-          if (typeof data?.error === "string") {
-            setErroRemarcar(data.error);
-            setErroConflito(data?.code === "CONFLITO_HORARIO");
-            return;
-          }
-        } catch {
-          // ignora parse
-        }
         setErroRemarcar(await lerMensagemErroAgendamento(res, "Erro ao remarcar consulta"));
-        setErroConflito(res.status === 409);
         return;
       }
       router.push("/paciente/agenda");
@@ -126,7 +97,6 @@ function RemarcarConsultaContent() {
       setErroRemarcar(
         "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
       );
-      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -196,11 +166,9 @@ function RemarcarConsultaContent() {
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleUpdate} className="space-y-8">
           {erroRemarcar && (
-            <AgendamentoErroAlert
-              titulo={erroConflito ? "Horário indisponível" : "Não foi possível remarcar"}
-              mensagem={erroRemarcar}
-              variante={erroConflito ? "conflito" : "erro"}
-            />
+            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
+              {erroRemarcar}
+            </p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="md:col-span-2">
@@ -238,34 +206,14 @@ function RemarcarConsultaContent() {
             </div>
 
             <div className="md:col-span-2">
-              <label className={labelClass}>
-                <ClockIcon className="w-4 h-4 text-cyan-600" />
-                Selecione o Novo Horário *
-              </label>
-
-              {!novaData ? (
-                <div className="bg-slate-50 border border-slate-100 rounded-2xl p-6 text-center text-sm text-slate-500 font-medium">
-                  Escolha uma data para ver os horários disponíveis.
-                </div>
-              ) : (
-                <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
-                  {HORARIOS_DISPONIVEIS.map((h) => (
-                    <button
-                      key={h}
-                      type="button"
-                      onClick={() => setNovaHora(h)}
-                      className={`py-3 rounded-xl text-sm font-bold transition-all border cursor-pointer
-                        ${
-                          novaHora === h
-                            ? "bg-cyan-600 border-cyan-600 text-white shadow-md shadow-cyan-600/20"
-                            : "bg-white border-slate-200 text-slate-600 hover:border-cyan-400 hover:text-cyan-600"
-                        }`}
-                    >
-                      {h}
-                    </button>
-                  ))}
-                </div>
-              )}
+              <HorariosDisponiveisPicker
+                profissionalId={consulta.profissionalId}
+                data={novaData}
+                value={novaHora}
+                onChange={setNovaHora}
+                excludeAgendamentoId={consulta.id}
+                labelClass={labelClass}
+              />
               <p className="text-[10px] text-slate-400 mt-3 ml-1">
                 Horário anterior: {consulta.hora}
               </p>

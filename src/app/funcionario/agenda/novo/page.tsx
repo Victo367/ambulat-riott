@@ -8,12 +8,11 @@ import {
   ChevronDownIcon,
   UserIcon,
   CalendarIcon,
-  ClockIcon,
   ChatBubbleLeftRightIcon,
   CheckIcon,
   BeakerIcon,
 } from "@heroicons/react/24/outline";
-import AgendamentoErroAlert from "@/components/agendamento/AgendamentoErroAlert";
+import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
 import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
 
 interface PacienteOption {
@@ -44,7 +43,6 @@ export default function NovoAgendamento() {
   const [loadingDados, setLoadingDados] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erroAgendamento, setErroAgendamento] = useState("");
-  const [erroConflito, setErroConflito] = useState(false);
 
   const [pacienteId, setPacienteId] = usePersistedState("pacienteId", "");
   const [profissionalId, setProfissionalId] = usePersistedState(
@@ -90,7 +88,6 @@ export default function NovoAgendamento() {
     }
 
     setErroAgendamento("");
-    setErroConflito(false);
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/agendamentos", {
@@ -107,20 +104,7 @@ export default function NovoAgendamento() {
         }),
       });
       if (!res.ok) {
-        let code = "";
-        try {
-          const data = await res.json();
-          code = typeof data?.code === "string" ? data.code : "";
-          if (typeof data?.error === "string") {
-            setErroAgendamento(data.error);
-            setErroConflito(code === "CONFLITO_HORARIO");
-            return;
-          }
-        } catch {
-          // ignora parse
-        }
         setErroAgendamento(await lerMensagemErroAgendamento(res));
-        setErroConflito(res.status === 409);
         return;
       }
       alert("Agendamento criado com sucesso!");
@@ -131,7 +115,6 @@ export default function NovoAgendamento() {
       setErroAgendamento(
         "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
       );
-      setErroConflito(false);
     } finally {
       setIsSubmitting(false);
     }
@@ -160,10 +143,9 @@ export default function NovoAgendamento() {
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10 max-w-5xl mx-auto">
         <form className="space-y-8" onSubmit={handleSubmit}>
           {erroAgendamento && (
-            <AgendamentoErroAlert
-              mensagem={erroAgendamento}
-              variante={erroConflito ? "conflito" : "erro"}
-            />
+            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
+              {erroAgendamento}
+            </p>
           )}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1">
@@ -198,7 +180,10 @@ export default function NovoAgendamento() {
                   className={inputClass}
                   required
                   value={profissionalId}
-                  onChange={(e) => setProfissionalId(e.target.value)}
+                  onChange={(e) => {
+                    setProfissionalId(e.target.value);
+                    setHora("");
+                  }}
                   disabled={loadingDados}
                 >
                   <option value="">
@@ -217,7 +202,7 @@ export default function NovoAgendamento() {
             </div>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1">
               <label className={labelClass}>Data da Consulta *</label>
               <div className="relative group">
@@ -227,21 +212,11 @@ export default function NovoAgendamento() {
                   className={inputClass}
                   required
                   value={data}
-                  onChange={(e) => setData(e.target.value)}
-                />
-              </div>
-            </div>
-
-            <div className="space-y-1">
-              <label className={labelClass}>Horário *</label>
-              <div className="relative group">
-                <ClockIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-cyan-600 transition-colors" />
-                <input
-                  type="time"
-                  className={inputClass}
-                  required
-                  value={hora}
-                  onChange={(e) => setHora(e.target.value)}
+                  min={dataIsoLocal()}
+                  onChange={(e) => {
+                    setData(e.target.value);
+                    setHora("");
+                  }}
                 />
               </div>
             </div>
@@ -263,7 +238,7 @@ export default function NovoAgendamento() {
               </div>
             </div>
 
-            <div className="space-y-1 md:col-span-3">
+            <div className="space-y-1 md:col-span-2">
               <label className={labelClass}>Status Inicial</label>
               <div className="relative">
                 <select
@@ -279,6 +254,15 @@ export default function NovoAgendamento() {
             </div>
 
           </div>
+
+          <HorariosDisponiveisPicker
+            profissionalId={profissionalId}
+            data={data}
+            value={hora}
+            onChange={setHora}
+            labelClass={`${labelClass} flex items-center gap-2`}
+            aguardandoProfissional="Selecione o profissional para ver os horários."
+          />
 
           <div className="space-y-1">
             <label className={labelClass}>Observações Adicionais</label>
@@ -304,7 +288,7 @@ export default function NovoAgendamento() {
             </button>
             <button
               type="submit"
-              disabled={isSubmitting || loadingDados}
+              disabled={isSubmitting || loadingDados || !hora}
               className="w-full md:w-auto bg-cyan-600 text-white px-12 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-cyan-600/20 hover:bg-cyan-700 hover:shadow-cyan-600/30 transition-all active:scale-[0.98] flex items-center justify-center gap-2 cursor-pointer disabled:opacity-50"
             >
               <CheckIcon className="w-5 h-5" />
