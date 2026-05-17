@@ -15,8 +15,13 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Ambulatório — Pacientes",
-  description: "Cadastro de pacientes do ambulatório",
+  title: "Ambulatório TT — Portal de Saúde",
+  description: "Portal de saúde do Ambulatório TT Marcela Prado",
+  icons: {
+    icon: [{ url: "/logo.png", type: "image/png" }],
+    shortcut: "/logo.png",
+    apple: [{ url: "/logo.png", type: "image/png" }],
+  },
 };
 
 export default async function RootLayout({
