@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import {
   ArrowLeftIcon,
   PencilIcon,
+  PencilSquareIcon,
   ExclamationCircleIcon,
   UserIcon,
   CheckIcon,
@@ -185,8 +186,8 @@ export default function VisualizarPaciente() {
     <div className="space-y-8 animate-fade-in pb-12 max-w-4xl mx-auto mt-8">
 
       {/* HEADER DA PÁGINA */}
-      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-5 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
-        <div className="flex items-center gap-4">
+      <header className="flex items-center justify-between gap-5 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
+        <div className="flex items-center gap-5">
           <button
             onClick={() => router.push("/funcionario/pacientes")}
             className="flex items-center justify-center w-11 h-11 rounded-full border border-slate-200 bg-white hover:bg-slate-50 text-slate-500 hover:text-cyan-600 transition-colors shadow-sm cursor-pointer"
@@ -202,6 +203,15 @@ export default function VisualizarPaciente() {
             </p>
           </div>
         </div>
+
+        {/* Botão Editar no Header (Igual a Funcionário) */}
+        <button
+          onClick={() => router.push(`/funcionario/pacientes/${pacienteId}/editar`)}
+          className="hidden md:flex bg-cyan-50 text-cyan-600 px-5 py-2.5 rounded-xl text-sm font-bold hover:bg-cyan-100 transition-colors items-center gap-2 cursor-pointer"
+        >
+          <PencilSquareIcon className="w-5 h-5" />
+          Editar Paciente
+        </button>
       </header>
 
       {/* CARD DE DETALHES */}
@@ -345,23 +355,21 @@ export default function VisualizarPaciente() {
             )}
           </div>
 
-          {/* Botões de Ação */}
-          <div className="flex flex-col-reverse md:flex-row justify-end items-center gap-4 mt-12 pt-8 border-t border-slate-100">
+          {/* FOOTER DO CARD (Botões Mobile/Secundários) */}
+          <div className="flex flex-col-reverse md:flex-row items-center justify-between gap-4 mt-12 pt-8 border-t border-slate-100">
             <button
               onClick={() => router.push("/funcionario/pacientes")}
-              className="w-full md:w-auto px-8 py-3.5 rounded-2xl text-sm font-bold text-slate-600 bg-white border border-slate-200 hover:bg-slate-50 transition-colors cursor-pointer"
+              className="w-full md:w-auto px-6 py-3.5 text-sm font-bold text-slate-500 hover:bg-slate-50 rounded-2xl transition-colors cursor-pointer"
             >
-              Voltar à Lista
+              Voltar para a lista
             </button>
 
             <button
               data-cy="editar-paciente"
-              onClick={() =>
-                router.push(`/funcionario/pacientes/${pacienteId}/editar`)
-              }
-              className="w-full md:w-auto flex items-center justify-center gap-2 bg-cyan-600 text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-cyan-600/20 hover:bg-cyan-700 active:scale-95 transition-all cursor-pointer"
+              onClick={() => router.push(`/funcionario/pacientes/${pacienteId}/editar`)}
+              className="w-full md:w-auto md:hidden bg-cyan-600 text-white px-8 py-3.5 rounded-2xl text-sm font-bold shadow-lg shadow-cyan-600/20 hover:bg-cyan-700 active:scale-95 transition-all flex items-center justify-center gap-2 cursor-pointer"
             >
-              <PencilIcon className="w-4 h-4" />
+              <PencilSquareIcon className="w-5 h-5" />
               Editar Paciente
             </button>
           </div>
