@@ -181,68 +181,59 @@ function AgendaConteudo() {
           </section>
         </section>
 
-        <section className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 flex-wrap">
-          <section
-            className="flex rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-1"
-            role="tablist"
-            aria-label="Modo de visualizacao"
-          >
-            <button
-              type="button"
-              role="tab"
-              aria-selected={!verTodos}
-              onClick={() => alterarVisao(false)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
-                !verTodos
-                  ? "bg-white text-cyan-700 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
+        <section className="flex flex-col sm:flex-row sm:items-center gap-3 w-full lg:w-auto min-w-0">
+          <section className="flex items-center gap-3 flex-wrap sm:flex-nowrap min-w-0">
+            <section
+              className="flex shrink-0 rounded-xl border border-slate-200 overflow-hidden bg-slate-50 p-1"
+              role="tablist"
+              aria-label="Modo de visualizacao"
             >
-              Por dia
-            </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={verTodos}
-              onClick={() => alterarVisao(true)}
-              className={`px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer ${
-                verTodos
-                  ? "bg-white text-cyan-700 shadow-sm"
-                  : "text-slate-500 hover:text-slate-700"
-              }`}
-            >
-              Todos
-            </button>
-          </section>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={!verTodos}
+                onClick={() => alterarVisao(false)}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  !verTodos
+                    ? "bg-white text-cyan-700 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Por dia
+              </button>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={verTodos}
+                onClick={() => alterarVisao(true)}
+                className={`px-4 py-2 rounded-lg text-sm font-bold transition-all cursor-pointer whitespace-nowrap ${
+                  verTodos
+                    ? "bg-white text-cyan-700 shadow-sm"
+                    : "text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                Todos
+              </button>
+            </section>
 
-          {!verTodos && (
-            <>
-              <label className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm">
-                <span className="text-slate-500 font-semibold whitespace-nowrap">
-                  Ver dia:
-                </span>
+            {!verTodos && (
+              <label className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-4 py-2.5 text-sm shrink-0">
+                <CalendarDaysIcon className="w-4 h-4 text-slate-400 shrink-0" />
                 <input
                   type="date"
                   value={dataFiltro}
                   onChange={(e) => alterarData(e.target.value)}
                   className="bg-transparent text-slate-800 font-medium outline-none cursor-pointer"
+                  aria-label="Data da agenda"
                 />
               </label>
-              {!ehHoje && (
-                <button
-                  type="button"
-                  onClick={() => alterarData(hoje)}
-                  className="text-cyan-600 text-sm font-bold hover:underline cursor-pointer px-2"
-                >
-                  Voltar para hoje
-                </button>
-              )}
-            </>
-          )}
+            )}
+          </section>
+
           <button
             type="button"
             onClick={() => router.push("/funcionario/agenda/novo")}
-            className="bg-cyan-600 text-white px-5 py-3 rounded-xl text-sm font-semibold shadow-md shadow-cyan-600/20 hover:bg-cyan-700 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer"
+            className="shrink-0 w-full sm:w-auto sm:ml-auto bg-cyan-600 text-white px-5 py-3 rounded-xl text-sm font-semibold shadow-md shadow-cyan-600/20 hover:bg-cyan-700 transition-all active:scale-95 flex items-center justify-center gap-2 cursor-pointer whitespace-nowrap"
           >
             <PlusIcon className="w-5 h-5" />
             Novo Agendamento
@@ -319,9 +310,7 @@ function AgendaConteudo() {
             <table className="w-full text-sm text-left">
               <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
                 <tr>
-                  {verTodos && (
-                    <th className="px-8 py-4">Data</th>
-                  )}
+                  {verTodos && <th className="px-8 py-4">Data</th>}
                   <th className="px-8 py-4">Horario</th>
                   <th className="px-8 py-4">Paciente</th>
                   <th className="px-8 py-4">Procedimento / Tipo</th>
