@@ -44,10 +44,10 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex items-center justify-center min-h-[80vh] w-full">
+    <div className="flex items-center justify-center min-h-[calc(100vh-8rem)] sm:min-h-[80vh] w-full px-1">
       
       {/* Removido o transition-all do container principal */}
-      <div className="bg-white p-8 md:p-10 rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full max-w-md flex flex-col items-center">
+      <div className="bg-white p-6 sm:p-8 md:p-10 rounded-[24px] sm:rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.04)] border border-slate-100 w-full max-w-md flex flex-col items-center">
         
         {/* Ilustração / Logo do Login totalmente estática */}
         <div className="relative w-full flex justify-center mb-6">

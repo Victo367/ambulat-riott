@@ -186,7 +186,7 @@ export default function VisualizarPaciente() {
     <div className="space-y-8 animate-fade-in pb-12 max-w-4xl mx-auto mt-8">
 
       {/* HEADER DA PÁGINA */}
-      <header className="flex items-center justify-between gap-5 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
+      <header className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 sm:gap-5 bg-white p-4 sm:p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
         <div className="flex items-center gap-5">
           <button
             onClick={() => router.push("/funcionario/pacientes")}

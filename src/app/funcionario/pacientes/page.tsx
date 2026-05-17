@@ -70,13 +70,13 @@ export default function ListaPacientes() {
     <div className="space-y-8 animate-fade-in pb-12">
       
       {/* HEADER DA PÁGINA */}
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-white p-4 sm:p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
         <div className="flex items-center gap-5">
           <div className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 shadow-sm">
             <UserGroupIcon className="w-6 h-6" />
           </div>
           <div>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Gestão de Pacientes
             </h1>
             <p className="text-sm text-slate-500 font-medium mt-0.5">
@@ -123,20 +123,20 @@ export default function ListaPacientes() {
       {/* ÁREA DA TABELA */}
       <div className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden">
         
-        <div className="overflow-x-auto">
+        <div>
           <table className="w-full text-sm text-left">
-            <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest">
+            <thead className="bg-slate-50/50 text-slate-500 uppercase text-[10px] font-bold tracking-widest hidden md:table-header-group">
               <tr>
-                <th className="px-8 py-5">Nome do Paciente</th>
-                <th className="px-8 py-5">E-mail de Contato</th>
-                <th className="px-8 py-5">Telefone</th>
+                <th className="px-4 lg:px-8 py-4">Nome do Paciente</th>
+                <th className="px-4 lg:px-8 py-4">E-mail de Contato</th>
+                <th className="px-4 lg:px-8 py-4">Telefone</th>
               </tr>
             </thead>
 
-            <tbody className="divide-y divide-slate-100">
+            <tbody className="divide-y divide-slate-100 block md:table-row-group">
               {pacientesFiltrados.length === 0 ? (
-                <tr>
-                  <td colSpan={3} className="px-8 py-16 text-center">
+                <tr className="block md:table-row">
+                  <td colSpan={3} className="block md:table-cell px-4 lg:px-8 py-12 md:py-16 text-center">
                     <div className="flex flex-col items-center justify-center text-slate-400">
                       <IdentificationIcon className="w-12 h-12 mb-3 text-slate-300" />
                       <p className="text-base font-semibold text-slate-600">
@@ -156,25 +156,31 @@ export default function ListaPacientes() {
                 pacientesFiltrados.map((paciente) => (
                   <tr
                     key={paciente._id}
-                    className="hover:bg-slate-50/80 transition-colors duration-150 group cursor-default"
+                    className="block md:table-row p-4 md:p-0 hover:bg-slate-50/80 transition-colors duration-150 group"
                   >
-                    {/* Nome (Clicável) */}
-                    <td className="px-8 py-5 whitespace-nowrap">
+                    <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5">
+                      <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                        Nome
+                      </div>
                       <button
                         onClick={() => router.push(`/funcionario/pacientes/${paciente._id}`)}
-                        className="font-bold text-slate-900 group-hover:text-cyan-600 transition-colors text-left focus:outline-none focus:underline"
+                        className="font-bold text-slate-900 group-hover:text-cyan-600 transition-colors text-left focus:outline-none focus:underline break-words"
                       >
                         {paciente.nome}
                       </button>
                     </td>
 
-                    {/* Email */}
-                    <td className="px-8 py-5 whitespace-nowrap text-slate-500 font-medium">
-                      {paciente.email || "-"}
+                    <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5 text-slate-500 font-medium">
+                      <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                        E-mail
+                      </div>
+                      <span className="break-all">{paciente.email || "-"}</span>
                     </td>
 
-                    {/* Telefone */}
-                    <td className="px-8 py-5 whitespace-nowrap text-slate-500">
+                    <td className="block md:table-cell px-4 lg:px-8 py-2 md:py-5 text-slate-500">
+                      <div className="md:hidden text-[11px] uppercase text-slate-400 font-bold mb-1">
+                        Telefone
+                      </div>
                       {paciente.telefone || "-"}
                     </td>
                   </tr>
@@ -183,7 +189,6 @@ export default function ListaPacientes() {
             </tbody>
           </table>
         </div>
-
       </div>
     </div>
   );

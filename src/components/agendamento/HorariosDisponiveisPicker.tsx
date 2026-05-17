@@ -112,7 +112,7 @@ export default function HorariosDisponiveisPicker({
           dia ou outro profissional.
         </div>
       ) : (
-        <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2 sm:gap-3">
           {horarios.map((h) => (
             <button
               key={h}

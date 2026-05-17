@@ -35,8 +35,8 @@ export default async function RootLayout({
       <body className="min-h-full flex bg-slate-100 text-slate-800">
         <Sidebar user={user ?? null} />
 
-        <main className="flex-1 min-w-0 ml-68 min-h-screen overflow-x-hidden">
-          <div className="w-full min-w-0 max-w-[1400px] mx-auto p-6 md:p-10 lg:p-12 animate-fade-in">
+        <main className="flex-1 min-w-0 min-h-screen overflow-x-hidden pt-14 lg:pt-0 ml-0 lg:ml-68">
+          <div className="w-full min-w-0 max-w-[1400px] mx-auto p-4 sm:p-6 md:p-10 lg:p-12 animate-fade-in">
             {children}
           </div>
         </main>

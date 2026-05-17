@@ -159,13 +159,13 @@ function AgendaConteudo() {
 
   return (
     <section className="space-y-8 animate-fade-in pb-10">
-      <header className="flex flex-col md:flex-row md:items-center justify-between gap-6 bg-white p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
+      <header className="flex flex-col md:flex-row md:items-center justify-between gap-4 sm:gap-6 bg-white p-4 sm:p-6 rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100">
         <section className="flex items-center gap-5">
           <span className="flex items-center justify-center w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 shadow-sm shrink-0">
             <CalendarIcon className="w-6 h-6" />
           </span>
           <section>
-            <h1 className="text-2xl font-extrabold text-slate-900 tracking-tight">
+            <h1 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight">
               Agenda da Unidade
             </h1>
             <p
@@ -282,7 +282,7 @@ function AgendaConteudo() {
       </section>
 
       <section className="bg-white rounded-[24px] shadow-[0_4px_24px_rgba(0,0,0,0.02)] border border-slate-100 overflow-hidden">
-        <header className="px-8 py-6 border-b border-slate-100 flex items-center gap-3">
+        <header className="px-4 sm:px-8 py-4 sm:py-6 border-b border-slate-100 flex items-center gap-3">
           <UserIcon className="w-5 h-5 text-cyan-600" />
           <h2 className="text-lg font-bold text-slate-900 tracking-tight">
             {verTodos ? "Todos os Pacientes Agendados" : "Lista de Pacientes"}

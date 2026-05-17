@@ -46,16 +46,16 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="space-y-12 animate-fade-in pb-12">
+    <div className="space-y-8 sm:space-y-12 animate-fade-in pb-12">
       
       {/* SEÇÃO HERO (ASSIMÉTRICA) */}
-      <section className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center bg-white p-8 rounded-[32px] shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-slate-100">
+      <section className="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center bg-white p-4 sm:p-6 lg:p-8 rounded-[24px] sm:rounded-[32px] shadow-[0_4px_30px_rgba(0,0,0,0.02)] border border-slate-100">
         <div className="lg:col-span-7 space-y-5">
           <div className="inline-flex items-center gap-2 bg-cyan-50 border border-cyan-100 px-3 py-1.5 rounded-full text-xs font-semibold text-cyan-700 uppercase tracking-wider">
             <SparklesIcon className="w-4 h-4 text-cyan-600" />
             Saúde Integral e Acolhimento
           </div>
-          <h1 className="text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
+          <h1 className="text-2xl sm:text-3xl md:text-5xl font-black text-slate-900 tracking-tight leading-[1.1]">
             Ambulatório TT <br />
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-600 to-cyan-700">
               Marcela Prado
@@ -64,16 +64,16 @@ export default function Home() {
           <p className="text-base text-slate-500 leading-relaxed max-w-2xl">
             Integrado à rede hospitalar do Governo da Paraíba no Hospital de Emergência e Trauma Dom Luiz Gonzaga Fernandes, em Campina Grande. Nosso propósito é oferecer atenção básica humanizada e especializada para a comunidade de travestis e transexuais.
           </p>
-          <div className="pt-2 flex flex-wrap gap-3">
+          <div className="pt-2 flex flex-col sm:flex-row flex-wrap gap-3">
             <button 
               onClick={() => router.push('/paciente/agenda/novo')} 
-              className="bg-cyan-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-md shadow-cyan-600/10 hover:bg-cyan-700 transition cursor-pointer"
+              className="w-full sm:w-auto bg-cyan-600 text-white text-sm font-semibold px-5 py-3 rounded-xl shadow-md shadow-cyan-600/10 hover:bg-cyan-700 transition cursor-pointer text-center"
             >
               Agendar Atendimento
             </button>
             <button 
               onClick={() => router.push('/especialidades')} 
-              className="border border-slate-200 text-slate-600 text-sm font-semibold px-5 py-3 rounded-xl hover:bg-slate-50 transition cursor-pointer"
+              className="border border-slate-200 text-slate-600 text-sm font-semibold px-5 py-3 rounded-xl hover:bg-slate-50 transition cursor-pointer w-full sm:w-auto text-center"
             >
               Conhecer Especialidades
             </button>
@@ -109,7 +109,7 @@ export default function Home() {
           {/* CARD 1: TERAPIA HORMONAL */}
           <div 
             onClick={() => router.push('/guias/terapia-hormonal')}
-            className="md:col-span-2 group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+            className="md:col-span-2 group bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
           >
             <div className="flex flex-col md:flex-row gap-6">
               <div className="flex-1 space-y-3">
@@ -133,7 +133,7 @@ export default function Home() {
           {/* CARD 2: TRANSGENERIDADE */}
           <div 
             onClick={() => router.push('/guias/identidade')}
-            className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+            className="group bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
           >
             <div className="space-y-3">
               <div className="p-2.5 bg-cyan-50 text-cyan-600 rounded-xl w-fit">
@@ -155,7 +155,7 @@ export default function Home() {
           {/* CARD 3: RETIFICAÇÃO DE NOME E GÊNERO */}
           <div 
             onClick={() => router.push('/guias/retificacao')}
-            className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+            className="group bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
           >
             <div className="space-y-3">
               <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl w-fit">
@@ -205,7 +205,7 @@ export default function Home() {
             <div 
               key={artigo.id}
               onClick={() => router.push(`/guias/${artigo.slug}`)}
-              className="group bg-white rounded-3xl border border-slate-100 p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
+              className="group bg-white rounded-3xl border border-slate-100 p-4 sm:p-6 flex flex-col justify-between shadow-[0_4px_24px_rgba(0,0,0,0.01)] hover:shadow-xl hover:border-cyan-200/50 transition-all duration-300 cursor-pointer"
             >
               <div className="space-y-3">
                 <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl w-fit">
