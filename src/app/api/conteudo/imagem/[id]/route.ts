@@ -15,17 +15,13 @@ export async function GET(
 
     await connectDB();
 
-    const imagem = await ConteudoImagem.findById(id).select("data contentType").lean();
+    const imagem = await ConteudoImagem.findById(id).select("data contentType");
 
-    if (!imagem?.data) {
+    if (!imagem?.data?.length) {
       return new Response("Imagem não encontrada", { status: 404 });
     }
 
-    const buffer = Buffer.isBuffer(imagem.data)
-      ? imagem.data
-      : Buffer.from(imagem.data);
-
-    return new Response(buffer, {
+    return new Response(imagem.data, {
       status: 200,
       headers: {
         "Content-Type": imagem.contentType || "image/jpeg",

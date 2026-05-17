@@ -48,7 +48,12 @@ export async function POST(req: Request) {
     const slug = await gerarSlugUnico(title);
     let image = "";
 
-    if (imageFile instanceof File && imageFile.size > 0) {
+    if (
+      imageFile &&
+      typeof imageFile === "object" &&
+      "arrayBuffer" in imageFile &&
+      imageFile.size > 0
+    ) {
       image = await salvarImagemConteudo(imageFile, slug);
     }
 

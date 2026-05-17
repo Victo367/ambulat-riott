@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import ConteudoCoverImage from "@/components/ConteudoCoverImage";
 import { 
   ArrowUpRightIcon, 
   BookOpenIcon, 
@@ -221,7 +222,11 @@ export default function Home() {
               {/* Se o artigo tiver imagem, exibe ela aqui em baixo */}
               {artigo.image && (
                 <div className="mt-4 h-28 relative rounded-xl overflow-hidden shrink-0">
-                  <Image src={artigo.image} alt={artigo.title} fill className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-300" />
+                  <ConteudoCoverImage
+                    src={artigo.image}
+                    alt={artigo.title}
+                    className="object-cover opacity-90 group-hover:scale-105 transition-transform duration-300"
+                  />
                 </div>
               )}
 

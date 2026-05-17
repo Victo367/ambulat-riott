@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
-import Image from "next/image";
+import ConteudoCoverImage from "@/components/ConteudoCoverImage";
 import { ArrowLeftIcon, BookOpenIcon } from "@heroicons/react/24/outline";
 
 type MateriaProps = {
@@ -59,7 +59,7 @@ export default function LerGuia() {
 
       {materia.image && (
         <div className="relative w-full aspect-[21/9] rounded-2xl overflow-hidden bg-slate-100 shadow-sm border border-slate-100">
-          <Image src={materia.image} alt={materia.title} fill className="object-cover" />
+          <ConteudoCoverImage src={materia.image} alt={materia.title} className="object-cover" sizes="100vw" />
         </div>
       )}
 

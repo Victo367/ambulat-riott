@@ -77,6 +77,12 @@ export default function GerenciarCards() {
 
       if (response.ok) {
         const materiaCriada = await response.json();
+
+        if (imagemFile && !materiaCriada.image) {
+          alert(
+            "O artigo foi salvo, mas a imagem não foi anexada. Publique de novo com a imagem ou faça um novo deploy do site."
+          );
+        }
         
         // Atualiza a lista na tela com o que voltou do backend
         setMaterias([materiaCriada, ...materias]);

@@ -16,10 +16,14 @@ export async function gerarSlugUnico(title: string) {
   return slug;
 }
 
-export async function salvarImagemConteudo(file: File, slug: string) {
+export async function salvarImagemConteudo(
+  file: Blob & { name?: string; type?: string },
+  slug: string
+) {
   await connectDB();
 
-  const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
+  const nomeOriginal = file.name || "imagem.jpg";
+  const ext = nomeOriginal.split(".").pop()?.toLowerCase() || "jpg";
   const nomeSeguro = `${Date.now()}-${slug}.${ext}`;
   const buffer = Buffer.from(await file.arrayBuffer());
   const contentType = file.type || `image/${ext === "jpg" ? "jpeg" : ext}`;
