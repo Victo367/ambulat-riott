@@ -23,12 +23,34 @@ export function readPersistedValue<T>(
   }
 }
 
+function isMeaningfulPersistedValue(value: unknown): boolean {
+  if (value === null || value === undefined) return false;
+  if (typeof value === "string") return value.trim().length > 0;
+  if (typeof value === "boolean") return value;
+  if (typeof value === "number") return !Number.isNaN(value);
+  if (Array.isArray(value)) return value.length > 0;
+  if (typeof value === "object") {
+    return Object.values(value as Record<string, unknown>).some(
+      isMeaningfulPersistedValue
+    );
+  }
+  return true;
+}
+
 export function hasPersistedPageState(pathname: string): boolean {
   if (typeof window === "undefined") return false;
   const prefix = `${PREFIX}${pathname}:`;
   for (let i = 0; i < sessionStorage.length; i++) {
     const storageKey = sessionStorage.key(i);
-    if (storageKey?.startsWith(prefix)) return true;
+    if (!storageKey?.startsWith(prefix)) continue;
+    try {
+      const raw = sessionStorage.getItem(storageKey);
+      if (raw == null) continue;
+      const parsed = JSON.parse(raw) as unknown;
+      if (isMeaningfulPersistedValue(parsed)) return true;
+    } catch {
+      continue;
+    }
   }
   return false;
 }
