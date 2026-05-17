@@ -1,6 +1,6 @@
-import { mkdir, writeFile } from "fs/promises";
-import path from "path";
 import Conteudo from "@/models/Conteudo";
+import ConteudoImagem from "@/models/ConteudoImagem";
+import { connectDB } from "@/lib/db";
 import { slugify } from "@/lib/conteudo-utils";
 
 export async function gerarSlugUnico(title: string) {
@@ -17,13 +17,18 @@ export async function gerarSlugUnico(title: string) {
 }
 
 export async function salvarImagemConteudo(file: File, slug: string) {
+  await connectDB();
+
   const ext = file.name.split(".").pop()?.toLowerCase() || "jpg";
   const nomeSeguro = `${Date.now()}-${slug}.${ext}`;
-  const uploadDir = path.join(process.cwd(), "public", "uploads", "conteudo");
-  await mkdir(uploadDir, { recursive: true });
-
   const buffer = Buffer.from(await file.arrayBuffer());
-  await writeFile(path.join(uploadDir, nomeSeguro), buffer);
+  const contentType = file.type || `image/${ext === "jpg" ? "jpeg" : ext}`;
 
-  return `/uploads/conteudo/${nomeSeguro}`;
+  const imagem = await ConteudoImagem.create({
+    data: buffer,
+    contentType,
+    filename: nomeSeguro,
+  });
+
+  return `/api/conteudo/imagem/${imagem._id.toString()}`;
 }
