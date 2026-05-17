@@ -63,7 +63,7 @@ export default function LerGuia() {
         </div>
       )}
 
-      <article className="bg-white p-6 md:p-10 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] space-y-6">
+      <article className="bg-white p-6 md:p-10 rounded-2xl border border-slate-100 shadow-[0_4px_24px_rgba(0,0,0,0.01)] space-y-6 min-w-0 max-w-full overflow-hidden">
         <div className="flex items-center gap-2 text-cyan-600 bg-cyan-50 px-3 py-1 rounded-full w-fit text-[11px] font-bold uppercase tracking-wider">
           <BookOpenIcon className="w-3.5 h-3.5" /> Guia Informativo de Saúde
         </div>
@@ -72,7 +72,7 @@ export default function LerGuia() {
           {materia.title}
         </h1>
 
-        <div className="text-slate-600 text-base leading-relaxed font-medium whitespace-pre-line pt-2">
+        <div className="content-prose text-slate-600 text-base leading-relaxed font-medium pt-2">
           {materia.content}
         </div>
       </article>

@@ -32,3 +32,17 @@ body {
 .animate-fade-in {
   animation: fade-in 0.35s ease-out both;
 }
+
+/* Texto longo: quebra linha para baixo, sem estourar para o lado */
+.content-prose,
+.content-textarea {
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+  max-width: 100%;
+}
+
+.content-textarea {
+  box-sizing: border-box;
+  field-sizing: fixed;
+}

@@ -115,7 +115,7 @@ export default function GerenciarCards() {
   };
 
   return (
-    <div className="space-y-8 animate-fade-in pb-12 max-w-5xl mx-auto mt-8 px-4">
+    <div className="space-y-8 animate-fade-in pb-12 max-w-5xl mx-auto mt-8 px-4 min-w-0">
       <header className="flex items-center gap-5 bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
         <div className="w-12 h-12 rounded-full bg-cyan-50 text-cyan-600 flex items-center justify-center shrink-0">
           <DocumentTextIcon className="w-6 h-6" />
@@ -126,9 +126,12 @@ export default function GerenciarCards() {
         </div>
       </header>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-w-0">
         {/* FORMULÁRIO */}
-        <form onSubmit={handlePublicar} className="lg:col-span-2 bg-white p-6 rounded-2xl border border-slate-100 space-y-4 shadow-sm">
+        <form
+          onSubmit={handlePublicar}
+          className="lg:col-span-2 min-w-0 bg-white p-6 rounded-2xl border border-slate-100 space-y-4 shadow-sm"
+        >
           <h2 className="text-base font-bold text-slate-800 flex items-center gap-2 mb-2">
             <PlusIcon className="w-4 h-4 text-cyan-600" /> Escrever Novo Artigo
           </h2>
@@ -164,14 +167,23 @@ export default function GerenciarCards() {
             </div>
           </div>
 
-          <div>
-            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">Texto Completo</label>
+          <div className="min-w-0">
+            <label className="text-xs font-bold text-slate-400 uppercase tracking-wider block mb-1">
+              Texto Completo
+            </label>
             <textarea
               value={novaMateria.content}
-              onChange={(e) => setNovaMateria({ ...novaMateria, content: e.target.value })}
-              className="w-full bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:border-cyan-600 transition-colors min-h-[180px]"
+              onChange={(e) =>
+                setNovaMateria({ ...novaMateria, content: e.target.value })
+              }
+              rows={12}
+              wrap="soft"
+              className="content-textarea w-full max-w-full min-w-0 block bg-slate-50 border border-slate-200 rounded-xl px-4 py-3 text-sm leading-relaxed focus:outline-none focus:border-cyan-600 transition-colors resize-y field-sizing-fixed whitespace-pre-wrap break-words overflow-x-hidden"
               required
             />
+            <p className="text-[11px] text-slate-400 mt-1.5">
+              Use Enter para novos parágrafos. O texto quebra automaticamente na largura do campo.
+            </p>
           </div>
 
           <button type="submit" className="w-full bg-cyan-600 hover:bg-cyan-700 text-white font-bold py-3 rounded-xl text-sm transition-colors flex items-center justify-center gap-2 cursor-pointer">
@@ -180,7 +192,7 @@ export default function GerenciarCards() {
         </form>
 
         {/* LISTA LATERIAL DE ITENS SALVOS */}
-        <div className="bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit space-y-4">
+        <div className="min-w-0 bg-white p-6 rounded-2xl border border-slate-100 shadow-sm h-fit space-y-4">
           <h2 className="text-base font-bold text-slate-800">Artigos no Ar ({materias.length})</h2>
           <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
             {materias.map((m) => (
