@@ -3,6 +3,7 @@ import User from "@/models/User";
 
 export {
   STATUS_VALUES,
+  HORARIOS_AGENDA,
   type StatusAgendamento,
   formatStatusLabel,
   normalizeStatus,
@@ -19,6 +20,8 @@ export {
   formatDiaSemana,
   partesDataCard,
 } from "@/lib/agendamentos-utils";
+
+import { HORARIOS_AGENDA, normalizarDataIso, normalizarHora } from "@/lib/agendamentos-utils";
 
 export async function findAgendamentoPopulado(id: string) {
   return Agendamento.findById(id)
@@ -85,6 +88,27 @@ export async function verificarConflitoHorario(
     excludeId
   );
   return Boolean(conflito);
+}
+
+export async function listarHorariosDisponiveis(
+  profissionalId: string,
+  data: string,
+  excludeId?: string
+): Promise<string[]> {
+  const dataIso = normalizarDataIso(data);
+  const query: Record<string, unknown> = {
+    profissional: profissionalId,
+    data: dataIso,
+    status: { $ne: "cancelado" },
+  };
+  if (excludeId) query._id = { $ne: excludeId };
+
+  const ocupados = await Agendamento.find(query).select("hora").lean();
+  const ocupadosSet = new Set(
+    ocupados.map((item) => normalizarHora(String(item.hora)))
+  );
+
+  return HORARIOS_AGENDA.filter((slot) => !ocupadosSet.has(slot));
 }
 
 export async function getNomeUsuario(usuarioId: string) {

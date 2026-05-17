@@ -5,28 +5,10 @@ import {
   serializeAgendamento,
   normalizeStatus,
   findAgendamentoPopulado,
-  buscarConflitoHorario,
-  montarMensagemConflitoHorario,
   getNomeUsuario,
   normalizarHora,
   normalizarDataIso,
 } from "@/lib/agendamentos";
-
-function respostaConflitoHorario(
-  conflito: NonNullable<Awaited<ReturnType<typeof buscarConflitoHorario>>>,
-  tipoUsuario: string
-) {
-  return Response.json(
-    {
-      error: montarMensagemConflitoHorario(conflito, {
-        omitirNomePaciente: tipoUsuario === "paciente",
-      }),
-      code: "CONFLITO_HORARIO",
-      conflito,
-    },
-    { status: 409 }
-  );
-}
 
 async function getAgendamentoAutorizado(id: string, userId: string, tipo: string) {
   const agendamento = await findAgendamentoPopulado(id);
@@ -164,17 +146,6 @@ export async function PATCH(
         });
       }
 
-      const profissionalId = String(agendamento.profissional);
-      const conflito = await buscarConflitoHorario(
-        profissionalId,
-        agendamento.data,
-        agendamento.hora,
-        id
-      );
-      if (conflito && agendamento.status !== "cancelado") {
-        return respostaConflitoHorario(conflito, loggedUser.tipo);
-      }
-
       agendamento.historico = historico;
       await agendamento.save();
 
@@ -231,17 +202,6 @@ export async function PATCH(
         });
         agendamento.status = novoStatus;
       }
-    }
-
-    const profissionalId = String(agendamento.profissional);
-    const conflito = await buscarConflitoHorario(
-      profissionalId,
-      agendamento.data,
-      agendamento.hora,
-      id
-    );
-    if (conflito && agendamento.status !== "cancelado") {
-      return respostaConflitoHorario(conflito, loggedUser.tipo);
     }
 
     agendamento.historico = historico;

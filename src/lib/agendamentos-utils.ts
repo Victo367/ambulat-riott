@@ -6,6 +6,23 @@ export const STATUS_VALUES = [
   "ausente",
 ] as const;
 
+/** Grade padrão de horários do ambulatório (mesma em paciente, funcionário e remarcação). */
+export const HORARIOS_AGENDA = [
+  "08:00",
+  "09:00",
+  "09:30",
+  "10:00",
+  "10:30",
+  "11:00",
+  "13:30",
+  "14:00",
+  "14:30",
+  "15:00",
+  "15:30",
+  "16:00",
+  "16:30",
+] as const;
+
 export type StatusAgendamento = (typeof STATUS_VALUES)[number];
 
 const STATUS_LABELS: Record<StatusAgendamento, string> = {

@@ -9,8 +9,6 @@ import {
   hojeIso,
   normalizarHora,
   normalizarDataIso,
-  buscarConflitoHorario,
-  montarMensagemConflitoHorario,
   getNomeUsuario,
 } from "@/lib/agendamentos";
 
@@ -99,20 +97,6 @@ export async function POST(req: Request) {
       return Response.json(
         { error: "Profissional não encontrado" },
         { status: 404 }
-      );
-    }
-
-    const conflito = await buscarConflitoHorario(profissionalId, data, hora);
-    if (conflito) {
-      return Response.json(
-        {
-          error: montarMensagemConflitoHorario(conflito, {
-            omitirNomePaciente: loggedUser.tipo === "paciente",
-          }),
-          code: "CONFLITO_HORARIO",
-          conflito,
-        },
-        { status: 409 }
       );
     }
 
