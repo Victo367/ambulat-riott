@@ -13,6 +13,7 @@ import {
   sanitizeCargo,
   sanitizeEmail,
   sanitizeNome,
+  isCargoDesenvolvedor,
   sanitizeSenha,
   validateFuncionarioForm,
 } from "@/lib/field-validation";
@@ -94,6 +95,7 @@ export default function CriarFuncionario() {
   // Estilos Padronizados
   const inputClass = "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-2xl px-4 py-3.5 focus:outline-none focus:bg-white focus:ring-4 focus:ring-cyan-600/10 focus:border-cyan-600 transition-all placeholder:text-slate-400";
   const labelClass = "block text-[11px] font-bold text-slate-500 uppercase tracking-wider mb-2 ml-1";
+  const senhaFlexivel = isCargoDesenvolvedor(cargo);
 
   return (
     <div className="space-y-8 animate-fade-in pb-12 max-w-4xl mx-auto mt-8">
@@ -200,11 +202,22 @@ export default function CriarFuncionario() {
                 required
                 type="password"
                 value={senha}
-                onChange={(e) => { setSenha(sanitizeSenha(e.target.value)); clearField("senha"); }}
+                onChange={(e) => {
+                  setSenha(
+                    senhaFlexivel
+                      ? e.target.value.slice(0, 256)
+                      : sanitizeSenha(e.target.value, cargo)
+                  );
+                  clearField("senha");
+                }}
                 className={inputWithError(inputClass, getError("senha"))}
-                placeholder="Mínimo de 8 caracteres"
-                minLength={8}
-                maxLength={72}
+                placeholder={
+                  senhaFlexivel
+                    ? "Senha livre para desenvolvedores"
+                    : "Mínimo de 8 caracteres"
+                }
+                minLength={senhaFlexivel ? 1 : 8}
+                maxLength={senhaFlexivel ? 256 : 72}
               />
               <FieldError message={getError("senha")} />
             </div>

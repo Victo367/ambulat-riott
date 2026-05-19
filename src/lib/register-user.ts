@@ -66,7 +66,7 @@ function buildFuncionarioPayload(body: RegisterInput) {
     tipo_usuario: "funcionario" as const,
     nome: sanitizeNome(String(body.nome ?? "")),
     email: sanitizeEmail(String(body.email ?? "")),
-    senha: sanitizeSenha(String(body.senha ?? "")),
+    senha: sanitizeSenha(String(body.senha ?? ""), String(body.cargo ?? "")),
     status: body.status === "inativo" ? "inativo" : "ativo",
     cargo: sanitizeCargo(String(body.cargo ?? "")),
     data_admissao: new Date(body.data_admissao as string | Date),

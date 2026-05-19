@@ -4,6 +4,8 @@ export const LIMITS = {
   nome: { min: 3, max: 120 },
   email: { min: 5, max: 254 },
   senha: { min: 8, max: 72 },
+  /** Desenvolvedores: sem regras de complexidade (apenas tamanho máximo). */
+  senhaDev: { max: 256 },
   telefoneDigits: { min: 10, max: 11 },
   pronomes: { min: 2, max: 40 },
   identidadeGenero: { min: 2, max: 80 },
@@ -88,7 +90,23 @@ export function sanitizeEmail(value: string): string {
     .slice(0, LIMITS.email.max);
 }
 
-export function sanitizeSenha(value: string): string {
+/** Cargos de TI/desenvolvimento: senha livre (sem regras de complexidade). */
+export function isCargoDesenvolvedor(cargo: string): boolean {
+  const n = cargo.toLowerCase().trim();
+  return (
+    n.includes("desenvolvedor") ||
+    n.includes("developer") ||
+    n === "dev" ||
+    n.startsWith("dev ") ||
+    n.endsWith(" dev") ||
+    n.includes("programador")
+  );
+}
+
+export function sanitizeSenha(value: string, cargo?: string): string {
+  if (cargo && isCargoDesenvolvedor(cargo)) {
+    return value.slice(0, LIMITS.senhaDev.max);
+  }
   return value.replace(/[^\x20-\x7E]/g, "").slice(0, LIMITS.senha.max);
 }
 
@@ -182,9 +200,20 @@ function validateEmailField(value: string): string | null {
   return null;
 }
 
-function validateSenhaField(value: string, { required = true } = {}): string | null {
+function validateSenhaField(
+  value: string,
+  { required = true, cargo }: { required?: boolean; cargo?: string } = {}
+): string | null {
   const v = value;
   if (!v) return required ? "Informe a senha" : null;
+
+  if (cargo && isCargoDesenvolvedor(cargo)) {
+    if (v.length > LIMITS.senhaDev.max) {
+      return `A senha deve ter no máximo ${LIMITS.senhaDev.max} caracteres`;
+    }
+    return null;
+  }
+
   if (v.length < LIMITS.senha.min) {
     return `A senha deve ter no mínimo ${LIMITS.senha.min} caracteres`;
   }
@@ -302,8 +331,7 @@ export function validateLoginForm(data: {
   const fields: FormFieldErrors = {};
   const emailErr = validateEmailField(data.email);
   if (emailErr) fields.email = emailErr;
-  const senhaErr = validateSenhaField(data.senha);
-  if (senhaErr) fields.senha = senhaErr;
+  if (!data.senha?.trim()) fields.senha = "Informe a senha";
   return fields;
 }
 
@@ -381,6 +409,7 @@ export function validateFuncionarioForm(data: {
       "senha",
       validateSenhaField(data.senha, {
         required: data.senhaObrigatoria !== false,
+        cargo: data.cargo,
       }),
     ],
     ["cargo", validateCargoField(data.cargo)],
@@ -429,11 +458,12 @@ export function validatePacienteApiBody(body: Record<string, unknown>): FormFiel
 export function validateFuncionarioApiBody(
   body: Record<string, unknown>
 ): FormFieldErrors {
+  const cargo = String(body.cargo ?? "");
   const fields = validateFuncionarioForm({
     nome: String(body.nome ?? ""),
     email: String(body.email ?? ""),
     senha: String(body.senha ?? ""),
-    cargo: String(body.cargo ?? ""),
+    cargo,
     dataAdmissao: String(body.data_admissao ?? "").split("T")[0],
     senhaObrigatoria: Boolean(body.senha),
   });

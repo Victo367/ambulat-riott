@@ -9,7 +9,6 @@ import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
 import {
   sanitizeEmail,
-  sanitizeSenha,
   validateLoginForm,
 } from "@/lib/field-validation";
 
@@ -117,7 +116,7 @@ export default function LoginPage() {
               placeholder="Senha"
               value={senha}
               onChange={(e) => {
-                setSenha(sanitizeSenha(e.target.value));
+                setSenha(e.target.value.slice(0, 256));
                 clearField("senha");
               }}
               className={inputWithError(
@@ -125,8 +124,7 @@ export default function LoginPage() {
                 getError("senha")
               )}
               required
-              minLength={8}
-              maxLength={72}
+              maxLength={256}
             />
             <FieldError message={getError("senha")} />
           </div>
