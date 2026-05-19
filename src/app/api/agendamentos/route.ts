@@ -80,22 +80,43 @@ export async function POST(req: Request) {
       pacienteId = loggedUser.id;
     }
 
-    if (!pacienteId || !profissionalId || !data || !hora) {
+    const fields: Record<string, string> = {};
+    if (!pacienteId) fields.pacienteId = "Selecione o paciente";
+    if (!profissionalId) fields.profissionalId = "Selecione o profissional";
+    if (!data) fields.data = "Informe a data da consulta";
+    if (!hora) fields.hora = "Selecione um horário disponível";
+    if (loggedUser.tipo === "paciente" && !body.especialidade) {
+      fields.especialidade = "Selecione a especialidade";
+    }
+
+    if (Object.keys(fields).length > 0) {
       return Response.json(
-        { error: "Campos obrigatórios: paciente, profissional, data e hora" },
+        {
+          error: "Preencha os campos obrigatórios indicados",
+          fields,
+        },
         { status: 400 }
       );
     }
 
     const paciente = await Paciente.findById(pacienteId);
     if (!paciente) {
-      return Response.json({ error: "Paciente não encontrado" }, { status: 404 });
+      return Response.json(
+        {
+          error: "Paciente não encontrado",
+          fields: { pacienteId: "Paciente não encontrado" },
+        },
+        { status: 404 }
+      );
     }
 
     const profissional = await Funcionario.findById(profissionalId);
     if (!profissional) {
       return Response.json(
-        { error: "Profissional não encontrado" },
+        {
+          error: "Profissional não encontrado",
+          fields: { profissionalId: "Profissional não encontrado" },
+        },
         { status: 404 }
       );
     }

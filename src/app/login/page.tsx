@@ -3,22 +3,37 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
-import { 
-  EnvelopeIcon, 
-  LockClosedIcon, 
-  ExclamationCircleIcon 
-} from "@heroicons/react/24/outline";
+import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [senha, setSenha] = useState("");
-  const [erro, setErro] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
 
   const router = useRouter();
 
   async function handleLogin(e: React.FormEvent) {
     e.preventDefault();
-    setErro("");
+    clearErrors();
+
+    const clientErrors = validateRequired([
+      { name: "email", value: email, message: "Informe o e-mail" },
+      { name: "senha", value: senha, message: "Informe a senha" },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
+      return;
+    }
 
     try {
       const res = await fetch("/api/login", {
@@ -29,17 +44,16 @@ export default function LoginPage() {
         body: JSON.stringify({ email, senha }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        setErro(data.error);
+        await applyApiError(res, "Não foi possível entrar");
         return;
       }
 
       window.location.href = "/";
-
-    } catch (err) {
-      setErro("Erro ao conectar com o servidor. Tente novamente.");
+    } catch {
+      setFieldErrors({
+        _form: "Erro ao conectar com o servidor. Tente novamente.",
+      });
     }
   }
 
@@ -82,13 +96,19 @@ export default function LoginPage() {
               type="email"
               placeholder="E-mail"
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all placeholder:text-slate-400"
+              onChange={(e) => {
+                setEmail(e.target.value);
+                clearField("email");
+              }}
+              className={inputWithError(
+                "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all placeholder:text-slate-400",
+                getError("email")
+              )}
               required
             />
+            <FieldError message={getError("email")} />
           </div>
 
-          {/* Input de Senha */}
           <div className="relative group">
             <LockClosedIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 transition-colors group-focus-within:text-cyan-600" />
             <input
@@ -96,19 +116,23 @@ export default function LoginPage() {
               data-cy="password"
               placeholder="Senha"
               value={senha}
-              onChange={(e) => setSenha(e.target.value)}
-              className="w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all placeholder:text-slate-400"
+              onChange={(e) => {
+                setSenha(e.target.value);
+                clearField("senha");
+              }}
+              className={inputWithError(
+                "w-full bg-slate-50 border border-slate-200 text-slate-900 text-sm rounded-xl pl-11 pr-4 py-3.5 focus:outline-none focus:ring-2 focus:ring-cyan-600/20 focus:border-cyan-600 transition-all placeholder:text-slate-400",
+                getError("senha")
+              )}
               required
             />
+            <FieldError message={getError("senha")} />
           </div>
 
-          {/* Container de Erro Refinado */}
-          {erro && (
-            <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 p-3 rounded-xl text-sm animate-fade-in">
-              <ExclamationCircleIcon className="w-5 h-5 shrink-0" />
-              <p data-cy="error" className="font-medium">{erro}</p>
-            </div>
-          )}
+          <p data-cy="error" className="sr-only">
+            {getError("_form") || getError("email") || getError("senha")}
+          </p>
+          <FieldError message={getError("_form")} className="text-sm" />
 
           {/* Botão de Submit */}
           <button

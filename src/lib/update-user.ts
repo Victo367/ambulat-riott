@@ -41,7 +41,10 @@ export async function buildUserUpdateData(id: string, body: Record<string, unkno
     return {
       ok: false as const,
       status: 400,
-      data: { error: "Nenhum campo válido para atualizar" },
+      data: {
+        error: "Nenhum campo válido para atualizar",
+        fields: { _form: "Nenhum dado foi alterado" },
+      },
     };
   }
 
@@ -52,7 +55,10 @@ export async function buildUserUpdateData(id: string, body: Record<string, unkno
     return {
       ok: false as const,
       status: 400,
-      data: { error: "Campo data_nascimento inválido" },
+      data: {
+        error: "Data de nascimento inválida",
+        fields: { data_nascimento: "Data de nascimento inválida" },
+      },
     };
   }
 
@@ -63,7 +69,10 @@ export async function buildUserUpdateData(id: string, body: Record<string, unkno
     return {
       ok: false as const,
       status: 400,
-      data: { error: "Campo data_admissao inválido" },
+      data: {
+        error: "Data de admissão inválida",
+        fields: { data_admissao: "Data de admissão inválida" },
+      },
     };
   }
 

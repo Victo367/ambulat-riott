@@ -8,8 +8,11 @@ import {
   UserIcon,
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
-import { formatDataCurta, lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
+import { formatDataCurta } from "@/lib/agendamentos-utils";
 import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 type AgendamentoDetalhe = {
   id: string;
@@ -32,7 +35,14 @@ function RemarcarConsultaContent() {
   const [novaData, setNovaData] = useState("");
   const [novaHora, setNovaHora] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [erroRemarcar, setErroRemarcar] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
 
   const carregar = useCallback(async () => {
     if (!agendamentoId) {
@@ -75,12 +85,25 @@ function RemarcarConsultaContent() {
     e.preventDefault();
     if (!consulta || !novaData || !novaHora) return;
 
-    if (novaData === consulta.data && novaHora === consulta.hora) {
-      alert("Selecione uma data ou horário diferente do atual.");
+    clearErrors();
+
+    const clientErrors = validateRequired([
+      { name: "novaData", value: novaData, message: "Informe a nova data" },
+      { name: "novaHora", value: novaHora, message: "Selecione o novo horário" },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
       return;
     }
 
-    setErroRemarcar("");
+    if (novaData === consulta.data && novaHora === consulta.hora) {
+      setFieldErrors({
+        novaData: "Escolha uma data diferente da atual",
+        novaHora: "Escolha um horário diferente do atual",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/agendamentos/${consulta.id}`, {
@@ -89,14 +112,18 @@ function RemarcarConsultaContent() {
         body: JSON.stringify({ data: novaData, hora: novaHora }),
       });
       if (!res.ok) {
-        setErroRemarcar(await lerMensagemErroAgendamento(res, "Erro ao remarcar consulta"));
+        await applyApiError(res, "Erro ao remarcar consulta", {
+          data: "novaData",
+          hora: "novaHora",
+        });
         return;
       }
       router.push("/paciente/agenda");
     } catch {
-      setErroRemarcar(
-        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
-      );
+      setFieldErrors({
+        _form:
+          "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -165,11 +192,7 @@ function RemarcarConsultaContent() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleUpdate} className="space-y-8">
-          {erroRemarcar && (
-            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
-              {erroRemarcar}
-            </p>
-          )}
+          <FieldError message={getError("_form")} className="text-sm" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="md:col-span-2">
               <label className={labelClass}>Especialidade</label>
@@ -196,10 +219,12 @@ function RemarcarConsultaContent() {
                 onChange={(e) => {
                   setNovaData(e.target.value);
                   setNovaHora("");
+                  clearField("novaData");
                 }}
                 min={new Date().toISOString().split("T")[0]}
-                className={inputClass}
+                className={inputWithError(inputClass, getError("novaData"))}
               />
+              <FieldError message={getError("novaData")} />
               <p className="text-[10px] text-slate-400 mt-2 ml-1">
                 Data atual: {formatDataCurta(consulta.data)}
               </p>
@@ -210,10 +235,14 @@ function RemarcarConsultaContent() {
                 profissionalId={consulta.profissionalId}
                 data={novaData}
                 value={novaHora}
-                onChange={setNovaHora}
+                onChange={(h) => {
+                  setNovaHora(h);
+                  clearField("novaHora");
+                }}
                 excludeAgendamentoId={consulta.id}
                 labelClass={labelClass}
               />
+              <FieldError message={getError("novaHora")} />
               <p className="text-[10px] text-slate-400 mt-3 ml-1">
                 Horário anterior: {consulta.hora}
               </p>

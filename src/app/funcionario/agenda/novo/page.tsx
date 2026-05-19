@@ -13,7 +13,9 @@ import {
   BeakerIcon,
 } from "@heroicons/react/24/outline";
 import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
-import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 interface PacienteOption {
   _id: string;
@@ -42,7 +44,14 @@ export default function NovoAgendamento() {
   const [funcionarios, setFuncionarios] = useState<FuncionarioOption[]>([]);
   const [loadingDados, setLoadingDados] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [erroAgendamento, setErroAgendamento] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
 
   const [pacienteId, setPacienteId] = usePersistedState("pacienteId", "");
   const [profissionalId, setProfissionalId] = usePersistedState(
@@ -82,12 +91,23 @@ export default function NovoAgendamento() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!pacienteId || !profissionalId || !data || !hora) {
-      alert("Preencha todos os campos obrigatórios.");
+    clearErrors();
+
+    const clientErrors = validateRequired([
+      { name: "pacienteId", value: pacienteId, message: "Selecione o paciente" },
+      {
+        name: "profissionalId",
+        value: profissionalId,
+        message: "Selecione o profissional",
+      },
+      { name: "data", value: data, message: "Informe a data da consulta" },
+      { name: "hora", value: hora, message: "Selecione um horário disponível" },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
       return;
     }
 
-    setErroAgendamento("");
     setIsSubmitting(true);
     try {
       const res = await fetch("/api/agendamentos", {
@@ -104,7 +124,7 @@ export default function NovoAgendamento() {
         }),
       });
       if (!res.ok) {
-        setErroAgendamento(await lerMensagemErroAgendamento(res));
+        await applyApiError(res, "Não foi possível criar o agendamento");
         return;
       }
       alert("Agendamento criado com sucesso!");
@@ -112,9 +132,10 @@ export default function NovoAgendamento() {
       router.push(`/funcionario/agenda?data=${data}`);
       router.refresh();
     } catch {
-      setErroAgendamento(
-        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
-      );
+      setFieldErrors({
+        _form:
+          "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -142,21 +163,20 @@ export default function NovoAgendamento() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10 max-w-5xl mx-auto">
         <form className="space-y-8" onSubmit={handleSubmit}>
-          {erroAgendamento && (
-            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
-              {erroAgendamento}
-            </p>
-          )}
+          <FieldError message={getError("_form")} className="text-sm" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1">
               <label className={labelClass}>Paciente Atendido *</label>
               <div className="relative group">
                 <UserIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-cyan-600 transition-colors" />
                 <select
-                  className={inputClass}
+                  className={inputWithError(inputClass, getError("pacienteId"))}
                   required
                   value={pacienteId}
-                  onChange={(e) => setPacienteId(e.target.value)}
+                  onChange={(e) => {
+                    setPacienteId(e.target.value);
+                    clearField("pacienteId");
+                  }}
                   disabled={loadingDados}
                 >
                   <option value="">
@@ -170,6 +190,7 @@ export default function NovoAgendamento() {
                 </select>
                 <ChevronDownIcon className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
+              <FieldError message={getError("pacienteId")} />
             </div>
 
             <div className="space-y-1">
@@ -177,12 +198,13 @@ export default function NovoAgendamento() {
               <div className="relative group">
                 <BeakerIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-cyan-600 transition-colors" />
                 <select
-                  className={inputClass}
+                  className={inputWithError(inputClass, getError("profissionalId"))}
                   required
                   value={profissionalId}
                   onChange={(e) => {
                     setProfissionalId(e.target.value);
                     setHora("");
+                    clearField("profissionalId");
                   }}
                   disabled={loadingDados}
                 >
@@ -199,6 +221,7 @@ export default function NovoAgendamento() {
                 </select>
                 <ChevronDownIcon className="w-4 h-4 text-slate-400 absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
+              <FieldError message={getError("profissionalId")} />
             </div>
           </div>
 
@@ -209,16 +232,18 @@ export default function NovoAgendamento() {
                 <CalendarIcon className="w-5 h-5 text-slate-400 absolute left-4 top-1/2 -translate-y-1/2 group-focus-within:text-cyan-600 transition-colors" />
                 <input
                   type="date"
-                  className={inputClass}
+                  className={inputWithError(inputClass, getError("data"))}
                   required
                   value={data}
                   min={dataIsoLocal()}
                   onChange={(e) => {
                     setData(e.target.value);
                     setHora("");
+                    clearField("data");
                   }}
                 />
               </div>
+              <FieldError message={getError("data")} />
             </div>
 
             <div className="space-y-1">
@@ -255,14 +280,20 @@ export default function NovoAgendamento() {
 
           </div>
 
-          <HorariosDisponiveisPicker
-            profissionalId={profissionalId}
-            data={data}
-            value={hora}
-            onChange={setHora}
-            labelClass={`${labelClass} flex items-center gap-2`}
-            aguardandoProfissional="Selecione o profissional para ver os horários."
-          />
+          <div>
+            <HorariosDisponiveisPicker
+              profissionalId={profissionalId}
+              data={data}
+              value={hora}
+              onChange={(h) => {
+                setHora(h);
+                clearField("hora");
+              }}
+              labelClass={`${labelClass} flex items-center gap-2`}
+              aguardandoProfissional="Selecione o profissional para ver os horários."
+            />
+            <FieldError message={getError("hora")} />
+          </div>
 
           <div className="space-y-1">
             <label className={labelClass}>Observações Adicionais</label>

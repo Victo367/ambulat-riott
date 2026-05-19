@@ -8,12 +8,26 @@ export async function POST(req: Request) {
   await connectDB();
 
   const { email, senha } = await req.json();
+  const fields: Record<string, string> = {};
 
-  const user = await User.findOne({ email }).lean();
+  if (!email?.trim()) fields.email = "Informe o e-mail";
+  if (!senha?.trim()) fields.senha = "Informe a senha";
+
+  if (Object.keys(fields).length > 0) {
+    return NextResponse.json(
+      { error: "Preencha e-mail e senha", fields },
+      { status: 400 }
+    );
+  }
+
+  const user = await User.findOne({ email: email.trim().toLowerCase() }).lean();
 
   if (!user) {
     return NextResponse.json(
-      { error: "Usuário não encontrado" },
+      {
+        error: "Credenciais inválidas",
+        fields: { email: "E-mail não encontrado" },
+      },
       { status: 401 }
     );
   }
@@ -22,7 +36,10 @@ export async function POST(req: Request) {
 
   if (!senhaValida) {
     return NextResponse.json(
-      { error: "Senha incorreta" },
+      {
+        error: "Credenciais inválidas",
+        fields: { senha: "Senha incorreta" },
+      },
       { status: 401 }
     );
   }

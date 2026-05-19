@@ -10,7 +10,9 @@ import {
   ChatBubbleBottomCenterTextIcon,
 } from "@heroicons/react/24/outline";
 import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
-import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 interface Profissional {
   id: string;
@@ -31,7 +33,14 @@ export default function NovoAgendamentoPaciente() {
   const [loadingProfissionais, setLoadingProfissionais] = useState(false);
   const [erroProfissionais, setErroProfissionais] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [erroAgendamento, setErroAgendamento] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
 
   useEffect(() => {
     if (!especialidade) {
@@ -79,17 +88,26 @@ export default function NovoAgendamentoPaciente() {
     setEspecialidade(e.target.value);
     setMedico("");
     setHora("");
+    clearField("especialidade");
+    clearField("medico");
+    clearField("hora");
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
+    clearErrors();
 
-    if (!especialidade || !medico || !data || !hora) {
-      alert("Por favor, preencha todos os campos obrigatórios.");
+    const clientErrors = validateRequired([
+      { name: "especialidade", value: especialidade, message: "Selecione a especialidade" },
+      { name: "medico", value: medico, message: "Selecione o profissional" },
+      { name: "data", value: data, message: "Informe a data desejada" },
+      { name: "hora", value: hora, message: "Selecione um horário disponível" },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
       return;
     }
 
-    setErroAgendamento("");
     setIsSubmitting(true);
 
     try {
@@ -108,7 +126,9 @@ export default function NovoAgendamentoPaciente() {
       });
 
       if (!res.ok) {
-        setErroAgendamento(await lerMensagemErroAgendamento(res));
+        await applyApiError(res, "Não foi possível agendar a consulta", {
+          profissionalId: "medico",
+        });
         return;
       }
 
@@ -117,9 +137,10 @@ export default function NovoAgendamentoPaciente() {
       router.push("/paciente/agenda");
       router.refresh();
     } catch {
-      setErroAgendamento(
-        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
-      );
+      setFieldErrors({
+        _form:
+          "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -152,11 +173,7 @@ export default function NovoAgendamentoPaciente() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleSubmit} className="space-y-8">
-          {erroAgendamento && (
-            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
-              {erroAgendamento}
-            </p>
-          )}
+          <FieldError message={getError("_form")} className="text-sm" />
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="md:col-span-2">
@@ -166,7 +183,7 @@ export default function NovoAgendamentoPaciente() {
               <select
                 value={especialidade}
                 onChange={handleEspecialidadeChange}
-                className={inputClass}
+                className={inputWithError(inputClass, getError("especialidade"))}
                 required
               >
                 <option value="" disabled>
@@ -177,6 +194,7 @@ export default function NovoAgendamentoPaciente() {
                 <option value="hormonal">Endocrinologista</option>
                 <option value="nutricao">Nutricionista</option>
               </select>
+              <FieldError message={getError("especialidade")} />
             </div>
 
             <div className="md:col-span-2">
@@ -189,8 +207,9 @@ export default function NovoAgendamentoPaciente() {
                 onChange={(e) => {
                   setMedico(e.target.value);
                   setHora("");
+                  clearField("medico");
                 }}
-                className={inputClass}
+                className={inputWithError(inputClass, getError("medico"))}
                 required
                 disabled={!especialidade || loadingProfissionais}
               >
@@ -212,6 +231,7 @@ export default function NovoAgendamentoPaciente() {
                   {erroProfissionais}
                 </p>
               )}
+              <FieldError message={getError("medico")} />
             </div>
 
             <div>
@@ -225,11 +245,13 @@ export default function NovoAgendamentoPaciente() {
                 onChange={(e) => {
                   setData(e.target.value);
                   setHora("");
+                  clearField("data");
                 }}
-                className={inputClass}
+                className={inputWithError(inputClass, getError("data"))}
                 required
                 min={new Date().toISOString().split("T")[0]}
               />
+              <FieldError message={getError("data")} />
             </div>
 
             <div className="md:col-span-2">
@@ -237,10 +259,14 @@ export default function NovoAgendamentoPaciente() {
                 profissionalId={medico}
                 data={data}
                 value={hora}
-                onChange={setHora}
+                onChange={(h) => {
+                  setHora(h);
+                  clearField("hora");
+                }}
                 labelClass={labelClass}
                 aguardandoProfissional="Selecione o profissional para ver os horários."
               />
+              <FieldError message={getError("hora")} />
             </div>
 
             <div className="md:col-span-2">

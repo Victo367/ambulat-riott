@@ -13,7 +13,9 @@ import {
   InformationCircleIcon,
 } from "@heroicons/react/24/outline";
 import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiveisPicker";
-import { lerMensagemErroAgendamento } from "@/lib/agendamentos-utils";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 interface AgendamentoForm {
   pacienteNome: string;
@@ -58,7 +60,14 @@ function EditarConteudo() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [erro, setErro] = useState("");
-  const [erroSalvar, setErroSalvar] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
 
   const carregar = useCallback(async () => {
     if (!id) {
@@ -99,7 +108,17 @@ function EditarConteudo() {
     e.preventDefault();
     if (!id || !form) return;
 
-    setErroSalvar("");
+    clearErrors();
+
+    const clientErrors = validateRequired([
+      { name: "data", value: form.data, message: "Informe a data" },
+      { name: "horario", value: form.horario, message: "Selecione o horário" },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
+      return;
+    }
+
     setIsSubmitting(true);
     try {
       const res = await fetch(`/api/agendamentos/${id}`, {
@@ -113,15 +132,16 @@ function EditarConteudo() {
         }),
       });
       if (!res.ok) {
-        setErroSalvar(await lerMensagemErroAgendamento(res, "Erro ao salvar"));
+        await applyApiError(res, "Erro ao salvar", { hora: "horario" });
         return;
       }
       alert("Agendamento atualizado com sucesso!");
       router.push(`/funcionario/agenda/detalhes?id=${id}`);
     } catch {
-      setErroSalvar(
-        "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente."
-      );
+      setFieldErrors({
+        _form:
+          "Erro ao conectar com o servidor. Verifique sua conexão e tente novamente.",
+      });
     } finally {
       setIsSubmitting(false);
     }
@@ -179,11 +199,7 @@ function EditarConteudo() {
 
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10 max-w-5xl mx-auto">
         <form className="space-y-8" onSubmit={handleSubmit}>
-          {erroSalvar && (
-            <p className="text-sm text-rose-600 font-medium bg-rose-50 border border-rose-100 rounded-2xl p-4">
-              {erroSalvar}
-            </p>
-          )}
+          <FieldError message={getError("_form")} className="text-sm" />
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div className="space-y-1 opacity-80">
               <label className={labelClass}>Nome Paciente *</label>
@@ -246,10 +262,11 @@ function EditarConteudo() {
                   onChange={(e) =>
                     setForm({ ...form, data: e.target.value, horario: "" })
                   }
-                  className={inputClass}
+                  className={inputWithError(inputClass, getError("data"))}
                   required
                 />
               </div>
+              <FieldError message={getError("data")} />
             </div>
             <div className="space-y-1">
               <label className={labelClass}>Status</label>
@@ -274,10 +291,14 @@ function EditarConteudo() {
             profissionalId={form.profissionalId}
             data={form.data}
             value={form.horario}
-            onChange={(horario) => setForm({ ...form, horario })}
+            onChange={(horario) => {
+              setForm({ ...form, horario });
+              clearField("horario");
+            }}
             excludeAgendamentoId={id ?? undefined}
             labelClass={`${labelClass} flex items-center gap-2`}
           />
+          <FieldError message={getError("horario")} />
 
           <div className="space-y-1">
             <label className={labelClass}>Observações</label>

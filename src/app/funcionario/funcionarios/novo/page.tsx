@@ -3,11 +3,10 @@
 import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
-import { 
-  ArrowLeftIcon, 
-  CheckCircleIcon, 
-  ExclamationCircleIcon 
-} from "@heroicons/react/24/outline";
+import { ArrowLeftIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 export default function CriarFuncionario() {
   const [nome, setNome] = usePersistedState("nome", "");
@@ -17,8 +16,15 @@ export default function CriarFuncionario() {
   const [senha, setSenha] = usePersistedState("senha", "");
   const [status] = usePersistedState("status", "ativo");
 
-  const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
@@ -27,11 +33,18 @@ export default function CriarFuncionario() {
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
 
-    setErro("");
+    clearErrors();
     setSucesso("");
 
-    if (!nome || !cargo || !dataAdmissao || !email || !senha) {
-      setErro("Por favor, preencha todos os campos obrigatórios.");
+    const clientErrors = validateRequired([
+      { name: "nome", value: nome },
+      { name: "cargo", value: cargo },
+      { name: "dataAdmissao", value: dataAdmissao, message: "Informe a data de admissão" },
+      { name: "email", value: email },
+      { name: "senha", value: senha },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
       return;
     }
 
@@ -54,10 +67,8 @@ export default function CriarFuncionario() {
         })
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        setErro(data.error || "Erro ao cadastrar funcionário");
+        await applyApiError(res, "Erro ao cadastrar funcionário");
         setIsSubmitting(false);
         return;
       }
@@ -68,9 +79,8 @@ export default function CriarFuncionario() {
       setTimeout(() => {
         router.push("/funcionario/funcionarios");
       }, 1000);
-
-    } catch (error) {
-      setErro("Erro ao conectar com o servidor");
+    } catch {
+      setFieldErrors({ _form: "Erro ao conectar com o servidor" });
       setIsSubmitting(false);
     }
   }
@@ -103,13 +113,6 @@ export default function CriarFuncionario() {
       </header>
 
       {/* ALERTAS DE FEEDBACK */}
-      {erro && (
-        <div className="flex items-center gap-3 bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl text-sm animate-fade-in">
-          <ExclamationCircleIcon className="w-6 h-6 shrink-0" />
-          <p className="font-semibold">{erro}</p>
-        </div>
-      )}
-
       {sucesso && (
         <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 text-emerald-600 p-4 rounded-2xl text-sm animate-fade-in">
           <CheckCircleIcon className="w-6 h-6 shrink-0" />
@@ -120,7 +123,8 @@ export default function CriarFuncionario() {
       {/* FORMULÁRIO */}
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleSubmit} className="space-y-6">
-          
+          <FieldError message={getError("_form")} className="text-sm" />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
             <div className="md:col-span-2">
@@ -130,10 +134,11 @@ export default function CriarFuncionario() {
                 required
                 type="text"
                 value={nome}
-                onChange={(e) => setNome(e.target.value)}
-                className={inputClass}
+                onChange={(e) => { setNome(e.target.value); clearField("nome"); }}
+                className={inputWithError(inputClass, getError("nome"))}
                 placeholder="Ex: Ana Silva"
               />
+              <FieldError message={getError("nome")} />
             </div>
 
             <div>
@@ -143,10 +148,11 @@ export default function CriarFuncionario() {
                 required
                 type="text"
                 value={cargo}
-                onChange={(e) => setCargo(e.target.value)}
-                className={inputClass}
+                onChange={(e) => { setCargo(e.target.value); clearField("cargo"); }}
+                className={inputWithError(inputClass, getError("cargo"))}
                 placeholder="Ex: Desenvolvedor Front-end"
               />
+              <FieldError message={getError("cargo")} />
             </div>
 
             <div>
@@ -156,9 +162,10 @@ export default function CriarFuncionario() {
                 required
                 type="date"
                 value={dataAdmissao}
-                onChange={(e) => setDataAdmissao(e.target.value)}
-                className={inputClass}
+                onChange={(e) => { setDataAdmissao(e.target.value); clearField("dataAdmissao"); }}
+                className={inputWithError(inputClass, getError("dataAdmissao"))}
               />
+              <FieldError message={getError("dataAdmissao")} />
             </div>
 
             <div>
@@ -168,10 +175,11 @@ export default function CriarFuncionario() {
                 required
                 type="email"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={inputClass}
+                onChange={(e) => { setEmail(e.target.value); clearField("email"); }}
+                className={inputWithError(inputClass, getError("email"))}
                 placeholder="ana.silva@empresa.com"
               />
+              <FieldError message={getError("email")} />
             </div>
 
             <div>
@@ -181,10 +189,11 @@ export default function CriarFuncionario() {
                 required
                 type="password"
                 value={senha}
-                onChange={(e) => setSenha(e.target.value)}
-                className={inputClass}
-                placeholder="Mínimo de 6 caracteres"
+                onChange={(e) => { setSenha(e.target.value); clearField("senha"); }}
+                className={inputWithError(inputClass, getError("senha"))}
+                placeholder="Mínimo de 8 caracteres"
               />
+              <FieldError message={getError("senha")} />
             </div>
 
           </div>

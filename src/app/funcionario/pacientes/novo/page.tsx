@@ -6,13 +6,15 @@ import { clearPageState, usePersistedState } from "@/hooks/usePersistedState";
 import {
   ArrowLeftIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon,
 } from "@heroicons/react/24/outline";
 import {
   TerapiaHormonalFields,
   terapiaToApiPayload,
   type TerapiaHormonalValues,
 } from "@/components/TerapiaHormonalFields";
+import FieldError from "@/components/form/FieldError";
+import { useFormErrors } from "@/hooks/useFormErrors";
+import { inputWithError } from "@/lib/form-errors";
 
 export default function CriarPaciente() {
   // Estados de Dados Pessoais
@@ -42,8 +44,15 @@ export default function CriarPaciente() {
   );
 
   // Estados de UI
-  const [erro, setErro] = useState("");
   const [sucesso, setSucesso] = useState("");
+  const {
+    clearErrors,
+    clearField,
+    setFieldErrors,
+    getError,
+    validateRequired,
+    applyApiError,
+  } = useFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const router = useRouter();
@@ -51,11 +60,21 @@ export default function CriarPaciente() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    setErro("");
+    clearErrors();
     setSucesso("");
 
-    if (!nome || !dataNascimento || !telefone || !email || !senha || !pronomes || !identidadeGenero) {
-      setErro("Por favor, preencha todos os campos obrigatórios.");
+    const clientErrors = validateRequired([
+      { name: "nome", value: nome },
+      { name: "identidadeGenero", value: identidadeGenero, message: "Informe a identidade de gênero" },
+      { name: "dataNascimento", value: dataNascimento, message: "Informe a data de nascimento" },
+      { name: "pronomes", value: pronomes },
+      { name: "telefone", value: telefone },
+      { name: "endereco", value: endereco },
+      { name: "email", value: email },
+      { name: "senha", value: senha },
+    ]);
+    if (clientErrors) {
+      setFieldErrors(clientErrors);
       return;
     }
 
@@ -78,16 +97,11 @@ export default function CriarPaciente() {
           telefone,
           status,
           ...terapiaToApiPayload(terapia),
-          // Caso a sua API espere endereço e CPF futuramente, eles já estão no state:
-          // endereco,
-          // cpf
         }),
       });
 
-      const data = await res.json();
-
       if (!res.ok) {
-        setErro(data.error || "Erro ao cadastrar paciente");
+        await applyApiError(res, "Erro ao cadastrar paciente");
         setIsSubmitting(false);
         return;
       }
@@ -98,9 +112,8 @@ export default function CriarPaciente() {
       setTimeout(() => {
         router.push("/funcionario/pacientes");
       }, 1000);
-
-    } catch (err) {
-      setErro("Erro ao conectar com o servidor");
+    } catch {
+      setFieldErrors({ _form: "Erro ao conectar com o servidor" });
       setIsSubmitting(false);
     }
   }
@@ -132,14 +145,6 @@ export default function CriarPaciente() {
         </div>
       </header>
 
-      {/* ALERTAS DE FEEDBACK */}
-      {erro && (
-        <div className="flex items-center gap-3 bg-rose-50 border border-rose-100 text-rose-600 p-4 rounded-2xl text-sm animate-fade-in">
-          <ExclamationCircleIcon className="w-6 h-6 shrink-0" />
-          <p className="font-semibold">{erro}</p>
-        </div>
-      )}
-
       {sucesso && (
         <div className="flex items-center gap-3 bg-emerald-50 border border-emerald-100 text-emerald-600 p-4 rounded-2xl text-sm animate-fade-in">
           <CheckCircleIcon className="w-6 h-6 shrink-0" />
@@ -150,7 +155,8 @@ export default function CriarPaciente() {
       {/* FORMULÁRIO */}
       <div className="bg-white rounded-[32px] shadow-[0_8px_30px_rgb(0,0,0,0.02)] border border-slate-100 p-8 md:p-10">
         <form onSubmit={handleSubmit} className="space-y-8">
-          
+          <FieldError message={getError("_form")} className="text-sm" />
+
           {/* SESSÃO: INFORMAÇÕES PESSOAIS */}
           <div className="space-y-6">
             <h2 className="text-lg font-extrabold text-slate-800 tracking-tight ml-1">Dados Pessoais</h2>
@@ -163,10 +169,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={nome} 
-                  onChange={(e) => setNome(e.target.value)} 
-                  className={inputClass} 
+                  onChange={(e) => { setNome(e.target.value); clearField("nome"); }} 
+                  className={inputWithError(inputClass, getError("nome"))} 
                   placeholder="Ex: Carlos Silva"
                 />
+                <FieldError message={getError("nome")} />
               </div>
 
               <div>
@@ -176,10 +183,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={identidadeGenero} 
-                  onChange={(e) => setIdentidadeGenero(e.target.value)} 
-                  className={inputClass} 
-                  placeholder="Ex: Homem Cisgênero"
+                  onChange={(e) => { setIdentidadeGenero(e.target.value); clearField("identidadeGenero"); }} 
+                  className={inputWithError(inputClass, getError("identidadeGenero"))} 
+                  placeholder="Ex: Homem Trans"
                 />
+                <FieldError message={getError("identidadeGenero")} />
               </div>
 
               <div>
@@ -189,9 +197,10 @@ export default function CriarPaciente() {
                   required
                   type="date" 
                   value={dataNascimento} 
-                  onChange={(e) => setDataNascimento(e.target.value)} 
-                  className={inputClass} 
+                  onChange={(e) => { setDataNascimento(e.target.value); clearField("dataNascimento"); }} 
+                  className={inputWithError(inputClass, getError("dataNascimento"))} 
                 />
+                <FieldError message={getError("dataNascimento")} />
               </div>
 
               <div>
@@ -201,10 +210,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={pronomes} 
-                  onChange={(e) => setPronomes(e.target.value)} 
-                  className={inputClass} 
+                  onChange={(e) => { setPronomes(e.target.value); clearField("pronomes"); }} 
+                  className={inputWithError(inputClass, getError("pronomes"))} 
                   placeholder="Ex: Ele/Dele"
                 />
+                <FieldError message={getError("pronomes")} />
               </div>
 
               <div>
@@ -214,10 +224,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={telefone} 
-                  onChange={(e) => setTelefone(e.target.value)} 
-                  className={inputClass} 
+                  onChange={(e) => { setTelefone(e.target.value); clearField("telefone"); }} 
+                  className={inputWithError(inputClass, getError("telefone"))} 
                   placeholder="(00) 00000-0000"
                 />
+                <FieldError message={getError("telefone")} />
               </div>
 
               <div className="md:col-span-2">
@@ -227,10 +238,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={endereco} 
-                  onChange={(e) => setEndereco(e.target.value)} 
-                  className={inputClass} 
+                  onChange={(e) => { setEndereco(e.target.value); clearField("endereco"); }} 
+                  className={inputWithError(inputClass, getError("endereco"))} 
                   placeholder="Ex: Rua das Flores, 123"
                 />
+                <FieldError message={getError("endereco")} />
               </div>
 
               <div>
@@ -240,10 +252,11 @@ export default function CriarPaciente() {
                   required
                   type="email" 
                   value={email} 
-                  onChange={(e) => setEmail(e.target.value)} 
-                  className={inputClass} 
+                  onChange={(e) => { setEmail(e.target.value); clearField("email"); }} 
+                  className={inputWithError(inputClass, getError("email"))} 
                   placeholder="email@exemplo.com"
                 />
+                <FieldError message={getError("email")} />
               </div>
 
               <div>
@@ -253,10 +266,11 @@ export default function CriarPaciente() {
                   required
                   type="password" 
                   value={senha} 
-                  onChange={(e) => setSenha(e.target.value)} 
-                  className={inputClass} 
-                  placeholder="Mínimo de 6 caracteres"
+                  onChange={(e) => { setSenha(e.target.value); clearField("senha"); }} 
+                  className={inputWithError(inputClass, getError("senha"))} 
+                  placeholder="Mínimo de 8 caracteres"
                 />
+                <FieldError message={getError("senha")} />
               </div>
             </div>
           </div>

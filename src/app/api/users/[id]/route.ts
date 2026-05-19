@@ -117,7 +117,10 @@ export async function PUT(
   } catch (error: any) {
     if (error?.code === 11000) {
       return Response.json(
-        { error: "E-mail já cadastrado" },
+        {
+          error: "E-mail já cadastrado",
+          fields: { email: "Este e-mail já está cadastrado" },
+        },
         { status: 409 }
       );
     }

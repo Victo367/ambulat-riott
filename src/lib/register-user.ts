@@ -1,5 +1,6 @@
 import Funcionario from "@/models/Funcionario";
 import Paciente from "@/models/Paciente";
+import type { FormFieldErrors } from "@/lib/form-errors";
 
 type TipoUsuario = "paciente" | "funcionario";
 
@@ -26,47 +27,51 @@ function isValidDate(value: unknown): boolean {
   return !Number.isNaN(date.getTime());
 }
 
-function validateBaseFields(body: RegisterInput) {
-  if (!body.nome?.trim()) return "Campo nome é obrigatório";
-  if (!body.email?.trim()) return "Campo email é obrigatório";
-  if (!body.senha?.trim()) return "Campo senha é obrigatório";
-  if (body.senha.trim().length < 8) {
-    return "Campo senha deve ter no mínimo 8 caracteres";
+function validateBaseFields(body: RegisterInput): FormFieldErrors {
+  const fields: FormFieldErrors = {};
+  if (!body.nome?.trim()) fields.nome = "Informe o nome completo";
+  if (!body.email?.trim()) {
+    fields.email = "Informe o e-mail";
+  } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(body.email.trim())) {
+    fields.email = "E-mail inválido";
   }
-  return null;
+  if (!body.senha?.trim()) {
+    fields.senha = "Informe a senha";
+  } else if (body.senha.trim().length < 8) {
+    fields.senha = "A senha deve ter no mínimo 8 caracteres";
+  }
+  return fields;
 }
 
-function validatePaciente(body: RegisterInput) {
-  const baseError = validateBaseFields(body);
-  if (baseError) return baseError;
-  if (!body.pronomes?.trim()) return "Campo pronomes é obrigatório";
+function validatePaciente(body: RegisterInput): FormFieldErrors {
+  const fields = validateBaseFields(body);
+  if (!body.pronomes?.trim()) fields.pronomes = "Informe os pronomes";
   if (!body.identidade_genero?.trim()) {
-    return "Campo identidade_genero é obrigatório";
+    fields.identidade_genero = "Informe a identidade de gênero";
   }
-  if (!body.telefone?.trim()) return "Campo telefone é obrigatório";
+  if (!body.telefone?.trim()) fields.telefone = "Informe o telefone";
   if (!isValidDate(body.data_nascimento)) {
-    return "Campo data_nascimento inválido";
+    fields.data_nascimento = "Data de nascimento inválida";
   }
   if (
     body.terapia_hormonal !== undefined &&
     typeof body.terapia_hormonal !== "boolean"
   ) {
-    return "Campo terapia_hormonal deve ser booleano";
+    fields.terapia_hormonal = "Valor inválido para terapia hormonal";
   }
-  return null;
+  return fields;
 }
 
-function validateFuncionario(body: RegisterInput) {
-  const baseError = validateBaseFields(body);
-  if (baseError) return baseError;
-  if (!body.cargo?.trim()) return "Campo cargo é obrigatório";
+function validateFuncionario(body: RegisterInput): FormFieldErrors {
+  const fields = validateBaseFields(body);
+  if (!body.cargo?.trim()) fields.cargo = "Informe o cargo";
   if (!isValidDate(body.data_admissao)) {
-    return "Campo data_admissao inválido";
+    fields.data_admissao = "Data de admissão inválida";
   }
-  return null;
+  return fields;
 }
 
-function sanitizeUser(user: any) {
+function sanitizeUser(user: { toObject: () => Record<string, unknown> }) {
   const userObj = user.toObject();
   delete userObj.senha;
   return userObj;
@@ -107,14 +112,17 @@ function buildFuncionarioPayload(body: RegisterInput) {
 }
 
 export async function createUserByType(body: RegisterInput, tipo: TipoUsuario) {
-  const validationError =
+  const fieldErrors =
     tipo === "paciente" ? validatePaciente(body) : validateFuncionario(body);
 
-  if (validationError) {
+  if (Object.keys(fieldErrors).length > 0) {
     return {
       ok: false as const,
       status: 400,
-      data: { error: validationError },
+      data: {
+        error: "Verifique os campos destacados abaixo",
+        fields: fieldErrors,
+      },
     };
   }
 
@@ -129,19 +137,25 @@ export async function createUserByType(body: RegisterInput, tipo: TipoUsuario) {
       status: 201,
       data: sanitizeUser(user),
     };
-  } catch (error: any) {
-    if (error?.code === 11000) {
+  } catch (error: unknown) {
+    const err = error as { code?: number; message?: string };
+    if (err?.code === 11000) {
       return {
         ok: false as const,
         status: 409,
-        data: { error: "E-mail já cadastrado" },
+        data: {
+          error: "E-mail já cadastrado",
+          fields: { email: "Este e-mail já está cadastrado" },
+        },
       };
     }
 
     return {
       ok: false as const,
       status: 500,
-      data: { error: error?.message || "Erro interno no cadastro" },
+      data: {
+        error: err?.message || "Erro interno no cadastro",
+      },
     };
   }
 }

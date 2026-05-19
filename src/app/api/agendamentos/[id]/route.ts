@@ -123,7 +123,13 @@ export async function PATCH(
       } else {
         if (body.data === undefined && body.hora === undefined) {
           return Response.json(
-            { error: "Informe a nova data ou horário" },
+            {
+              error: "Informe a nova data ou horário",
+              fields: {
+                data: "Selecione a nova data",
+                hora: "Selecione o novo horário",
+              },
+            },
             { status: 400 }
           );
         }
