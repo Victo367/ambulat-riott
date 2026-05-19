@@ -13,6 +13,11 @@ import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiv
 import FieldError from "@/components/form/FieldError";
 import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
+import {
+  maxDataAgendamentoIso,
+  minDataAgendamentoIso,
+  sanitizeObservacoes,
+} from "@/lib/field-validation";
 
 interface Profissional {
   id: string;
@@ -249,7 +254,8 @@ export default function NovoAgendamentoPaciente() {
                 }}
                 className={inputWithError(inputClass, getError("data"))}
                 required
-                min={new Date().toISOString().split("T")[0]}
+                min={minDataAgendamentoIso()}
+                max={maxDataAgendamentoIso()}
               />
               <FieldError message={getError("data")} />
             </div>
@@ -276,8 +282,9 @@ export default function NovoAgendamentoPaciente() {
               </label>
               <textarea
                 value={observacoes}
-                onChange={(e) => setObservacoes(e.target.value)}
+                onChange={(e) => setObservacoes(sanitizeObservacoes(e.target.value))}
                 className={`${inputClass} resize-none h-32`}
+                maxLength={500}
                 placeholder="Descreva brevemente o que está sentindo ou o motivo da sua visita..."
               />
             </div>

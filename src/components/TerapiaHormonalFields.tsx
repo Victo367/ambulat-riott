@@ -1,5 +1,7 @@
 "use client";
 
+import { sanitizeTerapiaTexto } from "@/lib/field-validation";
+
 export type TerapiaHormonalValues = {
   terapia_hormonal: boolean;
   dosagem_hormonio: string;
@@ -60,7 +62,7 @@ export function TerapiaHormonalFields({
     campo: "dosagem_hormonio" | "bloqueador_hormonal",
     valor: string
   ) {
-    const atualizado = { ...values, [campo]: valor };
+    const atualizado = { ...values, [campo]: sanitizeTerapiaTexto(valor) };
     const dosagem =
       campo === "dosagem_hormonio" ? valor : values.dosagem_hormonio;
     const bloqueador =
@@ -89,6 +91,7 @@ export function TerapiaHormonalFields({
             onChange={(e) => atualizarCampo("dosagem_hormonio", e.target.value)}
             placeholder="Ex: 2mg Valerato de Estradiol / dia"
             className={inputClass}
+            maxLength={120}
           />
         </div>
         <div>
@@ -102,6 +105,7 @@ export function TerapiaHormonalFields({
             }
             placeholder="Ex: 50mg Espironolactona / dia"
             className={inputClass}
+            maxLength={120}
           />
         </div>
       </div>

@@ -7,6 +7,7 @@ import {
   normalizeFieldErrors,
   parseApiErrorResponse,
 } from "@/lib/form-errors";
+import { hasFieldErrors } from "@/lib/field-validation";
 
 type RequiredField = {
   name: string;
@@ -52,6 +53,15 @@ export function useFormErrors() {
     return Object.keys(next).length > 0 ? next : null;
   }, []);
 
+  const validateForm = useCallback((fields: FormFieldErrors) => {
+    const normalized = normalizeFieldErrors(fields);
+    if (hasFieldErrors(normalized)) {
+      setErrors(normalized);
+      return normalized;
+    }
+    return null;
+  }, []);
+
   const applyApiError = useCallback(
     async (
       res: Response,
@@ -88,6 +98,7 @@ export function useFormErrors() {
     setFieldErrors,
     getError,
     validateRequired,
+    validateForm,
     applyApiError,
   };
 }

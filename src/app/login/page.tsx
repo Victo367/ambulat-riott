@@ -7,6 +7,11 @@ import { EnvelopeIcon, LockClosedIcon } from "@heroicons/react/24/outline";
 import FieldError from "@/components/form/FieldError";
 import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
+import {
+  sanitizeEmail,
+  sanitizeSenha,
+  validateLoginForm,
+} from "@/lib/field-validation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -16,7 +21,7 @@ export default function LoginPage() {
     clearField,
     setFieldErrors,
     getError,
-    validateRequired,
+    validateForm,
     applyApiError,
   } = useFormErrors();
 
@@ -26,14 +31,8 @@ export default function LoginPage() {
     e.preventDefault();
     clearErrors();
 
-    const clientErrors = validateRequired([
-      { name: "email", value: email, message: "Informe o e-mail" },
-      { name: "senha", value: senha, message: "Informe a senha" },
-    ]);
-    if (clientErrors) {
-      setFieldErrors(clientErrors);
-      return;
-    }
+    const clientErrors = validateLoginForm({ email, senha });
+    if (validateForm(clientErrors)) return;
 
     try {
       const res = await fetch("/api/login", {
@@ -97,7 +96,7 @@ export default function LoginPage() {
               placeholder="E-mail"
               value={email}
               onChange={(e) => {
-                setEmail(e.target.value);
+                setEmail(sanitizeEmail(e.target.value));
                 clearField("email");
               }}
               className={inputWithError(
@@ -105,6 +104,7 @@ export default function LoginPage() {
                 getError("email")
               )}
               required
+              maxLength={254}
             />
             <FieldError message={getError("email")} />
           </div>
@@ -117,7 +117,7 @@ export default function LoginPage() {
               placeholder="Senha"
               value={senha}
               onChange={(e) => {
-                setSenha(e.target.value);
+                setSenha(sanitizeSenha(e.target.value));
                 clearField("senha");
               }}
               className={inputWithError(
@@ -125,6 +125,8 @@ export default function LoginPage() {
                 getError("senha")
               )}
               required
+              minLength={8}
+              maxLength={72}
             />
             <FieldError message={getError("senha")} />
           </div>

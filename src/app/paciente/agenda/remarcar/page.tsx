@@ -13,6 +13,10 @@ import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiv
 import FieldError from "@/components/form/FieldError";
 import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
+import {
+  maxDataAgendamentoIso,
+  minDataAgendamentoIso,
+} from "@/lib/field-validation";
 
 type AgendamentoDetalhe = {
   id: string;
@@ -221,7 +225,8 @@ function RemarcarConsultaContent() {
                   setNovaHora("");
                   clearField("novaData");
                 }}
-                min={new Date().toISOString().split("T")[0]}
+                min={minDataAgendamentoIso()}
+                max={maxDataAgendamentoIso()}
                 className={inputWithError(inputClass, getError("novaData"))}
               />
               <FieldError message={getError("novaData")} />

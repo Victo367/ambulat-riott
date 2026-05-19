@@ -3,24 +3,29 @@ import User from "@/models/User";
 import bcrypt from "bcryptjs";
 import { generateToken } from "@/lib/auth";
 import { NextResponse } from "next/server";
+import {
+  sanitizeEmail,
+  validateLoginApiBody,
+  hasFieldErrors,
+} from "@/lib/field-validation";
 
 export async function POST(req: Request) {
   await connectDB();
 
-  const { email, senha } = await req.json();
-  const fields: Record<string, string> = {};
+  const body = await req.json();
+  const fields = validateLoginApiBody(body);
 
-  if (!email?.trim()) fields.email = "Informe o e-mail";
-  if (!senha?.trim()) fields.senha = "Informe a senha";
-
-  if (Object.keys(fields).length > 0) {
+  if (hasFieldErrors(fields)) {
     return NextResponse.json(
-      { error: "Preencha e-mail e senha", fields },
+      { error: "Verifique os campos destacados", fields },
       { status: 400 }
     );
   }
 
-  const user = await User.findOne({ email: email.trim().toLowerCase() }).lean();
+  const email = sanitizeEmail(String(body.email ?? ""));
+  const senha = String(body.senha ?? "");
+
+  const user = await User.findOne({ email }).lean();
 
   if (!user) {
     return NextResponse.json(

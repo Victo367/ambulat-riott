@@ -16,6 +16,11 @@ import HorariosDisponiveisPicker from "@/components/agendamento/HorariosDisponiv
 import FieldError from "@/components/form/FieldError";
 import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
+import {
+  maxDataAgendamentoIso,
+  minDataAgendamentoIso,
+  sanitizeObservacoes,
+} from "@/lib/field-validation";
 
 interface PacienteOption {
   _id: string;
@@ -235,7 +240,8 @@ export default function NovoAgendamento() {
                   className={inputWithError(inputClass, getError("data"))}
                   required
                   value={data}
-                  min={dataIsoLocal()}
+                  min={minDataAgendamentoIso()}
+                  max={maxDataAgendamentoIso()}
                   onChange={(e) => {
                     setData(e.target.value);
                     setHora("");
@@ -302,9 +308,10 @@ export default function NovoAgendamento() {
               <textarea
                 rows={4}
                 value={observacoes}
-                onChange={(e) => setObservacoes(e.target.value)}
+                onChange={(e) => setObservacoes(sanitizeObservacoes(e.target.value))}
                 placeholder="Detalhes sobre o encaminhamento ou necessidades específicas..."
                 className={`${inputClass} pl-11 resize-none pt-4`}
+                maxLength={500}
               />
             </div>
           </div>

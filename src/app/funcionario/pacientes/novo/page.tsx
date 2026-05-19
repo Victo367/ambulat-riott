@@ -15,6 +15,18 @@ import {
 import FieldError from "@/components/form/FieldError";
 import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
+import {
+  formatTelefoneBr,
+  maxDataNascimentoIso,
+  minDataNascimentoIso,
+  sanitizeEmail,
+  sanitizeEndereco,
+  sanitizeIdentidadeGenero,
+  sanitizeNome,
+  sanitizePronomes,
+  sanitizeSenha,
+  validatePacienteForm,
+} from "@/lib/field-validation";
 
 export default function CriarPaciente() {
   // Estados de Dados Pessoais
@@ -50,7 +62,7 @@ export default function CriarPaciente() {
     clearField,
     setFieldErrors,
     getError,
-    validateRequired,
+    validateForm,
     applyApiError,
   } = useFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -63,20 +75,20 @@ export default function CriarPaciente() {
     clearErrors();
     setSucesso("");
 
-    const clientErrors = validateRequired([
-      { name: "nome", value: nome },
-      { name: "identidadeGenero", value: identidadeGenero, message: "Informe a identidade de gênero" },
-      { name: "dataNascimento", value: dataNascimento, message: "Informe a data de nascimento" },
-      { name: "pronomes", value: pronomes },
-      { name: "telefone", value: telefone },
-      { name: "endereco", value: endereco },
-      { name: "email", value: email },
-      { name: "senha", value: senha },
-    ]);
-    if (clientErrors) {
-      setFieldErrors(clientErrors);
-      return;
-    }
+    const clientErrors = validatePacienteForm({
+      nome,
+      email,
+      senha,
+      pronomes,
+      identidadeGenero,
+      dataNascimento,
+      telefone,
+      endereco,
+      cpf,
+      dosagem_hormonio: terapia.dosagem_hormonio,
+      bloqueador_hormonal: terapia.bloqueador_hormonal,
+    });
+    if (validateForm(clientErrors)) return;
 
     setIsSubmitting(true);
 
@@ -169,9 +181,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={nome} 
-                  onChange={(e) => { setNome(e.target.value); clearField("nome"); }} 
+                  onChange={(e) => { setNome(sanitizeNome(e.target.value)); clearField("nome"); }} 
                   className={inputWithError(inputClass, getError("nome"))} 
                   placeholder="Ex: Carlos Silva"
+                  maxLength={120}
+                  autoComplete="name"
                 />
                 <FieldError message={getError("nome")} />
               </div>
@@ -183,9 +197,10 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={identidadeGenero} 
-                  onChange={(e) => { setIdentidadeGenero(e.target.value); clearField("identidadeGenero"); }} 
+                  onChange={(e) => { setIdentidadeGenero(sanitizeIdentidadeGenero(e.target.value)); clearField("identidadeGenero"); }} 
                   className={inputWithError(inputClass, getError("identidadeGenero"))} 
                   placeholder="Ex: Homem Trans"
+                  maxLength={80}
                 />
                 <FieldError message={getError("identidadeGenero")} />
               </div>
@@ -198,7 +213,9 @@ export default function CriarPaciente() {
                   type="date" 
                   value={dataNascimento} 
                   onChange={(e) => { setDataNascimento(e.target.value); clearField("dataNascimento"); }} 
-                  className={inputWithError(inputClass, getError("dataNascimento"))} 
+                  className={inputWithError(inputClass, getError("dataNascimento"))}
+                  min={minDataNascimentoIso()}
+                  max={maxDataNascimentoIso()}
                 />
                 <FieldError message={getError("dataNascimento")} />
               </div>
@@ -210,9 +227,10 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={pronomes} 
-                  onChange={(e) => { setPronomes(e.target.value); clearField("pronomes"); }} 
+                  onChange={(e) => { setPronomes(sanitizePronomes(e.target.value)); clearField("pronomes"); }} 
                   className={inputWithError(inputClass, getError("pronomes"))} 
                   placeholder="Ex: Ele/Dele"
+                  maxLength={40}
                 />
                 <FieldError message={getError("pronomes")} />
               </div>
@@ -224,9 +242,11 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={telefone} 
-                  onChange={(e) => { setTelefone(e.target.value); clearField("telefone"); }} 
+                  onChange={(e) => { setTelefone(formatTelefoneBr(e.target.value)); clearField("telefone"); }} 
                   className={inputWithError(inputClass, getError("telefone"))} 
-                  placeholder="(00) 00000-0000"
+                  placeholder="(11) 91234-5678"
+                  inputMode="tel"
+                  maxLength={16}
                 />
                 <FieldError message={getError("telefone")} />
               </div>
@@ -238,9 +258,10 @@ export default function CriarPaciente() {
                   required
                   type="text" 
                   value={endereco} 
-                  onChange={(e) => { setEndereco(e.target.value); clearField("endereco"); }} 
+                  onChange={(e) => { setEndereco(sanitizeEndereco(e.target.value)); clearField("endereco"); }} 
                   className={inputWithError(inputClass, getError("endereco"))} 
                   placeholder="Ex: Rua das Flores, 123"
+                  maxLength={200}
                 />
                 <FieldError message={getError("endereco")} />
               </div>
@@ -252,9 +273,11 @@ export default function CriarPaciente() {
                   required
                   type="email" 
                   value={email} 
-                  onChange={(e) => { setEmail(e.target.value); clearField("email"); }} 
+                  onChange={(e) => { setEmail(sanitizeEmail(e.target.value)); clearField("email"); }} 
                   className={inputWithError(inputClass, getError("email"))} 
                   placeholder="email@exemplo.com"
+                  maxLength={254}
+                  autoComplete="email"
                 />
                 <FieldError message={getError("email")} />
               </div>
@@ -266,9 +289,12 @@ export default function CriarPaciente() {
                   required
                   type="password" 
                   value={senha} 
-                  onChange={(e) => { setSenha(e.target.value); clearField("senha"); }} 
+                  onChange={(e) => { setSenha(sanitizeSenha(e.target.value)); clearField("senha"); }} 
                   className={inputWithError(inputClass, getError("senha"))} 
                   placeholder="Mínimo de 8 caracteres"
+                  minLength={8}
+                  maxLength={72}
+                  autoComplete="new-password"
                 />
                 <FieldError message={getError("senha")} />
               </div>

@@ -7,6 +7,15 @@ import { ArrowLeftIcon, CheckCircleIcon } from "@heroicons/react/24/outline";
 import FieldError from "@/components/form/FieldError";
 import { useFormErrors } from "@/hooks/useFormErrors";
 import { inputWithError } from "@/lib/form-errors";
+import {
+  maxDataAdmissaoIso,
+  minDataAdmissaoIso,
+  sanitizeCargo,
+  sanitizeEmail,
+  sanitizeNome,
+  sanitizeSenha,
+  validateFuncionarioForm,
+} from "@/lib/field-validation";
 
 export default function CriarFuncionario() {
   const [nome, setNome] = usePersistedState("nome", "");
@@ -22,7 +31,7 @@ export default function CriarFuncionario() {
     clearField,
     setFieldErrors,
     getError,
-    validateRequired,
+    validateForm,
     applyApiError,
   } = useFormErrors();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,17 +45,14 @@ export default function CriarFuncionario() {
     clearErrors();
     setSucesso("");
 
-    const clientErrors = validateRequired([
-      { name: "nome", value: nome },
-      { name: "cargo", value: cargo },
-      { name: "dataAdmissao", value: dataAdmissao, message: "Informe a data de admissão" },
-      { name: "email", value: email },
-      { name: "senha", value: senha },
-    ]);
-    if (clientErrors) {
-      setFieldErrors(clientErrors);
-      return;
-    }
+    const clientErrors = validateFuncionarioForm({
+      nome,
+      cargo,
+      dataAdmissao,
+      email,
+      senha,
+    });
+    if (validateForm(clientErrors)) return;
 
     setIsSubmitting(true);
 
@@ -134,9 +140,10 @@ export default function CriarFuncionario() {
                 required
                 type="text"
                 value={nome}
-                onChange={(e) => { setNome(e.target.value); clearField("nome"); }}
+                onChange={(e) => { setNome(sanitizeNome(e.target.value)); clearField("nome"); }}
                 className={inputWithError(inputClass, getError("nome"))}
                 placeholder="Ex: Ana Silva"
+                maxLength={120}
               />
               <FieldError message={getError("nome")} />
             </div>
@@ -148,9 +155,10 @@ export default function CriarFuncionario() {
                 required
                 type="text"
                 value={cargo}
-                onChange={(e) => { setCargo(e.target.value); clearField("cargo"); }}
+                onChange={(e) => { setCargo(sanitizeCargo(e.target.value)); clearField("cargo"); }}
                 className={inputWithError(inputClass, getError("cargo"))}
-                placeholder="Ex: Desenvolvedor Front-end"
+                placeholder="Ex: Psicólogo(a)"
+                maxLength={80}
               />
               <FieldError message={getError("cargo")} />
             </div>
@@ -164,6 +172,8 @@ export default function CriarFuncionario() {
                 value={dataAdmissao}
                 onChange={(e) => { setDataAdmissao(e.target.value); clearField("dataAdmissao"); }}
                 className={inputWithError(inputClass, getError("dataAdmissao"))}
+                min={minDataAdmissaoIso()}
+                max={maxDataAdmissaoIso()}
               />
               <FieldError message={getError("dataAdmissao")} />
             </div>
@@ -175,9 +185,10 @@ export default function CriarFuncionario() {
                 required
                 type="email"
                 value={email}
-                onChange={(e) => { setEmail(e.target.value); clearField("email"); }}
+                onChange={(e) => { setEmail(sanitizeEmail(e.target.value)); clearField("email"); }}
                 className={inputWithError(inputClass, getError("email"))}
                 placeholder="ana.silva@empresa.com"
+                maxLength={254}
               />
               <FieldError message={getError("email")} />
             </div>
@@ -189,9 +200,11 @@ export default function CriarFuncionario() {
                 required
                 type="password"
                 value={senha}
-                onChange={(e) => { setSenha(e.target.value); clearField("senha"); }}
+                onChange={(e) => { setSenha(sanitizeSenha(e.target.value)); clearField("senha"); }}
                 className={inputWithError(inputClass, getError("senha"))}
                 placeholder="Mínimo de 8 caracteres"
+                minLength={8}
+                maxLength={72}
               />
               <FieldError message={getError("senha")} />
             </div>
