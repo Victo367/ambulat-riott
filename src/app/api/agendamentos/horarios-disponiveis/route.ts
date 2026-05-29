@@ -1,7 +1,8 @@
 import { connectDB } from "@/lib/db";
 import { getUserFromRequest } from "@/lib/getUserFromRequest";
-import { listarHorariosDisponiveis } from "@/lib/agendamentos";
-import { HORARIOS_AGENDA, normalizarDataIso } from "@/lib/agendamentos-utils";
+import { agendamentoFacade } from "@/lib/agendamento-facade";
+import { agendamentoErrorResponse } from "@/lib/agendamento/http-response";
+import { AgendamentoDomainError } from "@/lib/agendamento/errors";
 
 export async function GET(req: Request) {
   try {
@@ -18,27 +19,20 @@ export async function GET(req: Request) {
     const excludeId = searchParams.get("excludeId")?.trim() || undefined;
 
     if (!profissionalId || !dataParam) {
-      return Response.json(
-        { error: "Informe profissionalId e data" },
-        { status: 400 }
+      throw new AgendamentoDomainError(
+        400,
+        "Informe profissionalId e data"
       );
     }
 
-    const data = normalizarDataIso(dataParam);
-    const disponiveis = await listarHorariosDisponiveis(
+    const resultado = await agendamentoFacade.horariosDisponiveis(
       profissionalId,
-      data,
+      dataParam,
       excludeId
     );
 
-    return Response.json({
-      data,
-      profissionalId,
-      disponiveis,
-      todos: [...HORARIOS_AGENDA],
-    });
+    return Response.json(resultado, { status: 200 });
   } catch (error: unknown) {
-    const message = error instanceof Error ? error.message : "Erro interno";
-    return Response.json({ error: message }, { status: 500 });
+    return agendamentoErrorResponse(error);
   }
 }

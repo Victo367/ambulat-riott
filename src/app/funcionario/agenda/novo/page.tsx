@@ -21,6 +21,7 @@ import {
   minDataAgendamentoIso,
   sanitizeObservacoes,
 } from "@/lib/field-validation";
+import { hojeIso } from "@/lib/agendamentos-utils";
 
 interface PacienteOption {
   _id: string;
@@ -31,14 +32,6 @@ interface FuncionarioOption {
   _id: string;
   nome: string;
   cargo?: string;
-}
-
-function dataIsoLocal() {
-  const hoje = new Date();
-  const y = hoje.getFullYear();
-  const m = String(hoje.getMonth() + 1).padStart(2, "0");
-  const d = String(hoje.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }
 
 export default function NovoAgendamento() {
@@ -63,7 +56,7 @@ export default function NovoAgendamento() {
     "profissionalId",
     ""
   );
-  const [data, setData] = usePersistedState("data", dataIsoLocal());
+  const [data, setData] = usePersistedState("data", hojeIso());
   const [hora, setHora] = usePersistedState("hora", "");
   const [status, setStatus] = usePersistedState("status", "confirmado");
   const [tipo, setTipo] = usePersistedState("tipo", "Consulta Inicial");

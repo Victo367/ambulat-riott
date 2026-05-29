@@ -1,21 +1,6 @@
-import Funcionario from "@/models/Funcionario";
-import Paciente from "@/models/Paciente";
 import type { FormFieldErrors } from "@/lib/form-errors";
-import {
-  sanitizeCargo,
-  sanitizeEmail,
-  sanitizeIdentidadeGenero,
-  sanitizeNome,
-  sanitizePronomes,
-  sanitizeSenha,
-  sanitizeTerapiaTexto,
-  telefoneDigitos,
-  validateFuncionarioApiBody,
-  validatePacienteApiBody,
-  hasFieldErrors,
-} from "@/lib/field-validation";
-
-type TipoUsuario = "paciente" | "funcionario";
+import { hasFieldErrors } from "@/lib/field-validation";
+import { createUserCreator, type TipoUsuario } from "@/lib/user-creators/factory";
 
 type RegisterInput = {
   tipo_usuario?: string;
@@ -40,44 +25,11 @@ function sanitizeUser(user: { toObject: () => Record<string, unknown> }) {
   return userObj;
 }
 
-function buildPacientePayload(body: RegisterInput) {
-  return {
-    tipo_usuario: "paciente" as const,
-    nome: sanitizeNome(String(body.nome ?? "")),
-    email: sanitizeEmail(String(body.email ?? "")),
-    senha: sanitizeSenha(String(body.senha ?? "")),
-    status: body.status === "inativo" ? "inativo" : "ativo",
-    pronomes: sanitizePronomes(String(body.pronomes ?? "")),
-    identidade_genero: sanitizeIdentidadeGenero(
-      String(body.identidade_genero ?? "")
-    ),
-    data_nascimento: new Date(body.data_nascimento as string | Date),
-    telefone: telefoneDigitos(String(body.telefone ?? "")),
-    terapia_hormonal: Boolean(body.terapia_hormonal),
-    dosagem_hormonio: sanitizeTerapiaTexto(String(body.dosagem_hormonio ?? "")),
-    bloqueador_hormonal: sanitizeTerapiaTexto(
-      String(body.bloqueador_hormonal ?? "")
-    ),
-  };
-}
-
-function buildFuncionarioPayload(body: RegisterInput) {
-  return {
-    tipo_usuario: "funcionario" as const,
-    nome: sanitizeNome(String(body.nome ?? "")),
-    email: sanitizeEmail(String(body.email ?? "")),
-    senha: sanitizeSenha(String(body.senha ?? ""), String(body.cargo ?? "")),
-    status: body.status === "inativo" ? "inativo" : "ativo",
-    cargo: sanitizeCargo(String(body.cargo ?? "")),
-    data_admissao: new Date(body.data_admissao as string | Date),
-  };
-}
-
 export async function createUserByType(body: RegisterInput, tipo: TipoUsuario) {
-  const fieldErrors: FormFieldErrors =
-    tipo === "paciente"
-      ? validatePacienteApiBody(body as Record<string, unknown>)
-      : validateFuncionarioApiBody(body as Record<string, unknown>);
+  const creator = createUserCreator(tipo);
+  const fieldErrors: FormFieldErrors = creator.validate(
+    body as Record<string, unknown>
+  );
 
   if (hasFieldErrors(fieldErrors)) {
     return {
@@ -91,10 +43,8 @@ export async function createUserByType(body: RegisterInput, tipo: TipoUsuario) {
   }
 
   try {
-    const user =
-      tipo === "paciente"
-        ? await Paciente.create(buildPacientePayload(body))
-        : await Funcionario.create(buildFuncionarioPayload(body));
+    const payload = creator.buildPayload(body as Record<string, unknown>);
+    const user = await creator.create(payload);
 
     return {
       ok: true as const,

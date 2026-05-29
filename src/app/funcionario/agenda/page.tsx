@@ -10,6 +10,7 @@ import {
   UserIcon,
   CalendarIcon,
 } from "@heroicons/react/24/outline";
+import { formatDataExibicao, hojeIso } from "@/lib/agendamentos-utils";
 
 interface AgendamentoItem {
   id: string;
@@ -19,13 +20,6 @@ interface AgendamentoItem {
   status: string;
   data: string;
   dataFormatada: string;
-}
-
-function dataIsoLocal(date = new Date()) {
-  const y = date.getFullYear();
-  const m = String(date.getMonth() + 1).padStart(2, "0");
-  const d = String(date.getDate()).padStart(2, "0");
-  return `${y}-${m}-${d}`;
 }
 
 const AGENDA_QUERY_KEY = "page-state:/funcionario/agenda:__query";
@@ -39,21 +33,11 @@ function salvarUltimaVisaoAgenda(query: string) {
   }
 }
 
-function formatarDataExibicao(iso: string) {
-  const [year, month, day] = iso.split("-").map(Number);
-  return new Intl.DateTimeFormat("pt-BR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric",
-  }).format(new Date(year, month - 1, day));
-}
-
 function AgendaConteudo() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const hoje = dataIsoLocal();
+  const hoje = hojeIso();
   const verTodos = searchParams.get("todos") === "1";
   const dataFiltro = searchParams.get("data") || hoje;
 
@@ -63,7 +47,7 @@ function AgendaConteudo() {
 
   const dataExibicao = verTodos
     ? "Todos os agendamentos"
-    : formatarDataExibicao(dataFiltro);
+    : formatDataExibicao(dataFiltro);
   const ehHoje = !verTodos && dataFiltro === hoje;
 
   const carregarAgenda = useCallback(async () => {
